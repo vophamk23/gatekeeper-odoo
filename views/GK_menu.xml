@@ -95,6 +95,12 @@
             action="t4_gate_keeper_area_warning_type_action" 
             sequence="20"/>
 
+    <menuitem id="t4_gate_keeper_alert_policy_menu" 
+            name="Alert Policies" 
+            parent="t4_gate_keeper_configuration_warning_menu" 
+            action="t4_gate_keeper_alert_policy_action" 
+            sequence="30"/>
+
   <!-- CONFIG: device tab -->
   <menuitem id="t4_gate_keeper_configuration_device_menu"
             name="Device"
@@ -119,6 +125,18 @@
             parent="t4_gate_keeper_configuration_device_menu" 
             action="t4_gate_keeper_device_model_action" 
             sequence="30"/>
+
+    <menuitem id="t4_gate_keeper_device_log_menu" 
+            name="Device Logs" 
+            parent="t4_gate_keeper_configuration_device_menu" 
+            action="t4_gate_keeper_device_log_action" 
+            sequence="35"/>
+
+    <menuitem id="t4_gate_keeper_presence_state_menu" 
+            name="Presence States" 
+            parent="t4_gate_keeper_configuration_device_menu" 
+            action="t4_gate_keeper_presence_state_action" 
+            sequence="36"/>
 
   <!-- CONFIG: controller tab -->
   <menuitem id="t4_gate_keeper_configuration_controller_menu"

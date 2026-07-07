@@ -1,25 +1,10 @@
+# -*- coding: utf-8 -*-
+# Mục đích: Lưu trữ bất biến sự kiện ra/vào. Trái tim của engine kiểm duyệt bảo mật.
+#          Mỗi lần tạo log sẽ tự động kiểm tra chính sách cảnh báo và phát sinh area warning.
 # pyrefly: ignore [missing-import]
-from odoo import api, models, fields, _
-from odoo.addons.t4_gate_keeper.utils import check_outside_working_hours
+from odoo import _, api, fields, models
+from odoo.exceptions import ValidationError
 
-SYNC_STATUS = [
-    ('success', 'Success'),
-    ('fail', 'Failed'),
-    ('updating', 'Updating'),
-]
-
-VERIFICATION_TYPE = [
-    ('face', 'Face'),
-    ('fingerprint', 'Fingerprint'),
-    ('card', 'Card'),
-    ('password', 'Password'),
-    ('other', 'Other'),
-]
-
-DIRECTION = [
-    ('in', 'Check-in'),
-    ('out', 'Check-out'),
-]
 
 class GateKeeperAccessLog(models.Model):
     _name = "t4.gate_keeper.access_log"
@@ -29,104 +14,134 @@ class GateKeeperAccessLog(models.Model):
     controller_id = fields.Many2one(
         comodel_name="t4.gate_keeper.controller",
         string="Controller",
-        required=True,
-        index=True,
+        ondelete="set null",
     )
 
     device_id = fields.Many2one(
         comodel_name="t4.gate_keeper.device",
         string="Device",
-        index=True,
+        ondelete="set null",
     )
 
     employee_id = fields.Many2one(
         comodel_name="t4.gate_keeper.employee",
         string="Employee",
-        index=True,
+        ondelete="set null",
     )
 
     access_time = fields.Datetime(
-        string="Access Time",
-        required=True,
-        default=fields.Datetime.now,
+        string="Access Time", required=True, default=fields.Datetime.now
     )
-
     direction = fields.Selection(
-        selection=DIRECTION,
-        string="Direction",
+        [("in", "In"), ("out", "Out")], string="Direction", required=True, default="in"
     )
-
     verification_type = fields.Selection(
-        selection=VERIFICATION_TYPE,
+        [
+            ("face", "Face"),
+            ("fingerprint", "Fingerprint"),
+            ("card", "Card"),
+            ("password", "Password"),
+            ("other", "Other"),
+        ],
         string="Verification Type",
+        default="card",
     )
-
     sync_status = fields.Selection(
-        selection=SYNC_STATUS,
+        [("success", "Success"), ("fail", "Fail"), ("updating", "Updating")],
         string="Sync Status",
-        default="updating",
-        tracking=True,
+        default="success",
+    )
+    is_system_generated = fields.Boolean(
+        string="System Generated", default=False, readonly=True
     )
 
     branch_id = fields.Many2one(
         comodel_name="t4.gate_keeper.branch",
-        related="controller_id.branch_id",
         string="Branch",
+        related="device_id.branch_id",
         store=True,
         readonly=True,
     )
 
-
     area_id = fields.Many2one(
         comodel_name="t4.gate_keeper.area",
-        related="device_id.area_id",
         string="Area",
+        related="device_id.area_id",
         store=True,
-        index=True,
         readonly=True,
     )
 
     @api.model_create_multi
     def create(self, vals_list):
-        records = super(GateKeeperAccessLog, self).create(vals_list)
+        records = super().create(vals_list)
         for record in records:
-            if record.area_id:
+            if record.device_id:
                 record._check_access_security_rules()
         return records
 
+    def write(self, vals):
+        if any(
+            field in vals
+            for field in [
+                "employee_id",
+                "access_time",
+                "device_id",
+                "controller_id",
+                "direction",
+                "verification_type",
+            ]
+        ):
+            raise ValidationError(
+                _("Access logs are immutable except for system-managed fields.")
+            )
+        return super().write(vals)
+
+    def unlink(self):
+        raise ValidationError(_("Access logs cannot be deleted."))
+
     def _check_access_security_rules(self):
-        """
-        Check if access is outside normal working hours (e.g. before 08:00 or after 17:00, or weekend).
-        If so, create an active t4.gate_keeper.area_warning record.
-        """
         self.ensure_one()
-        if not self.access_time:
+        if not self.device_id:
             return
 
-        tz_name = self.branch_id.timezone or self.env.user.tz or 'UTC'
-        is_warning, reason_en = check_outside_working_hours(self.access_time, self.env, tz_name=tz_name)
+        self._evaluate_policy_rules()
 
+    def _evaluate_policy_rules(self):
+        """Duyệt qua các chính sách đang khớp (branch/area/group) và tạo cảnh báo khi vi phạm."""
+        policies = self.env["t4.gate_keeper.alert_policy"]._get_matching_policies(self)
+        for policy in policies:
+            triggered, reason = policy._evaluate(self)
+            if triggered:
+                self._create_warning(policy.warning_type_id.code, reason, policy=policy)
 
-        if is_warning:
-            # Translate the reason if needed
-            reason = _("Access on weekend (%s)") if "weekend" in reason_en else _("Access outside working hours (%s)")
-            # Extract day/time info from reason_en
-            param = reason_en.split('(')[-1].split(')')[0]
-            reason = reason % param
+    def _create_warning(self, condition_type, description, policy=False):
+        warning_type = self.env["t4.gate_keeper.area_warning_type"].search(
+            [("code", "=", condition_type)], limit=1
+        )
+        if not warning_type:
+            return
 
-            warning_type = self.env["t4.gate_keeper.area_warning_type"].search([("code", "=", "invalid_access")], limit=1)
-            if warning_type:
-                self.env["t4.gate_keeper.area_warning"].create({
-                    "area_id": self.area_id.id,
-                    "device_id": self.device_id.id,
-                    "employee_id": self.employee_id.id,
-                    "access_log_id": self.id,
-                    "warning_type_id": warning_type.id,
-                    "description": _("Employee %s accessed via %s at %s. Reason: %s") % (
-                        self.employee_id.name or _("Unknown Employee"),
-                        self.device_id.name or _("Unknown Device"),
-                        fields.Datetime.to_string(self.access_time),
-                        reason
-                    )
-                })
+        existing = self.env["t4.gate_keeper.area_warning"].search(
+            [
+                ("access_log_id", "=", self.id),
+                ("warning_type_id", "=", warning_type.id),
+                ("state", "=", "warning"),
+            ],
+            limit=1,
+        )
+        if existing:
+            return
 
+        values = {
+            "area_id": self.area_id.id if self.area_id else False,
+            "device_id": self.device_id.id if self.device_id else False,
+            "employee_id": self.employee_id.id if self.employee_id else False,
+            "access_log_id": self.id,
+            "warning_type_id": warning_type.id,
+            "description": description,
+            "priority": 10,
+        }
+        if policy:
+            values["policy_id"] = policy.id
+
+        self.env["t4.gate_keeper.area_warning"].create(values)

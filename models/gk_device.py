@@ -1,10 +1,7 @@
-# pyrefly: ignore [missing-import]
-from odoo import api, _, fields, models
+# -*- coding: utf-8 -*-
+# Mục đích: Quản lý thiết bị đầu cuối vật lý (Device), trạng thái hoạt động và cảnh báo liên quan.
 
-# DEVICE_ROLES = [
-#     ("input", "Input"),
-#     ("output", "Output"),
-# ]
+from odoo import api, _, fields, models
 
 DEVICE_STATUS = [
     ("online", "Online"),
@@ -48,21 +45,12 @@ class GateKeeperDevice(models.Model):
         store=True,
     )
 
-
-
     area_id = fields.Many2one(
         comodel_name="t4.gate_keeper.area",
         string="Area",
         domain="[('branch_id', '=', branch_id)]",
         help="Area within the branch where this device is located.",
     )
-
-    # device_role = fields.Selection(
-    #     selection=DEVICE_ROLES,
-    #     string="Device Role",
-    #     required=True,
-    #     help="Defines whether the device reads data or receives output commands.",
-    # )
 
     vendor = fields.Char(
         string="Vendor",
@@ -137,8 +125,16 @@ class GateKeeperDevice(models.Model):
         help="Indicates whether the device has synchronized the latest employee updates.",
     )
 
+    _sql_constraints = [
+        (
+            "controller_port_unique",
+            "UNIQUE(controller_id, port_or_channel)",
+            "Device port or channel must be unique per controller.",
+        )
+    ]
+
     def _compute_employee_sync_status(self):
-        # Placeholder logic: Currently unhandled API, just return out_of_sync if not set
+        # TODO: Hoàn thiện logic kiểm tra trạng thái đồng bộ dữ liệu cho thiết bị
         for device in self:
             if device.last_sync_at:
                 device.employee_sync_status = "synced"
@@ -147,19 +143,18 @@ class GateKeeperDevice(models.Model):
 
     @api.model_create_multi
     def create(self, vals_list):
-        records = super(GateKeeperDevice, self).create(vals_list)
-        for record in records:
-            if record.status in ('offline', 'controller_offline'):
-                record._handle_device_issue_warning()
-        return records
+        # Không gọi _handle_device_issue_warning() ở đây: device mới tạo (mặc định
+        # "offline" vì chưa từng kết nối) không được coi là một sự cố cần cảnh báo.
+        # Warning chỉ nên phát sinh khi status THAY ĐỔI sau khi device đã hoạt động (xem write()).
+        return super(GateKeeperDevice, self).create(vals_list)
 
     def write(self, vals):
         res = super(GateKeeperDevice, self).write(vals)
-        if 'status' in vals or 'area_id' in vals:
+        if "status" in vals or "area_id" in vals:
             for record in self:
-                if record.status in ('offline', 'controller_offline'):
+                if record.status in ("offline", "controller_offline"):
                     record._handle_device_issue_warning()
-                elif record.status == 'online':
+                elif record.status == "online":
                     record._resolve_device_issue_warnings()
         return res
 
@@ -169,43 +164,52 @@ class GateKeeperDevice(models.Model):
             self._resolve_device_issue_warnings()
             return
 
-        warning_type = self.env["t4.gate_keeper.area_warning_type"].search([("code", "=", "device_issue")], limit=1)
+        warning_type = self.env["t4.gate_keeper.area_warning_type"].search(
+            [("code", "=", "device_issue")], limit=1
+        )
         if not warning_type:
             return
 
-        active_warning = self.env["t4.gate_keeper.area_warning"].search([
-            ("device_id", "=", self.id),
-            ("warning_type_id", "=", warning_type.id),
-            ("state", "=", "warning"),
-        ], limit=1)
+        active_warning = self.env["t4.gate_keeper.area_warning"].search(
+            [
+                ("device_id", "=", self.id),
+                ("warning_type_id", "=", warning_type.id),
+                ("state", "=", "warning"),
+            ],
+            limit=1,
+        )
 
         if active_warning:
             if active_warning.area_id != self.area_id:
                 active_warning.write({"area_id": self.area_id.id})
         else:
-            status_label = dict(self._fields['status'].selection).get(self.status, self.status)
-            self.env["t4.gate_keeper.area_warning"].create({
-                "area_id": self.area_id.id,
-                "device_id": self.id,
-                "warning_type_id": warning_type.id,
-                "description": _("Device %s is offline. Status: %s") % (self.name, status_label),
-            })
+            status_label = dict(self._fields["status"].selection).get(
+                self.status, self.status
+            )
+            self.env["t4.gate_keeper.area_warning"].create(
+                {
+                    "area_id": self.area_id.id,
+                    "device_id": self.id,
+                    "warning_type_id": warning_type.id,
+                    "description": _("Device %s is offline. Status: %s")
+                    % (self.name, status_label),
+                }
+            )
 
     def _resolve_device_issue_warnings(self):
         self.ensure_one()
-        warning_type = self.env["t4.gate_keeper.area_warning_type"].search([("code", "=", "device_issue")], limit=1)
+        warning_type = self.env["t4.gate_keeper.area_warning_type"].search(
+            [("code", "=", "device_issue")], limit=1
+        )
         if not warning_type:
             return
 
-        active_warnings = self.env["t4.gate_keeper.area_warning"].search([
-            ("device_id", "=", self.id),
-            ("warning_type_id", "=", warning_type.id),
-            ("state", "=", "warning"),
-        ])
+        active_warnings = self.env["t4.gate_keeper.area_warning"].search(
+            [
+                ("device_id", "=", self.id),
+                ("warning_type_id", "=", warning_type.id),
+                ("state", "=", "warning"),
+            ]
+        )
         if active_warnings:
             active_warnings.action_resolve()
-
-    _controller_port_unique = models.Constraint(
-        "UNIQUE(controller_id, port_or_channel)",
-        _("Device port or channel must be unique per controller.")
-    )

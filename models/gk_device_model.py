@@ -1,5 +1,8 @@
-# pyrefly: ignore [missing-import]
+# -*- coding: utf-8 -*-
+# Mục đích: Quản lý danh mục model phần cứng và các thuật toán mà model đó hỗ trợ.
+
 from odoo import models, fields
+
 
 class GateKeeperDeviceModel(models.Model):
     _name = "t4.gate_keeper.device_model"

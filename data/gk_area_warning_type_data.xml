@@ -12,5 +12,17 @@
             <field name="code">device_issue</field>
             <field name="description">The physical access control device is offline or parent controller connection is lost.</field>
         </record>
+
+        <record id="warning_type_unauthorized_time" model="t4.gate_keeper.area_warning_type">
+            <field name="name">Unauthorized Time</field>
+            <field name="code">unauthorized_time</field>
+            <field name="description">Access attempted outside the configured working hours.</field>
+        </record>
+
+        <record id="warning_type_unknown_card" model="t4.gate_keeper.area_warning_type">
+            <field name="name">Unknown Card</field>
+            <field name="code">unknown_card</field>
+            <field name="description">Access attempted with an unknown or unregistered card.</field>
+        </record>
     </data>
 </odoo>

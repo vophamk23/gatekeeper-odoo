@@ -1,95 +1,58 @@
-<?xml version="1.0" encoding="utf-8"?>
 <odoo>
-    <record id="t4_gate_keeper_branch_view_list" model="ir.ui.view">
-        <field name="name">t4.gate_keeper.branch.view.list</field>
-        <field name="model">t4.gate_keeper.branch</field>
-        <field name="arch" type="xml">
-            <list string="Branches">
-                <field name="name"/>
-                <field name="company_id"/>
-            </list>
-        </field>
-    </record>
+  <record id="view_gate_keeper_branch_tree" model="ir.ui.view">
+    <field name="name">t4.gate_keeper.branch.tree</field>
+    <field name="model">t4.gate_keeper.branch</field>
+    <field name="arch" type="xml">
+      <tree string="Branches">
+        <field name="name"/>
+        <field name="company_id"/>
+        <field name="timezone"/>
+        <field name="active"/>
+      </tree>
+    </field>
+  </record>
 
-    <record id="t4_gate_keeper_branch_view_form" model="ir.ui.view">
-        <field name="name">t4.gate_keeper.branch.view.form</field>
-        <field name="model">t4.gate_keeper.branch</field>
-        <field name="arch" type="xml">
-            <form string="Branch">
-                <sheet>
-                    <group>
-                        <group>
-                            <field name="name"/>
-                            <field name="timezone"/>
-                        </group>
+  <record id="view_gate_keeper_branch_form" model="ir.ui.view">
+    <field name="name">t4.gate_keeper.branch.form</field>
+    <field name="model">t4.gate_keeper.branch</field>
+    <field name="arch" type="xml">
+      <form string="Branch">
+        <sheet>
+          <group>
+            <field name="name"/>
+            <field name="company_id"/>
+            <field name="timezone"/>
+            <field name="address"/>
+            <field name="active"/>
+          </group>
+          <notebook>
+            <page string="Areas">
+              <field name="area_ids">
+                <tree editable="bottom">
+                  <field name="name"/>
+                </tree>
+              </field>
+            </page>
+            <page string="Controllers">
+              <field name="controller_ids">
+                <tree editable="bottom">
+                  <field name="name"/>
+                  <field name="status"/>
+                </tree>
+              </field>
+            </page>
+            <page string="Devices">
+              <field name="device_ids"/>
+            </page>
+          </notebook>
+        </sheet>
+      </form>
+    </field>
+  </record>
 
-                        <group>
-                            <field name="company_id"/>
-                            <field name="address"/>
-                        </group>
-                    </group>
-                    <notebook>
-                    <page string="Areas" name="areas">
-                            <field name="area_ids">
-                                <list>
-                                    <field name="name"/>
-                                    <field name="status" 
-                                           widget="badge" 
-                                           decoration-success="status == 'normal'" 
-                                           decoration-warning="status == 'warning'"/>
-                                    <!-- <field name="device_ids" widget="many2many_tags" readonly="1"/> -->
-                                    <button name="action_view_warnings" 
-                                            string="Logs" 
-                                            type="object" 
-                                            icon="fa-list-ul"/>
-                                </list>
-
-                            </field>
-                        </page>
-                        <page string="Controllers" name="controllers">
-                            <field name="controller_ids">
-                                <list>
-                                    <field name="name"/>
-                                    <field name="serial_number"/>
-                                    <field name="status"
-                                           widget="badge"
-                                           decoration-success="status == 'online'"
-                                           decoration-danger="status == 'offline'"/>
-                                    <field name="employee_sync_status"
-                                           widget="badge" 
-                                           decoration-success="employee_sync_status == 'synced'" 
-                                           decoration-danger="employee_sync_status == 'out_of_sync'"/>
-                                </list>
-                            </field>
-                        </page>
-                        <page string="Devices" name="devices">
-                            <field name="device_ids">
-                                <list>
-                                    <field name="name"/>
-                                    <field name="serial_number"/>
-                                    <field name="area_id"/>
-                                    <field name="status"
-                                           widget="badge"
-                                           decoration-success="status == 'online'"
-                                           decoration-danger="status == 'offline'"
-                                           decoration-warning="status == 'controller_offline'"/>
-                                </list>
-                            </field>
-                        </page>
-                    </notebook>
-                </sheet>
-            </form>
-        </field>
-    </record>
-
-    <record id="t4_gate_keeper_branch_action" model="ir.actions.act_window">
-        <field name="name">Branches</field>
-        <field name="res_model">t4.gate_keeper.branch</field>
-        <field name="view_mode">list,form</field>
-        <field name="help" type="html">
-            <p class="o_view_nocontent_smiling_face">
-                No branch found! Create your first branch.
-            </p>
-        </field>
-    </record>
+  <record id="t4_gate_keeper_branch_action" model="ir.actions.act_window">
+    <field name="name">Branches</field>
+    <field name="res_model">t4.gate_keeper.branch</field>
+    <field name="view_mode">tree,form</field>
+  </record>
 </odoo>

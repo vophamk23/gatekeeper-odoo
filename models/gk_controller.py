@@ -1,15 +1,13 @@
+# -*- coding: utf-8 -*-
+# Mục đích: Quản lý thiết bị điều khiển vật lý (Controller), cài đặt kết nối, heartbeat và các API đồng bộ.
+
 import logging
 
-# pyrefly: ignore [missing-import]
 from odoo import api, _, fields, models
-# pyrefly: ignore [missing-import]
-from odoo.addons.t4_coreapi.utils import endpoint, get_body, set_response
-# pyrefly: ignore [missing-import]
+from odoo.addons.t4_coreapi.utils import endpoint, get_body
 from odoo.exceptions import ValidationError
 
-
 _logger = logging.getLogger(__name__)
-
 
 CONTROLLER_STATUS = [
     ("online", "Online"),
@@ -51,7 +49,6 @@ class T4GateKeeperController(models.Model):
         readonly=True,
         store=True,
     )
-
 
     device_ids = fields.One2many(
         "t4.gate_keeper.device",
@@ -125,7 +122,12 @@ class T4GateKeeperController(models.Model):
         help="Indicates whether the controller has synchronized the latest employee updates.",
     )
 
+    _sql_constraints = [
+        ("serial_number_unique", "UNIQUE(serial_number)", "Controller serial number must be unique.")
+    ]
+
     def _compute_employee_sync_status(self):
+        # TODO: Hoàn thiện logic tính trạng thái đồng bộ nhân viên dựa trên write_date của các bản ghi con
         for controller in self:
             domain = controller._get_employee_sync_domain(controller)
             unsynced_count = self.env["t4.gate_keeper.employee"].search_count(domain)
@@ -134,20 +136,14 @@ class T4GateKeeperController(models.Model):
             else:
                 controller.employee_sync_status = "out_of_sync"
 
-    _serial_number_unique = models.Constraint(
-        "UNIQUE(serial_number)",
-        _("Controller serial number must be unique.")
-    )
-
-    ################################## ENDPOINT ###############################################
     def _find_controller(self, serial_number):
         return self.search([
             ("serial_number", "=", serial_number),
         ], limit=1)
-    
 
     @endpoint(name="ControllerHeartbeat")
     def controller_heartbeat(self):
+        # TODO: Tái cấu trúc và tối ưu lại bước xác thực payload của endpoint heartbeat
         body = get_body(self.env)
         serial_number = body.get("serial_number", False)
 
@@ -161,9 +157,9 @@ class T4GateKeeperController(models.Model):
             "status": "online",
         })
 
-
     @endpoint(name="ControllerEmployeeSync")
     def controller_employee_sync(self):
+        # TODO: Hoàn thiện việc lấy dữ liệu đồng bộ nhân viên dựa trên delta write_date
         body = get_body()
         serial_number = body.get("serial_number", False)
 

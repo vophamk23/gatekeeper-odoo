@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="t4_gate_keeper_area_warning_type_extra_view_list" model="ir.ui.view">
+        <field name="name">t4.gate_keeper.area_warning_type.view.list</field>
+        <field name="model">t4.gate_keeper.area_warning_type</field>
+        <field name="arch" type="xml">
+            <list string="Warning Types">
+                <field name="name"/>
+                <field name="code"/>
+                <field name="condition_type"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="t4_gate_keeper_area_warning_type_extra_view_form" model="ir.ui.view">
+        <field name="name">t4.gate_keeper.area_warning_type.view.form</field>
+        <field name="model">t4.gate_keeper.area_warning_type</field>
+        <field name="arch" type="xml">
+            <form string="Warning Type">
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="name"/>
+                            <field name="code"/>
+                        </group>
+                        <group>
+                            <field name="condition_type"/>
+                        </group>
+                    </group>
+                    <group>
+                        <field name="description"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="t4_gate_keeper_area_warning_type_extra_action" model="ir.actions.act_window">
+        <field name="name">Warning Types</field>
+        <field name="res_model">t4.gate_keeper.area_warning_type</field>
+        <field name="view_mode">list,form</field>
+    </record>
+</odoo>

@@ -1,19 +1,15 @@
-# pyrefly: ignore [missing-import]
+# -*- coding: utf-8 -*-
+# Mục đích: Quản lý các khu vực (zone) trong chi nhánh và theo dõi cảnh báo theo khu vực.
+
 from odoo import api, fields, models, _
 
-
 AREA_STATUS = [
-    ('warning', 'Warning'),
-    ('normal', 'Normal'),
+    ("warning", "Warning"),
+    ("normal", "Normal"),
 ]
 
-ALARM_STATE = [
-        ("warning", "Warning"),
-        ("resolved", "Resolved"),
-    ]
 
 class GateKeeperArea(models.Model):
-
     _name = "t4.gate_keeper.area"
     _description = "Gate Keeper Area"
     _order = "name"
@@ -37,7 +33,7 @@ class GateKeeperArea(models.Model):
         "t4.gate_keeper.device",
         "area_id",
         string="Devices",
-        readonly="1",
+        readonly=True,
     )
 
     warning_ids = fields.One2many(
@@ -71,11 +67,6 @@ class GateKeeperArea(models.Model):
         for area in self:
             area.warning_count = len(area.warning_ids)
 
-    # def action_clear_warnings(self):
-    #     for area in self:
-    #         active_warnings = area.warning_ids.filtered(lambda w: w.state == "active")
-    #         active_warnings.action_resolve()
-
     def action_view_warnings(self):
         self.ensure_one()
         return {
@@ -88,82 +79,3 @@ class GateKeeperArea(models.Model):
                 "default_area_id": self.id,
             },
         }
-
-
-class GateKeeperAreaWarning(models.Model):
-
-    _name = "t4.gate_keeper.area_warning"
-    _description = "Gate Keeper Area Warning"
-    _order = "create_date desc"
-
-    area_id = fields.Many2one(
-        "t4.gate_keeper.area",
-        string="Area",
-        required=True,
-        ondelete="cascade",
-        index=True,
-    )
-    device_id = fields.Many2one(
-        "t4.gate_keeper.device",
-        string="Device",
-        ondelete="set null",
-    )
-    employee_id = fields.Many2one(
-        "t4.gate_keeper.employee",
-        string="Employee",
-        ondelete="set null",
-    )
-    access_log_id = fields.Many2one(
-        "t4.gate_keeper.access_log",
-        string="Related Access Log",
-        ondelete="set null",
-    )
-    warning_type_id = fields.Many2one(
-        "t4.gate_keeper.area_warning_type",
-        string="Warning Type",
-        required=True,
-        ondelete="restrict",
-    )
-    description = fields.Text(string="Description")
-
-    state = fields.Selection(
-        selection=ALARM_STATE, 
-        string="State", 
-        default="warning", 
-        required=True, 
-        index=True
-    )
-    resolved_by_id = fields.Many2one(
-        "res.users",
-        string="Resolved By",
-        readonly=True,
-    )
-    resolved_at = fields.Datetime(
-        string="Resolved At",
-        readonly=True,
-    )
-    resolution_notes = fields.Text(string="Resolution Notes")
-
-    def action_resolve(self):
-        for warning in self:
-            warning.write({
-                "state": "resolved",
-                "resolved_by_id": self.env.user.id,
-                "resolved_at": fields.Datetime.now(),
-            })
-
-
-class GateKeeperAreaWarningType(models.Model):
-    _name = "t4.gate_keeper.area_warning_type"
-    _description = "Gate Keeper Area Warning Type"
-    _order = "name"
-
-    name = fields.Char(string="Warning Type Name", required=True)
-    code = fields.Char(string="Code", required=True, help="Code used in business logic to identify the warning type.")
-    description = fields.Text(string="Description")
-
-    _code_uniq = models.Constraint(
-        "UNIQUE(code)",
-        "Warning type code must be unique!"
-    )
-

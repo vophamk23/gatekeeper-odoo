@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- Algorithm Views -->
+    <record id="t4_gate_keeper_algorithm_view_list" model="ir.ui.view">
+        <field name="name">t4.gate_keeper.algorithm.view.list</field>
+        <field name="model">t4.gate_keeper.algorithm</field>
+        <field name="arch" type="xml">
+            <list>
+                <field name="name"/>
+                <field name="algorithm_type"/>
+                <field name="version"/>
+                <field name="template_format"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="t4_gate_keeper_algorithm_view_form" model="ir.ui.view">
+        <field name="name">t4.gate_keeper.algorithm.view.form</field>
+        <field name="model">t4.gate_keeper.algorithm</field>
+        <field name="arch" type="xml">
+            <form>
+                <sheet>
+                    <group>
+                        <group string="Algorithm">
+                            <field name="name"/>
+                            <field name="algorithm_type"/>
+                            <field name="version"/>
+                        </group>
+                        <group string="Compatibility">
+                            <field name="template_format"/>
+                        </group>
+                    </group>
+                    <group>
+                        <field name="notes"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="t4_gate_keeper_algorithm_action" model="ir.actions.act_window">
+        <field name="name">Algorithms</field>
+        <field name="res_model">t4.gate_keeper.algorithm</field>
+        <field name="view_mode">list,form</field>
+    </record>
+
+</odoo>

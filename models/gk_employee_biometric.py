@@ -1,4 +1,6 @@
-# pyrefly: ignore [missing-import]
+# -*- coding: utf-8 -*-
+# Mục đích: Lưu trữ mẫu sinh trắc học (vân tay, khuôn mặt) của từng nhân viên theo thuật toán.
+
 from odoo import models, fields, api, _
 
 class GateKeeperEmployeeBiometric(models.Model):

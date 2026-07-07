@@ -1,4 +1,6 @@
-# pyrefly: ignore [missing-import]
+# -*- coding: utf-8 -*-
+# Mục đích: Quản lý các thuật toán nhận diện sinh trắc học (vân tay, kữún mặt, thẻ, v.v.).
+
 from odoo import models, fields, api, _
 
 ALGORITHM_TYPES = [
@@ -33,11 +35,6 @@ class GateKeeperAlgorithm(models.Model):
         help="Version of this recognition algorithm.",
     )
 
-    # vendor = fields.Char(
-    #     string="Vendor",
-    #     help="Algorithm vendor or provider.",
-    # )
-
     template_format = fields.Char(
         string="Template Format",
         help="Biometric template format produced or consumed by this algorithm.",
@@ -47,7 +44,10 @@ class GateKeeperAlgorithm(models.Model):
         string="Notes",
     )
 
-    _algorithm_version_unique = models.Constraint(
-        "UNIQUE(name, algorithm_type, version, vendor)",
-        _("Algorithm version must be unique per name, type, and vendor.")
-    )
+    _sql_constraints = [
+        (
+            "algorithm_version_unique",
+            "UNIQUE(name, algorithm_type, version)",
+            "Algorithm version must be unique per name, type and version."
+        )
+    ]

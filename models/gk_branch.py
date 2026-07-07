@@ -1,6 +1,14 @@
-# pyrefly: ignore [missing-import]
-import pytz
-from odoo import fields, models
+# -*- coding: utf-8 -*-
+# Mục đích: Quản lý các chi nhánh (vị trí vật lý) và múi giờ tương ứng.
+
+try:
+    import pytz
+    TIMEZONE_SELECTION = [(tz, tz) for tz in sorted(pytz.common_timezones)]
+except ImportError:
+    TIMEZONE_SELECTION = [("Asia/Ho_Chi_Minh", "Asia/Ho_Chi_Minh")]
+
+from odoo import api, fields, models
+
 
 class GateKeeperBranch(models.Model):
     _name = "t4.gate_keeper.branch"
@@ -10,49 +18,64 @@ class GateKeeperBranch(models.Model):
     name = fields.Char(
         string="Branch Name",
         required=True,
-        help="Name of the branch.",
+        help="Name of the branch or physical site.",
     )
 
-    timezone = fields.Selection(
-        selection=lambda self: [(tz, tz) for tz in pytz.common_timezones],
-        string="Timezone",
-        default="Asia/Ho_Chi_Minh",
-        required=True,
-        help="Timezone of this branch, used to evaluate local time of device logs.",
-    )
-
-    address = fields.Text(
-        string="Address",
-    )
-    
     company_id = fields.Many2one(
         "res.company",
         string="Company",
         required=True,
         default=lambda self: self.env.company,
         index=True,
+        help="Company that owns this branch.",
     )
 
-    
-    controller_ids = fields.One2many(
-        "t4.gate_keeper.controller",
-        "branch_id",
-        string="Controllers",
+    timezone = fields.Selection(
+        selection=TIMEZONE_SELECTION,
+        string="Timezone",
+        default="Asia/Ho_Chi_Minh",
+        required=True,
+        help="Timezone used for branch-level time evaluation.",
+    )
+
+    address = fields.Text(
+        string="Address",
+        help="Physical address of the branch.",
+    )
+
+    active = fields.Boolean(
+        string="Active",
+        default=True,
     )
 
     area_ids = fields.One2many(
-        "t4.gate_keeper.area",
-        "branch_id",
+        comodel_name="t4.gate_keeper.area",
+        inverse_name="branch_id",
         string="Areas",
     )
 
-    device_ids = fields.Many2many(
-        "t4.gate_keeper.device",
-        compute="_compute_device_ids",
-        string="Devices",
-        store=False,
+    controller_ids = fields.One2many(
+        comodel_name="t4.gate_keeper.controller",
+        inverse_name="branch_id",
+        string="Controllers",
     )
 
+    device_ids = fields.Many2many(
+        comodel_name="t4.gate_keeper.device",
+        string="Devices",
+        compute="_compute_device_ids",
+    )
+
+    @api.depends("controller_ids", "controller_ids.device_ids")
     def _compute_device_ids(self):
         for branch in self:
-            branch.device_ids = branch.controller_ids.mapped("device_ids")
+            if not branch.controller_ids:
+                branch.device_ids = [(6, 0, [])]
+                continue
+
+            device_ids = self.env["t4.gate_keeper.device"].search(
+                [
+                    ("controller_id", "in", branch.controller_ids.ids),
+                ]
+            )
+            branch.device_ids = [(6, 0, device_ids.ids)]
