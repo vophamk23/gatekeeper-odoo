@@ -172,66 +172,66 @@ Mỗi **[PHẦN]** tương ứng với một **Epic**, mỗi **[NHÓM]** tương
 *Mục đích: Tiếp nhận và xử lý các yêu cầu HTTP từ các bộ điều khiển vật lý.*
 
 ### [API] Khai báo các Endpoint kết nối
-* ├── **Feature**: Đăng ký và hiện thực 3 endpoint Khởi động/Cấu hình (ControllerRegister, DeviceRegister, ControllerGetConfig)
+* ├── **Feature**: Đăng ký và hiện thực API ControllerRegister
   * **Mô tả chi tiết**:
-    - **API `ControllerRegister`**:
-      - *Mục đích*: Thiết bị gửi thông tin phần cứng khi khởi động hoặc cắm mạng lần đầu để Backend ghi nhận IP/MAC và kích hoạt trạng thái.
-      - *HTTP Method & Route*: `POST` `/api/v1/controller-register` (hoặc thông qua `t4_coreapi` registry).
-      - *Payload*: `controller_id`, `hardware_model`, `firmware_version`, `ip_address`, `mac_address`, `connection_type`.
-      - *Logic xử lý*: Tra cứu bản ghi `t4.gate_keeper.controller` theo serial. Nếu tồn tại, cập nhật IP/MAC và đổi `status` sang `online`, đặt `last_heartbeat_at = Datetime.now()`. Cascade chuyển các thiết bị con từ `controller_offline` sang `online`.
-    - **API `DeviceRegister`**:
-      - *Mục đích*: Đăng ký các thiết bị con kết nối trực tiếp với bộ điều khiển vật lý.
-      - *HTTP Method & Route*: `POST` `/api/v1/device-register`
-      - *Payload*: `device_sn`, `area`, `device-model`, `firmware_version`, `port/channel`.
-      - *Logic xử lý*: Tra cứu thiết bị con trong `t4.gate_keeper.device` theo mã serial (`device_sn`), cập nhật trạng thái `online`, liên kết với khu vực tương ứng.
-    - **API `ControllerGetConfig`**:
-      - *Mục đích*: Cho phép Controller tải cấu hình múi giờ chi nhánh sở hữu và danh sách thuật toán sinh trắc học được hỗ trợ của các thiết bị con trực thuộc.
-      - *HTTP Method & Route*: `POST` `/api/v1/config`
-      - *Payload*: `serial_number`.
-      - *Logic xử lý*: Trích xuất múi giờ địa phương từ chi nhánh của Controller (`branch_id.timezone`) và danh sách thuật toán sinh trắc học được hỗ trợ của từng thiết bị con từ `device_model_id.algorithm_ids`.
-* ├── **Feature**: Đăng ký và hiện thực endpoint nhận heartbeat (ControllerHeartbeat)
+    - *Mục đích*: Thiết bị gửi thông tin phần cứng khi khởi động hoặc cắm mạng lần đầu để Backend ghi nhận IP/MAC và kích hoạt trạng thái.
+    - *HTTP Method & Route*: `POST` `/api/v1/controller-register` (hoặc thông qua `t4_coreapi` registry).
+    - *Payload*: `controller_id`, `hardware_model`, `firmware_version`, `ip_address`, `mac_address`, `connection_type`.
+    - *Logic xử lý*: Tra cứu bản ghi `t4.gate_keeper.controller` theo serial. Nếu tồn tại, cập nhật IP/MAC và đổi `status` sang `online`, đặt `last_heartbeat_at = Datetime.now()`. Cascade chuyển các thiết bị con từ `controller_offline` sang `online`.
+* ├── **Feature**: Đăng ký và hiện thực API DeviceRegister
   * **Mô tả chi tiết**:
-    - **API `ControllerHeartbeat`**:
-      - *Mục đích*: Nhận nhịp tim định kỳ từ bộ điều khiển để kiểm tra tình trạng kết nối.
-      - *HTTP Method & Route*: `POST` `/api/v1/heartbeat`
-      - *Payload*: `controller_id`, mảng `devices_status` (gồm `device_sn` và `status` của từng thiết bị con).
-      - *Logic xử lý*: Cập nhật `last_heartbeat_at = Datetime.now()` và đặt trạng thái Controller là `online`. Duyệt mảng `devices_status` để cập nhật trạng thái thiết bị con. Nếu thiết bị con offline và thuộc khu vực, tự động tạo Area Warning loại `device_issue`. Nếu trực tuyến lại, tự động đóng cảnh báo.
-* ├── **Feature**: Đăng ký và hiện thực 3 endpoint Đồng bộ nhân viên (ControllerEmployeeSync, EmployeeBiometricGet, ControllerSyncAck)
+    - *Mục đích*: Đăng ký các thiết bị con kết nối trực tiếp với bộ điều khiển vật lý.
+    - *HTTP Method & Route*: `POST` `/api/v1/device-register`
+    - *Payload*: `device_sn`, `area`, `device-model`, `firmware_version`, `port/channel`.
+    - *Logic xử lý*: Tra cứu thiết bị con trong `t4.gate_keeper.device` theo mã serial (`device_sn`), cập nhật trạng thái `online`, liên kết với khu vực tương ứng.
+* ├── **Feature**: Đăng ký và hiện thực API ControllerGetConfig
   * **Mô tả chi tiết**:
-    - **API `ControllerEmployeeSync`**:
-      - *Mục đích*: Trả về danh sách nhân viên thay đổi hoặc cần xóa khỏi thiết bị tính từ lần đồng bộ trước.
-      - *HTTP Method & Route*: `POST` `/api/v1/employee-sync`
-      - *Payload*: `serial_number`, `last_sync_at`.
-      - *Logic xử lý*: So sánh `write_date` của bản ghi nhân viên (`t4.gate_keeper.employee`) với thời điểm `last_sync_at` để lọc danh sách các nhân viên cần ghi đè/thêm mới (`action = "update"`) hoặc cần xóa (`action = "delete"`).
-    - **API `EmployeeBiometricGet`**:
-      - *Mục đích*: Tải dữ liệu vân tay/khuôn mặt/thẻ chi tiết của một nhân viên cụ thể.
-      - *HTTP Method & Route*: `POST` `/api/v1/biometric`
-      - *Payload*: `controller_id`, `emp_id`.
-      - *Logic xử lý*: Tìm bản ghi nhân viên dựa theo mã UUID duy nhất `emp_id`. Truy vấn dữ liệu liên kết từ bảng sinh trắc học `t4.gate_keeper.employee.biometric`. Lọc chỉ lấy các dữ liệu sinh trắc học có thuật toán tương thích. Mã hóa trường dữ liệu nhị phân `template` sang chuỗi `Base64`.
-    - **API `ControllerSyncAck`**:
-      - *Mục đích*: Controller gửi xác nhận nạp dữ liệu hoàn tất, cập nhật lại thời điểm đồng bộ thành công gần nhất.
-      - *HTTP Method & Route*: `POST` `/api/v1/sync`
-      - *Payload*: `controller_id`, `sync_timestamp`.
-      - *Logic xử lý*: Tìm Controller theo `serial_number` và cập nhật trường `last_sync_at = sync_timestamp`. Khi đó, trường tính toán trạng thái đồng bộ nhân viên (`employee_sync_status`) của Controller tự động chuyển về trạng thái đồng bộ hoàn tất (`synced`).
-* ├── **Feature**: Đăng ký và hiện thực endpoint nhận nhật ký quẹt thẻ (AccessLogUpload)
+    - *Mục đích*: Cho phép Controller tải cấu hình múi giờ chi nhánh sở hữu và danh sách thuật toán sinh trắc học được hỗ trợ của các thiết bị con trực thuộc.
+    - *HTTP Method & Route*: `POST` `/api/v1/config`
+    - *Payload*: `serial_number`.
+    - *Logic xử lý*: Trích xuất múi giờ địa phương từ chi nhánh của Controller (`branch_id.timezone`) và danh sách thuật toán sinh trắc học được hỗ trợ của từng thiết bị con từ `device_model_id.algorithm_ids`.
+* ├── **Feature**: Đăng ký và hiện thực API ControllerHeartbeat
   * **Mô tả chi tiết**:
-    - **API `AccessLogUpload`**:
-      - *Mục đích*: Tiếp nhận mảng log quẹt thẻ để lưu trữ và kiểm tra vi phạm bảo mật.
-      - *HTTP Method & Route*: `POST` `/api/v1/log`
-      - *Payload*: `controller_id`, mảng `logs` (gồm `device_serial`, `emp_id`, `access_time`, `direction`, `verification_type`).
-      - *Logic xử lý*: Tra cứu thiết bị con theo `device_serial` để ra `device_id`, tra cứu nhân viên theo `emp_id` để ra `employee_id`. Tạo mới bản ghi trong `t4.gate_keeper.access_log` với trạng thái `sync_status = "success"`. Trong hàm `create()` của `t4.gate_keeper.access_log`, hệ thống tự động kiểm tra chính sách vi phạm giờ giấc ra vào, timezone địa phương và sinh Area Warning nếu vi phạm.
-* └── **Feature**: Đăng ký và hiện thực 2 endpoint Lệnh từ xa (ControllerCommandPoll, ControllerCommandAck)
+    - *Mục đích*: Nhận nhịp tim định kỳ từ bộ điều khiển để kiểm tra tình trạng kết nối.
+    - *HTTP Method & Route*: `POST` `/api/v1/heartbeat`
+    - *Payload*: `controller_id`, mảng `devices_status` (gồm `device_sn` và `status` của từng thiết bị con).
+    - *Logic xử lý*: Cập nhật `last_heartbeat_at = Datetime.now()` và đặt trạng thái Controller là `online`. Duyệt mảng `devices_status` để cập nhật trạng thái thiết bị con. Nếu thiết bị con offline và thuộc khu vực, tự động tạo Area Warning loại `device_issue`. Nếu trực tuyến lại, tự động đóng cảnh báo.
+* ├── **Feature**: Đăng ký và hiện thực API ControllerEmployeeSync
   * **Mô tả chi tiết**:
-    - **API `ControllerCommandPoll`**:
-      - *Mục đích*: Bộ điều khiển gọi định kỳ (5-10s) quét tìm các lệnh mở cửa từ xa đang ở trạng thái `pending`.
-      - *HTTP Method & Route*: `POST` `/api/v1/command`
-      - *Payload*: `controller_id`.
-      - *Logic xử lý*: Tìm kiếm các lệnh dành riêng cho Controller này đang ở trạng thái `pending`. Trả về danh sách lệnh và tự động chuyển trạng thái của lệnh sang `sending` để tránh trùng lặp.
-    - **API `ControllerCommandAck`**:
-      - *Mục đích*: Bộ điều khiển gửi phản hồi báo cáo kết quả thực thi lệnh mở cửa từ xa.
-      - *HTTP Method & Route*: `POST` `/api/v1/confirmation`
-      - *Payload*: `controller_id`, `command_id`, `execution_message`.
-      - *Logic xử lý*: Tìm bản ghi lệnh theo `command_id`, cập nhật trạng thái lệnh sang `success` hoặc `failed` và lưu lại tin nhắn kết quả (`execution_message`) lên Odoo.
+    - *Mục đích*: Trả về danh sách nhân viên thay đổi hoặc cần xóa khỏi thiết bị tính từ lần đồng bộ trước.
+    - *HTTP Method & Route*: `POST` `/api/v1/employee-sync`
+    - *Payload*: `serial_number`, `last_sync_at`.
+    - *Logic xử lý*: So sánh `write_date` của bản ghi nhân viên (`t4.gate_keeper.employee`) với thời điểm `last_sync_at` để lọc danh sách các nhân viên cần ghi đè/thêm mới (`action = "update"`) hoặc cần xóa (`action = "delete"`).
+* ├── **Feature**: Đăng ký và hiện thực API EmployeeBiometricGet
+  * **Mô tả chi tiết**:
+    - *Mục đích*: Tải dữ liệu vân tay/khuôn mặt/thẻ chi tiết của một nhân viên cụ thể.
+    - *HTTP Method & Route*: `POST` `/api/v1/biometric`
+    - *Payload*: `controller_id`, `emp_id`.
+    - *Logic xử lý*: Tìm bản ghi nhân viên dựa theo mã UUID duy nhất `emp_id`. Truy vấn dữ liệu liên kết từ bảng sinh trắc học `t4.gate_keeper.employee.biometric`. Lọc chỉ lấy các dữ liệu sinh trắc học có thuật toán tương thích. Mã hóa trường dữ liệu nhị phân `template` sang chuỗi `Base64`.
+* ├── **Feature**: Đăng ký và hiện thực API ControllerSyncAck
+  * **Mô tả chi tiết**:
+    - *Mục đích*: Controller gửi xác nhận nạp dữ liệu hoàn tất, cập nhật lại thời điểm đồng bộ thành công gần nhất.
+    - *HTTP Method & Route*: `POST` `/api/v1/sync`
+    - *Payload*: `controller_id`, `sync_timestamp`.
+    - *Logic xử lý*: Tìm Controller theo `serial_number` và cập nhật trường `last_sync_at = sync_timestamp`. Khi đó, trường tính toán trạng thái đồng bộ nhân viên (`employee_sync_status`) của Controller tự động chuyển về trạng thái đồng bộ hoàn tất (`synced`).
+* ├── **Feature**: Đăng ký và hiện thực API AccessLogUpload
+  * **Mô tả chi tiết**:
+    - *Mục đích*: Tiếp nhận mảng log quẹt thẻ để lưu trữ và kiểm tra vi phạm bảo mật.
+    - *HTTP Method & Route*: `POST` `/api/v1/log`
+    - *Payload*: `controller_id`, mảng `logs` (gồm `device_serial`, `emp_id`, `access_time`, `direction`, `verification_type`).
+    - *Logic xử lý*: Tra cứu thiết bị con theo `device_serial` để ra `device_id`, tra cứu nhân viên theo `emp_id` để ra `employee_id`. Tạo mới bản ghi trong `t4.gate_keeper.access_log` với trạng thái `sync_status = "success"`. Trong hàm `create()` của `t4.gate_keeper.access_log`, hệ thống tự động kiểm tra chính sách vi phạm giờ giấc ra vào, timezone địa phương và sinh Area Warning nếu vi phạm.
+* ├── **Feature**: Đăng ký và hiện thực API ControllerCommandPoll
+  * **Mô tả chi tiết**:
+    - *Mục đích*: Bộ điều khiển gọi định kỳ (5-10s) quét tìm các lệnh mở cửa từ xa đang ở trạng thái `pending`.
+    - *HTTP Method & Route*: `POST` `/api/v1/command`
+    - *Payload*: `controller_id`.
+    - *Logic xử lý*: Tìm kiếm các lệnh dành riêng cho Controller này đang ở trạng thái `pending`. Trả về danh sách lệnh và tự động chuyển trạng thái của lệnh sang `sending` để tránh trùng lặp.
+* └── **Feature**: Đăng ký và hiện thực API ControllerCommandAck
+  * **Mô tả chi tiết**:
+    - *Mục đích*: Bộ điều khiển gửi phản hồi báo cáo kết quả thực thi lệnh mở cửa từ xa.
+    - *HTTP Method & Route*: `POST` `/api/v1/confirmation`
+    - *Payload*: `controller_id`, `command_id`, `execution_message`.
+    - *Logic xử lý*: Tìm bản ghi lệnh theo `command_id`, cập nhật trạng thái lệnh sang `success` hoặc `failed` và lưu lại tin nhắn kết quả (`execution_message`) lên Odoo.
 
 ### [LOGIC] Nhật ký thiết bị thô (Device Log) và Xử lý Batch
 * ├── **Feature**: Tạo model Nhật ký thiết bị thô `t4.gate_keeper.device_log` (`models/gk_device_log.py`)
