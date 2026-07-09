@@ -68,14 +68,10 @@ class GateKeeperBranch(models.Model):
 
     @api.depends("controller_ids", "controller_ids.device_ids")
     def _compute_device_ids(self):
-        for branch in self:
-            if not branch.controller_ids:
-                branch.device_ids = [(6, 0, [])]
-                continue
+        """Tính tập hợp thiết bị thuộc chi nhánh thông qua các controller.
 
-            device_ids = self.env["t4.gate_keeper.device"].search(
-                [
-                    ("controller_id", "in", branch.controller_ids.ids),
-                ]
-            )
-            branch.device_ids = [(6, 0, device_ids.ids)]
+        Làm phẳng quan hệ Branch → Controller → Device thành một Many2many
+        để hiển thị nhanh và lọc dữ liệu theo chi nhánh.
+        """
+        for branch in self:
+            branch.device_ids = branch.controller_ids.device_ids

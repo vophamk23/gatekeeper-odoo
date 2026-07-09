@@ -22,6 +22,13 @@ class GateKeeperAlgorithm(models.Model):
         help="Commercial or technical name of the recognition algorithm.",
     )
 
+    code = fields.Char(
+        string="Algorithm Code",
+        required=True,
+        index=True,
+        help="Unique identifier code for the algorithm, e.g. face_3d.",
+    )
+
     algorithm_type = fields.Selection(
         selection=ALGORITHM_TYPES,
         string="Algorithm Type",

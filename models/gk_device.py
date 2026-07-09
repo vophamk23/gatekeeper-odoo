@@ -12,12 +12,14 @@ DEVICE_STATUS = [
 
 class GateKeeperDevice(models.Model):
     _name = "t4.gate_keeper.device"
+    _inherit = ["mail.thread", "mail.activity.mixin"]
     _description = "Gate Keeper Device"
     _order = "controller_id, id"
 
     name = fields.Char(
         string="Device Name",
         required=True,
+        tracking=True,
         help="Human-readable name used to identify this device.",
     )
 
@@ -27,6 +29,7 @@ class GateKeeperDevice(models.Model):
         required=True,
         ondelete="cascade",
         index=True,
+        tracking=True,
         help="Controller that manages this device.",
     )
 
@@ -49,6 +52,7 @@ class GateKeeperDevice(models.Model):
         comodel_name="t4.gate_keeper.area",
         string="Area",
         domain="[('branch_id', '=', branch_id)]",
+        tracking=True,
         help="Area within the branch where this device is located.",
     )
 
@@ -67,6 +71,7 @@ class GateKeeperDevice(models.Model):
         string="Serial Number",
         copy=False,
         index=True,
+        tracking=True,
         help="Physical serial number of the device.",
     )
 
@@ -125,6 +130,13 @@ class GateKeeperDevice(models.Model):
         help="Indicates whether the device has synchronized the latest employee updates.",
     )
 
+    device_log_ids = fields.One2many(
+        comodel_name="t4.gate_keeper.device_log",
+        inverse_name="device_id",
+        string="Device Status Logs",
+    )
+
+
     _sql_constraints = [
         (
             "controller_port_unique",
@@ -134,12 +146,30 @@ class GateKeeperDevice(models.Model):
     ]
 
     def _compute_employee_sync_status(self):
-        # TODO: Hoàn thiện logic kiểm tra trạng thái đồng bộ dữ liệu cho thiết bị
+        """Tính trạng thái đồng bộ nhân viên cho device.
+
+        Logic: So sánh last_sync_at với write_date của các bản ghi employee.biometric
+        liên quan đến algorithm của device. Nếu có bản ghi mới hơn last_sync_at
+        thì device bị coi là out_of_sync.
+        """
         for device in self:
-            if device.last_sync_at:
-                device.employee_sync_status = "synced"
-            else:
+            if not device.last_sync_at:
                 device.employee_sync_status = "out_of_sync"
+                continue
+
+            # So sánh với các bản ghi biometric thuộc algorithm của device
+            algorithm_ids = device.algorithm_ids.ids
+            if algorithm_ids:
+                newer_biometrics = self.env["t4.gate_keeper.employee.biometric"].search_count(
+                    [
+                        ("algorithm_id", "in", algorithm_ids),
+                        ("write_date", ">", device.last_sync_at),
+                    ]
+                )
+                device.employee_sync_status = "out_of_sync" if newer_biometrics else "synced"
+            else:
+                # Device không có algorithm → không cần đồng bộ sinh trắc học
+                device.employee_sync_status = "synced"
 
     @api.model_create_multi
     def create(self, vals_list):
@@ -149,18 +179,40 @@ class GateKeeperDevice(models.Model):
         return super(GateKeeperDevice, self).create(vals_list)
 
     def write(self, vals):
+        # Lưu lại trạng thái cũ của từng thiết bị trước khi cập nhật
+        old_statuses = {d.id: d.status for d in self}
         res = super(GateKeeperDevice, self).write(vals)
+        
+        # Xử lý ghi log thiết bị khi status thay đổi
+        if "status" in vals:
+            for record in self:
+                old_status = old_statuses.get(record.id)
+                new_status = vals["status"]
+                if old_status != new_status:
+                    # ---> Chuyển sang: Tạo bản ghi log trong file models/gk_device_log.py
+                    self.env["t4.gate_keeper.device_log"].create({
+                        "device_id": record.id,
+                        "event_type": "status_changed",
+                        "old_status": old_status or "offline",
+                        "new_status": new_status,
+                        "changed_at": fields.Datetime.now(),
+                        "note": _("Trạng thái thiết bị thay đổi từ %s sang %s") % (old_status or "offline", new_status),
+                    })
+
         if "status" in vals or "area_id" in vals:
             for record in self:
                 if record.status in ("offline", "controller_offline"):
+                    # ---> Gọi hàm: _handle_device_issue_warning() bên dưới trong file này (gk_device.py)
                     record._handle_device_issue_warning()
                 elif record.status == "online":
+                    # ---> Gọi hàm: _resolve_device_issue_warnings() bên dưới trong file này (gk_device.py)
                     record._resolve_device_issue_warnings()
         return res
 
     def _handle_device_issue_warning(self):
         self.ensure_one()
         if not self.area_id:
+            # ---> Gọi hàm: _resolve_device_issue_warnings() bên dưới trong file này (gk_device.py)
             self._resolve_device_issue_warnings()
             return
 
@@ -186,6 +238,7 @@ class GateKeeperDevice(models.Model):
             status_label = dict(self._fields["status"].selection).get(
                 self.status, self.status
             )
+            # ---> Chuyển sang: Tạo bản ghi cảnh báo trong file models/gk_area_warning.py
             self.env["t4.gate_keeper.area_warning"].create(
                 {
                     "area_id": self.area_id.id,
@@ -212,4 +265,5 @@ class GateKeeperDevice(models.Model):
             ]
         )
         if active_warnings:
+            # ---> Chuyển sang: Hàm action_resolve() trong file models/gk_area_warning.py để xử lý cảnh báo
             active_warnings.action_resolve()

@@ -1,49 +1,168 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
-    <record id="t4_gate_keeper_alert_policy_view_list" model="ir.ui.view">
-        <field name="name">t4.gate_keeper.alert_policy.view.list</field>
-        <field name="model">t4.gate_keeper.alert_policy</field>
-        <field name="arch" type="xml">
-            <list string="Alert Policies">
-                <field name="name"/>
-                <field name="code"/>
-                <field name="severity"/>
-                <field name="branch_id"/>
-                <field name="active"/>
-            </list>
-        </field>
-    </record>
+    <data>
 
-    <record id="t4_gate_keeper_alert_policy_view_form" model="ir.ui.view">
-        <field name="name">t4.gate_keeper.alert_policy.view.form</field>
-        <field name="model">t4.gate_keeper.alert_policy</field>
-        <field name="arch" type="xml">
-            <form string="Alert Policy">
-                <sheet>
-                    <group>
-                        <group>
-                            <field name="name"/>
-                            <field name="code"/>
-                            <field name="active"/>
-                        </group>
-                        <group>
-                            <field name="severity"/>
-                            <field name="priority"/>
-                            <field name="branch_id"/>
-                        </group>
-                    </group>
-                    <group>
-                        <field name="area_ids" widget="many2many_tags"/>
-                        <field name="description"/>
-                    </group>
-                </sheet>
-            </form>
-        </field>
-    </record>
+        <!-- LIST VIEW -->
+        <record id="t4_gate_keeper_alert_policy_view_list" model="ir.ui.view">
+            <field name="name">t4.gate_keeper.alert_policy.view.list</field>
+            <field name="model">t4.gate_keeper.alert_policy</field>
+            <field name="arch" type="xml">
+                <list string="Alert Policies" decoration-muted="not active">
+                    <field name="name" string="Policy Name"/>
+                    <field name="code" string="Code"/>
+                    <field name="warning_type_id" string="Warning Type"/>
+                    <field name="priority"
+                           string="Priority"
+                           widget="badge"
+                           decoration-danger="priority == 'critical'"
+                           decoration-warning="priority == 'high'"
+                           decoration-info="priority == 'medium'"
+                           decoration-muted="priority == 'low'"/>
+                    <field name="start_hour" string="Start Hour" widget="float_time"/>
+                    <field name="end_hour" string="End Hour" widget="float_time"/>
+                    <field name="active" string="Active" widget="boolean_toggle"/>
+                </list>
+            </field>
+        </record>
 
-    <record id="t4_gate_keeper_alert_policy_action" model="ir.actions.act_window">
-        <field name="name">Alert Policies</field>
-        <field name="res_model">t4.gate_keeper.alert_policy</field>
-        <field name="view_mode">list,form</field>
-    </record>
+        <!-- KANBAN VIEW -->
+        <record id="t4_gate_keeper_alert_policy_view_kanban" model="ir.ui.view">
+            <field name="name">t4.gate_keeper.alert_policy.view.kanban</field>
+            <field name="model">t4.gate_keeper.alert_policy</field>
+            <field name="arch" type="xml">
+                <kanban class="o_kanban_small_column" default_group_by="warning_type_id">
+                    <field name="id"/>
+                    <field name="name"/>
+                    <field name="warning_type_id"/>
+                    <field name="priority"/>
+                    <field name="active"/>
+                    <field name="start_hour"/>
+                    <field name="end_hour"/>
+                    <field name="description"/>
+                    <templates>
+                        <t t-name="card">
+                            <!-- Colored band on top based on priority -->
+                            <div t-attf-class="o_kanban_card_header text-white
+                                #{ record.priority.raw_value == 'critical' and 'bg-danger' or
+                                   record.priority.raw_value == 'high'     and 'bg-warning text-dark' or
+                                   record.priority.raw_value == 'medium'   and 'bg-info'  or
+                                   'bg-secondary' }"
+                                style="padding: 6px 12px; border-radius: 6px 6px 0 0; font-size:11px; font-weight:600;">
+                                <span t-if="record.priority.raw_value == 'critical'">🚨 CRITICAL</span>
+                                <span t-elif="record.priority.raw_value == 'high'">⚠️ HIGH</span>
+                                <span t-elif="record.priority.raw_value == 'medium'">ℹ️ MEDIUM</span>
+                                <span t-else="">🔵 LOW</span>
+                                <span t-if="!record.active.raw_value"
+                                      style="float:right; background:rgba(0,0,0,.25); border-radius:4px; padding:1px 6px; font-size:10px;">Inactive</span>
+                            </div>
+
+                            <div style="padding: 10px 12px 8px;">
+                                <strong style="font-size:13px; display:block; margin-bottom:6px;">
+                                    <field name="name"/>
+                                </strong>
+
+                                <div t-if="record.start_hour.raw_value or record.end_hour.raw_value"
+                                     style="font-size:12px; color:#555; margin-bottom:6px;">
+                                    🕐 <field name="start_hour" widget="float_time"/> – <field name="end_hour" widget="float_time"/>
+                                </div>
+
+                                <div t-if="record.description.value" style="font-size:11px; color:#888; margin-top:6px; border-top:1px solid #eee; padding-top:6px;">
+                                    <field name="description"/>
+                                </div>
+                            </div>
+                        </t>
+                    </templates>
+                </kanban>
+            </field>
+        </record>
+
+        <!-- FORM VIEW -->
+        <record id="t4_gate_keeper_alert_policy_view_form" model="ir.ui.view">
+            <field name="name">t4.gate_keeper.alert_policy.view.form</field>
+            <field name="model">t4.gate_keeper.alert_policy</field>
+            <field name="arch" type="xml">
+                <form string="Alert Policy">
+                    <sheet>
+                        <widget name="web_ribbon" title="Archived" bg_color="text-danger" invisible="active"/>
+                        <div class="oe_title">
+                            <label for="name" string="Policy Name"/>
+                            <h1>
+                                <field name="name" placeholder="e.g. Deny Access After Working Hours..."/>
+                            </h1>
+                        </div>
+                        <group>
+                            <group string="Configuration">
+                                <field name="code"/>
+                                <field name="warning_type_id"/>
+                                <field name="condition_type" invisible="1"/>
+                                <field name="priority"/>
+                                <field name="active" invisible="1"/>
+                            </group>
+                            <group string="Time Curfew" invisible="condition_type != 'unauthorized_time'">
+                                <field name="start_hour" widget="float_time"/>
+                                <field name="end_hour" widget="float_time"/>
+                                <field name="apply_weekend"/>
+                            </group>
+                        </group>
+                        <notebook>
+                            <page string="Scoping" name="scope">
+                                <group>
+                                    <field name="branch_ids" widget="many2many_tags" placeholder="Select branches... (Empty = all)"/>
+                                    <field name="area_ids" widget="many2many_tags" 
+                                           domain="branch_ids and [('branch_id', 'in', branch_ids)] or []"
+                                           placeholder="Select areas... (Empty = all)"/>
+                                    <field name="employee_group_ids" widget="many2many_tags" 
+                                           domain="branch_ids and [('branch_id', 'in', branch_ids)] or []"
+                                           placeholder="Select employee groups... (Empty = all)"/>
+                                    <field name="allowed_group_ids" widget="many2many_tags" 
+                                           domain="branch_ids and [('branch_id', 'in', branch_ids)] or []"
+                                           placeholder="Select allowed groups for restricted areas..."/>
+                                </group>
+                            </page>
+                            <page string="Description &amp; Action Plan" name="description">
+                                <field name="description" placeholder="Write instructions for security guards when this policy is breached..."/>
+                            </page>
+                        </notebook>
+                    </sheet>
+                </form>
+            </field>
+        </record>
+
+        <!-- SEARCH VIEW -->
+        <record id="t4_gate_keeper_alert_policy_view_search" model="ir.ui.view">
+            <field name="name">t4.gate_keeper.alert_policy.view.search</field>
+            <field name="model">t4.gate_keeper.alert_policy</field>
+            <field name="arch" type="xml">
+                <search string="Search Alert Policies">
+                    <field name="name" string="Policy Name"/>
+                    <field name="code" string="Code"/>
+                    <field name="warning_type_id" string="Warning Type"/>
+                    <separator/>
+                    <filter string="Active" name="active" domain="[('active', '=', True)]"/>
+                    <filter string="Archived" name="archived" domain="[('active', '=', False)]"/>
+                    <group expand="1" string="Group By">
+                        <filter string="Warning Type" name="group_warning_type" context="{'group_by': 'warning_type_id'}"/>
+                        <filter string="Priority" name="group_priority" context="{'group_by': 'priority'}"/>
+                    </group>
+                </search>
+            </field>
+        </record>
+
+        <!-- ACTION WINDOW -->
+        <record id="t4_gate_keeper_alert_policy_action" model="ir.actions.act_window">
+            <field name="name">Alert Policies</field>
+            <field name="res_model">t4.gate_keeper.alert_policy</field>
+            <field name="view_mode">list,kanban,form</field>
+            <field name="search_view_id" ref="t4_gate_keeper_alert_policy_view_search"/>
+            <field name="help" type="html">
+                <p class="o_view_nocontent_smiling_face">
+                    No alert policies configured!
+                </p>
+                <p>
+                    Configure rules to automatically monitor and trigger warnings on unauthorized access, device offline, etc.
+                </p>
+            </field>
+        </record>
+
+    </data>
 </odoo>

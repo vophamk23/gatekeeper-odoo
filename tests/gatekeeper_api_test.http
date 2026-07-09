@@ -1,0 +1,107 @@
+# ==============================================================================
+# HƯỚNG DẪN KIỂM THỬ API BẰNG VS CODE REST CLIENT / POSTMAN
+# ==============================================================================
+# 1. Hãy chắc chắn rằng bạn đã cài đặt extension "REST Client" trong VS Code.
+# 2. Chạy container Odoo trước bằng lệnh: make up
+# 3. Click "Send Request" ở phần đăng nhập dưới đây trước để lấy Bearer Token.
+# ==============================================================================
+
+# @name login
+POST http://localhost:8070/api/v1/auth/token
+Content-Type: application/json
+
+{
+    "client_id": "app_8d157c9251df29c0e38243cc1f2c96f2",
+    "client_secret": "client_secret_123456",
+    "grant_type": "client_credentials"
+}
+
+### Đọc Token từ Response và tự động lưu vào biến
+@token = {{login.response.body.access_token}}
+
+# ==============================================================================
+# PHẦN 1: CÁC API THIẾT BỊ NGOẠI VI (HEARTBEAT & ĐỒNG BỘ NHÂN SỰ CHI NHÁNH)
+# ==============================================================================
+
+### 1.1 Gửi Heartbeat từ Bộ điều khiển (Controller) của Chi nhánh
+# Mong muốn: Cập nhật trạng thái bộ điều khiển chi nhánh công ty sang Online
+POST http://localhost:8070/api/ControllerHeartbeat
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+    "serial_number": "CTRL-API-DEMO-999"
+}
+
+### 1.2 Đồng bộ dữ liệu nhân sự (Delta Sync) về Bộ điều khiển Chi nhánh
+# Mong muốn: Trả về danh sách nhân viên chi nhánh cần nạp mẫu sinh trắc/quyền truy cập
+POST http://localhost:8070/api/ControllerEmployeeSync
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+    "serial_number": "CTRL-API-DEMO-999"
+}
+
+
+# ==============================================================================
+# PHẦN 2: KỊCH BẢN GIÁM SÁT RA VÀO - NHÂN VIÊN VĂN PHÒNG CHI NHÁNH
+# Mã thẻ: CARD-API-DEMO-999 | Mã nhân viên: EMP-API-DEMO-999
+# ==============================================================================
+
+### 2.1 Nhân viên quẹt thẻ VÀO Văn phòng Chi nhánh hợp lệ
+# Mong muốn: Lưu sự kiện VÀO, trạng thái Nhân viên -> inside (Khu vực Phòng Máy Chủ Chi Nhánh)
+POST http://localhost:8070/api/ControllerAccessLogUpload
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+    "serial_number": "CTRL-API-DEMO-999",
+    "device_serial": "DEV-API-DEMO-999",
+    "card_value": "CARD-API-DEMO-999",
+    "direction": "in",
+    "verification_type": "card"
+}
+
+### 2.2 Nhân viên quẹt thẻ RA khỏi Văn phòng Chi nhánh hợp lệ
+# Mong muốn: Lưu sự kiện RA, trạng thái Nhân viên -> outside (ngoài khu vực văn phòng)
+POST http://localhost:8070/api/ControllerAccessLogUpload
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+    "serial_number": "CTRL-API-DEMO-999",
+    "device_serial": "DEV-API-DEMO-999",
+    "card_value": "CARD-API-DEMO-999",
+    "direction": "out",
+    "verification_type": "card"
+}
+
+### 2.3 Quẹt thẻ VÀO Văn phòng lúc NỬA ĐÊM - VI PHẠM GIỜ GIỚI NGHIÊM / GIỜ CẤM CHI NHÁNH (22:00 - 05:00)
+# Mong muốn: Chặn không cho vào, tạo Cảnh báo vi phạm giờ giới nghiêm chi nhánh, tự động tạo log OUT giả lập.
+POST http://localhost:8070/api/ControllerAccessLogUpload
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+    "serial_number": "CTRL-API-DEMO-999",
+    "device_serial": "DEV-API-DEMO-999",
+    "card_value": "CARD-API-DEMO-999",
+    "direction": "in",
+    "verification_type": "card",
+    "access_time": "2026-07-02 17:00:00"
+}
+
+### 2.4 Quẹt thẻ lạ chưa đăng ký vào Văn phòng Chi nhánh
+# Mong muốn: Báo lỗi thẻ lạ, tạo Cảnh báo thẻ chưa đăng ký (unknown_card).
+POST http://localhost:8070/api/ControllerAccessLogUpload
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+    "serial_number": "CTRL-API-DEMO-999",
+    "device_serial": "DEV-API-DEMO-999",
+    "card_value": "CARD_UNKNOWN_999",
+    "direction": "in",
+    "verification_type": "card"
+}

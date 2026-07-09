@@ -8,9 +8,9 @@
                 <field name="device_id"/>
                 <field name="controller_id"/>
                 <field name="event_type"/>
-                <field name="event_time"/>
-                <field name="status_from"/>
-                <field name="status_to"/>
+                <field name="changed_at"/>
+                <field name="old_status"/>
+                <field name="new_status"/>
             </list>
         </field>
     </record>
@@ -26,15 +26,15 @@
                             <field name="device_id"/>
                             <field name="controller_id"/>
                             <field name="event_type"/>
-                            <field name="event_time"/>
+                            <field name="changed_at"/>
                         </group>
                         <group>
-                            <field name="status_from"/>
-                            <field name="status_to"/>
+                            <field name="old_status"/>
+                            <field name="new_status"/>
                         </group>
                     </group>
                     <group>
-                        <field name="notes"/>
+                        <field name="note"/>
                     </group>
                 </sheet>
             </form>

@@ -1,46 +1,150 @@
+<?xml version="1.0" encoding="utf-8"?>
 <odoo>
-  <record id="view_gate_keeper_access_log_tree" model="ir.ui.view">
-    <field name="name">t4.gate_keeper.access_log.tree</field>
-    <field name="model">t4.gate_keeper.access_log</field>
-    <field name="arch" type="xml">
-      <tree string="Access Logs">
-        <field name="access_time"/>
-        <field name="employee_id"/>
-        <field name="device_id"/>
-        <field name="direction"/>
-        <field name="verification_type"/>
-        <field name="branch_id"/>
-        <field name="area_id"/>
-      </tree>
-    </field>
-  </record>
+    <data>
 
-  <record id="view_gate_keeper_access_log_form" model="ir.ui.view">
-    <field name="name">t4.gate_keeper.access_log.form</field>
-    <field name="model">t4.gate_keeper.access_log</field>
-    <field name="arch" type="xml">
-      <form string="Access Log">
-        <sheet>
-          <group>
-            <field name="access_time"/>
-            <field name="employee_id"/>
-            <field name="device_id"/>
-            <field name="controller_id"/>
-            <field name="direction"/>
-            <field name="verification_type"/>
-            <field name="sync_status"/>
-            <field name="is_system_generated"/>
-            <field name="branch_id"/>
-            <field name="area_id"/>
-          </group>
-        </sheet>
-      </form>
-    </field>
-  </record>
+        <!-- Access Log List View -->
+        <record id="view_gate_keeper_access_log_tree" model="ir.ui.view">
+            <field name="name">t4.gate_keeper.access_log.tree</field>
+            <field name="model">t4.gate_keeper.access_log</field>
+            <field name="arch" type="xml">
+                <list string="Access Logs" create="false" edit="false" delete="false"
+                      decoration-warning="sync_status == 'fail'"
+                      decoration-muted="is_system_generated == True">
+                    <field name="access_time" string="Time"/>
+                    <field name="employee_id" string="Employee"/>
+                    <field name="device_id" string="Device"/>
+                    <field name="direction"
+                           string="Direction"
+                           widget="badge"
+                           decoration-success="direction == 'in'"
+                           decoration-warning="direction == 'out'"/>
+                    <field name="verification_type" string="Verification"/>
+                    <field name="branch_id" string="Branch"/>
+                    <field name="area_id" string="Area"/>
+                    <field name="sync_status"
+                           string="Sync Status"
+                           widget="badge"
+                           decoration-success="sync_status == 'success'"
+                           decoration-danger="sync_status == 'fail'"
+                           decoration-info="sync_status == 'updating'"/>
+                    <field name="is_system_generated" optional="hide"/>
+                </list>
+            </field>
+        </record>
 
-  <record id="t4_gate_keeper_access_log_action" model="ir.actions.act_window">
-    <field name="name">Access Logs</field>
-    <field name="res_model">t4.gate_keeper.access_log</field>
-    <field name="view_mode">tree,form</field>
-  </record>
+        <!-- Access Log Form View -->
+        <record id="view_gate_keeper_access_log_form" model="ir.ui.view">
+            <field name="name">t4.gate_keeper.access_log.form</field>
+            <field name="model">t4.gate_keeper.access_log</field>
+            <field name="arch" type="xml">
+                <form string="Access Log" create="false" edit="false" delete="false">
+                    <sheet>
+                        <div class="oe_title">
+                            <label for="access_time" string="Access Time"/>
+                            <h1>
+                                <field name="access_time" readonly="1"/>
+                            </h1>
+                        </div>
+                        <group>
+                            <group string="Event Details">
+                                <field name="direction" readonly="1"
+                                       widget="badge"
+                                       decoration-success="direction == 'in'"
+                                       decoration-warning="direction == 'out'"/>
+                                <field name="verification_type" readonly="1"/>
+                                <field name="sync_status" readonly="1"
+                                       widget="badge"
+                                       decoration-success="sync_status == 'success'"
+                                       decoration-danger="sync_status == 'fail'"/>
+                                <field name="is_system_generated" readonly="1"/>
+                            </group>
+                            <group string="Location &amp; Hardware">
+                                <field name="branch_id" readonly="1"/>
+                                <field name="area_id" readonly="1"/>
+                                <field name="device_id" readonly="1"/>
+                                <field name="controller_id" readonly="1"/>
+                            </group>
+                        </group>
+                        <group string="Employee Info">
+                            <field name="employee_id" readonly="1" options="{'no_open': False}"/>
+                        </group>
+                    </sheet>
+                </form>
+            </field>
+        </record>
+
+        <!-- Access Log Graph View -->
+        <record id="view_gate_keeper_access_log_graph" model="ir.ui.view">
+            <field name="name">t4.gate_keeper.access_log.graph</field>
+            <field name="model">t4.gate_keeper.access_log</field>
+            <field name="arch" type="xml">
+                <graph string="Access Density Analysis" type="line" sample="1">
+                    <field name="access_time" interval="day"/>
+                    <field name="direction"/>
+                </graph>
+            </field>
+        </record>
+
+        <!-- Access Log Pivot View -->
+        <record id="view_gate_keeper_access_log_pivot" model="ir.ui.view">
+            <field name="name">t4.gate_keeper.access_log.pivot</field>
+            <field name="model">t4.gate_keeper.access_log</field>
+            <field name="arch" type="xml">
+                <pivot string="Access Flow Pivot" sample="1">
+                    <field name="branch_id" type="row"/>
+                    <field name="direction" type="col"/>
+                    <field name="access_time" type="row" interval="day"/>
+                </pivot>
+            </field>
+        </record>
+
+        <!-- Access Log Search View -->
+        <record id="view_gate_keeper_access_log_search" model="ir.ui.view">
+            <field name="name">t4.gate_keeper.access_log.search</field>
+            <field name="model">t4.gate_keeper.access_log</field>
+            <field name="arch" type="xml">
+                <search string="Search Access Logs">
+                    <field name="employee_id" string="Employee"/>
+                    <field name="device_id" string="Device"/>
+                    <field name="branch_id" string="Branch"/>
+                    <field name="area_id" string="Area"/>
+                    <separator/>
+                    <filter string="In Flow" name="filter_in" domain="[('direction', '=', 'in')]"/>
+                    <filter string="Out Flow" name="filter_out" domain="[('direction', '=', 'out')]"/>
+                    <separator/>
+                    <filter string="Today" name="today" domain="[('access_time', '&gt;=', datetime.datetime.combine(context_today(), datetime.time(0,0,0)))]"/>
+                    <filter string="Last 7 Days" name="last_7_days" domain="[('access_time', '&gt;=', datetime.datetime.combine(context_today() - datetime.timedelta(days=7), datetime.time(0,0,0)))]"/>
+                    <separator/>
+                    <filter string="Sync Failures" name="filter_fail" domain="[('sync_status', '=', 'fail')]"/>
+                    <filter string="User Events" name="filter_user" domain="[('is_system_generated', '=', False)]"/>
+                    <group expand="1" string="Group By">
+                        <filter string="Direction" name="group_direction" context="{'group_by': 'direction'}"/>
+                        <filter string="Employee" name="group_employee" context="{'group_by': 'employee_id'}"/>
+                        <filter string="Branch" name="group_branch" context="{'group_by': 'branch_id'}"/>
+                        <filter string="Area" name="group_area" context="{'group_by': 'area_id'}"/>
+                        <filter string="Device" name="group_device" context="{'group_by': 'device_id'}"/>
+                        <filter string="Date" name="group_date" context="{'group_by': 'access_time:day'}"/>
+                    </group>
+                </search>
+            </field>
+        </record>
+
+        <!-- Access Log Action -->
+        <record id="t4_gate_keeper_access_log_action" model="ir.actions.act_window">
+            <field name="name">Access Logs</field>
+            <field name="res_model">t4.gate_keeper.access_log</field>
+            <field name="view_mode">list,form,graph,pivot</field>
+            <field name="search_view_id" ref="view_gate_keeper_access_log_search"/>
+            <field name="context">{'search_default_group_branch': 1}</field>
+            <field name="help" type="html">
+                <p class="o_view_nocontent_smiling_face">
+                    No access events recorded!
+                </p>
+                <p>
+                    Access events will automatically show up when devices send card swipe and biometric records to the server.
+                </p>
+            </field>
+        </record>
+
+    </data>
 </odoo>

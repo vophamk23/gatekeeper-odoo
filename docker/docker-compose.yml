@@ -1,0 +1,53 @@
+services:
+  postgres:
+    image: postgres:15-alpine
+    container_name: tnnt_postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: gatekeeper_db
+      POSTGRES_USER: odoo
+      POSTGRES_PASSWORD: odoo
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5434:5432" # Dùng cổng 5434 để tránh đụng độ với PostgreSQL đang chạy trên máy
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U odoo"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - tnnt_net
+
+  odoo:
+    image: odoo:18.0
+    container_name: tnnt_odoo
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      HOST: postgres
+      PORT: 5432
+      USER: odoo
+      PASSWORD: odoo
+    volumes:
+      - odoo_data:/var/lib/odoo
+      - ./odoo.conf:/etc/odoo/odoo.conf:ro
+      # Mount trực tiếp các thư mục chứa mã nguồn của t4_gatekeeper và coreapi
+      - ..:/mnt/t4_gate_keeper:ro
+      - ../../gatekepper/t4_coreapi:/mnt/t4_coreapi:ro
+    command: -d gatekeeper_db -u t4_coreapi,t4_gate_keeper
+    ports:
+      - "8070:8069" # Dùng cổng 8070 để tránh đụng độ với Odoo đang chạy trên máy (8069)
+      - "8072:8072"
+    networks:
+      - tnnt_net
+
+volumes:
+  postgres_data:
+  odoo_data:
+
+networks:
+  tnnt_net:
+    driver: bridge

@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
+
+    <!-- Area List View -->
     <record id="t4_gate_keeper_area_view_list" model="ir.ui.view">
         <field name="name">t4.gate_keeper.area.view.list</field>
         <field name="model">t4.gate_keeper.area</field>
@@ -7,32 +9,28 @@
             <list string="Areas">
                 <field name="name"/>
                 <field name="branch_id"/>
-                <field name="status" 
-                       widget="badge" 
-                       decoration-success="status == 'normal'" 
+                <field name="warning_count" string="Active Warnings"/>
+                <field name="status"
+                       widget="badge"
+                       decoration-success="status == 'normal'"
                        decoration-warning="status == 'warning'"/>
             </list>
         </field>
     </record>
 
+    <!-- Area Form View -->
     <record id="t4_gate_keeper_area_view_form" model="ir.ui.view">
         <field name="name">t4.gate_keeper.area.view.form</field>
         <field name="model">t4.gate_keeper.area</field>
         <field name="arch" type="xml">
             <form string="Area">
-                <!-- <header>
-                    <button name="action_clear_warnings" 
-                            string="Clear Warnings" 
-                            type="object" 
-                            class="btn-primary" 
-                            invisible="status != 'warning'"/>
-                </header> -->
                 <sheet>
                     <div class="oe_button_box" name="button_box">
-                        <button name="action_view_warnings" 
-                                type="object" 
-                                class="oe_stat_button" 
-                                icon="fa-list-ul">
+                        <button name="action_view_warnings"
+                                type="object"
+                                class="oe_stat_button"
+                                icon="fa-exclamation-triangle"
+                                invisible="warning_count == 0">
                             <field name="warning_count" widget="statinfo" string="Warnings"/>
                         </button>
                     </div>
@@ -40,9 +38,9 @@
                         <group>
                             <field name="name"/>
                             <field name="branch_id"/>
-                            <field name="status" 
-                                   widget="badge" 
-                                   decoration-success="status == 'normal'" 
+                            <field name="status"
+                                   widget="badge"
+                                   decoration-success="status == 'normal'"
                                    decoration-warning="status == 'warning'"/>
                         </group>
                     </group>
@@ -52,6 +50,7 @@
                                 <list>
                                     <field name="name"/>
                                     <field name="serial_number"/>
+                                    <field name="device_model_id"/>
                                     <field name="status"
                                            widget="badge"
                                            decoration-success="status == 'online'"
@@ -60,13 +59,35 @@
                                 </list>
                             </field>
                         </page>
+                        <page string="Active Warnings" name="warnings">
+                            <field name="warning_ids" domain="[('state','=','warning')]">
+                                <list create="false" delete="false"
+                                      decoration-danger="priority == 'critical'"
+                                      decoration-warning="priority == 'high'">
+                                    <field name="create_date" string="Detected At"/>
+                                    <field name="warning_type_id"/>
+                                    <field name="employee_id"/>
+                                    <field name="device_id"/>
+                                    <field name="priority" widget="badge"
+                                           decoration-danger="priority == 'critical'"
+                                           decoration-warning="priority == 'high'"/>
+                                    <field name="state" widget="badge"
+                                           decoration-danger="state == 'warning'"
+                                           decoration-success="state == 'resolved'"/>
+                                    <button name="action_resolve" string="Resolve"
+                                            type="object" class="btn-sm btn-secondary"
+                                            invisible="state == 'resolved'"/>
+                                </list>
+                            </field>
+                        </page>
                     </notebook>
                 </sheet>
+                <chatter/>
             </form>
-
         </field>
     </record>
 
+    <!-- Warning list embedded in Area (from gk_area_views original) -->
     <record id="t4_gate_keeper_area_warning_view_list" model="ir.ui.view">
         <field name="name">t4.gate_keeper.area_warning.view.list</field>
         <field name="model">t4.gate_keeper.area_warning</field>
@@ -77,102 +98,51 @@
                 <field name="employee_id"/>
                 <field name="device_id"/>
                 <field name="create_date" string="Detected At"/>
-                <field name="state" 
-                       widget="badge" 
-                       decoration-warning="state == 'warning'" 
+                <field name="state"
+                       widget="badge"
+                       decoration-danger="state == 'warning'"
                        decoration-success="state == 'resolved'"/>
+                <field name="priority"
+                       widget="badge"
+                       decoration-danger="priority == 'critical'"
+                       decoration-warning="priority == 'high'"/>
+                <button name="action_resolve" string="Resolve" type="object"
+                        class="btn-sm btn-secondary"
+                        invisible="state == 'resolved'"/>
             </list>
         </field>
     </record>
 
-    <record id="t4_gate_keeper_area_warning_view_form" model="ir.ui.view">
-        <field name="name">t4.gate_keeper.area_warning.view.form</field>
-        <field name="model">t4.gate_keeper.area_warning</field>
+    <!-- Area Search View -->
+    <record id="t4_gate_keeper_area_view_search" model="ir.ui.view">
+        <field name="name">t4.gate_keeper.area.view.search</field>
+        <field name="model">t4.gate_keeper.area</field>
         <field name="arch" type="xml">
-            <form string="Area Warning">
-                <header>
-                    <button name="action_resolve" 
-                            string="Resolve" 
-                            type="object" 
-                            class="btn-primary" 
-                            invisible="state == 'resolved'"/>
-                    <field name="state" widget="statusbar" statusbar_visible="warning,resolved"/>
-                </header>
-                <sheet>
-                    <group>
-                        <group string="Warning Information">
-                            <field name="area_id" readonly="1"/>
-                            <field name="device_id" readonly="1"/>
-                            <field name="employee_id" readonly="1"/>
-                            <field name="warning_type_id" readonly="1"/>
-                            <field name="create_date" string="Detected At" readonly="1"/>
-                        </group>
-                        <group string="Resolution Details">
-                            <field name="resolved_by_id"/>
-                            <field name="resolved_at"/>
-                            <field name="resolution_notes" placeholder="Enter notes about how this warning was resolved..."/>
-                        </group>
-                    </group>
-                    <group string="Description">
-                        <field name="description" readonly="1"/>
-                    </group>
-                </sheet>
-            </form>
+            <search string="Search Areas">
+                <field name="name" string="Area Name"/>
+                <field name="branch_id" string="Branch"/>
+                <group expand="1" string="Group By">
+                    <filter string="Branch" name="group_branch" context="{'group_by': 'branch_id'}"/>
+                    <filter string="Status" name="group_status" context="{'group_by': 'status'}"/>
+                </group>
+            </search>
         </field>
     </record>
 
-    <record id="t4_gate_keeper_area_warning_type_view_list" model="ir.ui.view">
-        <field name="name">t4.gate_keeper.area_warning_type.view.list</field>
-        <field name="model">t4.gate_keeper.area_warning_type</field>
-        <field name="arch" type="xml">
-            <list string="Warning Types">
-                <field name="name"/>
-                <field name="code"/>
-                <field name="description"/>
-            </list>
-        </field>
-    </record>
-
-    <record id="t4_gate_keeper_area_warning_type_view_form" model="ir.ui.view">
-        <field name="name">t4.gate_keeper.area_warning_type.view.form</field>
-        <field name="model">t4.gate_keeper.area_warning_type</field>
-        <field name="arch" type="xml">
-            <form string="Warning Type">
-                <sheet>
-                    <group>
-                        <group>
-                            <field name="name"/>
-                            <field name="code"/>
-                        </group>
-                    </group>
-                    <group string="Description">
-                        <field name="description" placeholder="Describe this warning type..."/>
-                    </group>
-                </sheet>
-            </form>
-        </field>
-    </record>
-
+    <!-- Area Warning Type action (used by menu) -->
     <record id="t4_gate_keeper_area_warning_type_action" model="ir.actions.act_window">
         <field name="name">Warning Types</field>
         <field name="res_model">t4.gate_keeper.area_warning_type</field>
         <field name="view_mode">list,form</field>
-        <field name="help" type="html">
-            <p class="o_view_nocontent_smiling_face">
-                No warning types configured! Create your first warning type.
-            </p>
-        </field>
     </record>
 
+    <!-- Area action -->
     <record id="t4_gate_keeper_area_action" model="ir.actions.act_window">
         <field name="name">Areas</field>
         <field name="res_model">t4.gate_keeper.area</field>
         <field name="view_mode">list,form</field>
-        <field name="help" type="html">
-            <p class="o_view_nocontent_smiling_face">
-                No area found! Create your first area.
-            </p>
-        </field>
+        <field name="search_view_id" ref="t4_gate_keeper_area_view_search"/>
+        <field name="context">{'search_default_group_branch': 1}</field>
     </record>
 
 </odoo>

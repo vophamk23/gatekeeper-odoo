@@ -4,7 +4,7 @@
     "category": "Uncategorized",
     "version": "0.1",
     # any module necessary for this one to work correctly
-    "depends": ["base", "hr", "hr_attendance"],
+    "depends": ["base", "hr", "hr_attendance", "t4_coreapi", "mail"],
     "post_init_hook": "post_init_hook",
     # always loaded
     "data": [
@@ -29,7 +29,9 @@
         "views/gk_area_warning_views.xml",
         "views/gk_area_warning_type_views.xml",
         "views/gk_device_log_views.xml",
-        "views/gk_presence_state_views.xml",
         "views/GK_menu.xml",
+        "data/gk_demo_data.xml",
+    ],
+    "demo": [
     ],
 }

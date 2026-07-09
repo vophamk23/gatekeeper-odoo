@@ -1,52 +1,128 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
+    <!-- LIST VIEW -->
     <record id="t4_gate_keeper_area_warning_extra_view_list" model="ir.ui.view">
         <field name="name">t4.gate_keeper.area_warning.view.list</field>
         <field name="model">t4.gate_keeper.area_warning</field>
         <field name="arch" type="xml">
-            <list string="Area Warnings">
+            <list string="Area Warnings" create="false" delete="false"
+                  decoration-danger="state == 'warning' and priority == 'critical'"
+                  decoration-warning="state == 'warning' and priority in ('high','medium')"
+                  decoration-muted="state == 'resolved'">
+                <field name="create_date" string="Detected At"/>
                 <field name="area_id"/>
                 <field name="warning_type_id"/>
                 <field name="employee_id"/>
                 <field name="device_id"/>
-                <field name="state"/>
-                <field name="priority"/>
+                <field name="priority"
+                       widget="badge"
+                       decoration-danger="priority == 'critical'"
+                       decoration-warning="priority == 'high'"
+                       decoration-info="priority == 'medium'"
+                       decoration-muted="priority == 'low'"/>
+                <field name="state"
+                       widget="badge"
+                       decoration-danger="state == 'warning'"
+                       decoration-success="state == 'resolved'"/>
+                <button name="action_resolve" string="Resolve" type="object"
+                        class="btn-sm btn-secondary"
+                        invisible="state == 'resolved'"/>
             </list>
         </field>
     </record>
 
+    <!-- FORM VIEW -->
     <record id="t4_gate_keeper_area_warning_extra_view_form" model="ir.ui.view">
         <field name="name">t4.gate_keeper.area_warning.view.form</field>
         <field name="model">t4.gate_keeper.area_warning</field>
         <field name="arch" type="xml">
             <form string="Area Warning">
+                <header>
+                    <button name="action_resolve"
+                            string="Mark as Resolved"
+                            type="object"
+                            class="btn-primary"
+                            invisible="state == 'resolved'"/>
+                    <field name="state" widget="statusbar"
+                           statusbar_visible="warning,resolved"/>
+                </header>
                 <sheet>
                     <group>
-                        <group>
+                        <group string="Warning Info">
                             <field name="area_id"/>
+                            <field name="warning_type_id"/>
+                            <field name="priority"
+                                   widget="badge"
+                                   decoration-danger="priority == 'critical'"
+                                   decoration-warning="priority == 'high'"/>
+                            <field name="escalated_at" readonly="1"/>
+                        </group>
+                        <group string="Source">
                             <field name="device_id"/>
                             <field name="employee_id"/>
-                            <field name="warning_type_id"/>
+                            <field name="access_log_id"/>
+                            <field name="policy_id"/>
+                        </group>
+                    </group>
+                    <group string="Description">
+                        <field name="description" nolabel="1" readonly="1"/>
+                    </group>
+                    <group string="Resolution" invisible="state == 'warning'">
+                        <group>
+                            <field name="resolved_by_id" readonly="1"/>
+                            <field name="resolved_at" readonly="1"/>
                         </group>
                         <group>
-                            <field name="policy_id"/>
-                            <field name="state"/>
-                            <field name="priority"/>
-                            <field name="escalated_at"/>
+                            <field name="resolution_notes"/>
                         </group>
                     </group>
-                    <group>
-                        <field name="description"/>
-                        <field name="resolution_notes"/>
-                    </group>
                 </sheet>
+                <chatter/>
             </form>
         </field>
     </record>
 
+    <!-- SEARCH VIEW -->
+    <record id="t4_gate_keeper_area_warning_view_search" model="ir.ui.view">
+        <field name="name">t4.gate_keeper.area_warning.view.search</field>
+        <field name="model">t4.gate_keeper.area_warning</field>
+        <field name="arch" type="xml">
+            <search string="Search Area Warnings">
+                <field name="employee_id" string="Employee"/>
+                <field name="device_id" string="Device"/>
+                <field name="area_id" string="Area"/>
+                <field name="warning_type_id" string="Warning Type"/>
+                <separator/>
+                <filter string="Active Warnings" name="unresolved" domain="[('state', '=', 'warning')]"/>
+                <filter string="Resolved Warnings" name="resolved" domain="[('state', '=', 'resolved')]"/>
+                <separator/>
+                <filter string="Critical Priority" name="priority_critical" domain="[('priority', '=', 'critical')]"/>
+                <filter string="High Priority" name="priority_high" domain="[('priority', '=', 'high')]"/>
+                <group expand="0" string="Group By">
+                    <filter string="Status" name="group_state" context="{'group_by': 'state'}"/>
+                    <filter string="Priority" name="group_priority" context="{'group_by': 'priority'}"/>
+                    <filter string="Area" name="group_area" context="{'group_by': 'area_id'}"/>
+                    <filter string="Warning Type" name="group_warning_type" context="{'group_by': 'warning_type_id'}"/>
+                    <filter string="Detection Date" name="group_date" context="{'group_by': 'create_date:day'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <!-- ACTION -->
     <record id="t4_gate_keeper_area_warning_extra_action" model="ir.actions.act_window">
         <field name="name">Area Warnings</field>
         <field name="res_model">t4.gate_keeper.area_warning</field>
         <field name="view_mode">list,form</field>
+        <field name="search_view_id" ref="t4_gate_keeper_area_warning_view_search"/>
+        <field name="context">{'search_default_unresolved': 1}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Great! No active warnings.
+            </p>
+            <p>
+                The system automatically creates warnings when security rules are breached or devices go offline.
+            </p>
+        </field>
     </record>
 </odoo>

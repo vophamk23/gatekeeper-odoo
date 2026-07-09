@@ -1,86 +1,217 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
+    <data>
 
-    <!-- Device Views -->
-    <record id="t4_gate_keeper_device_view_list" model="ir.ui.view">
-        <field name="name">t4.gate_keeper.device.view.list</field>
-        <field name="model">t4.gate_keeper.device</field>
-        <field name="arch" type="xml">
-            <list>
-                <field name="name"/>
-                <field name="device_model_id"/>
-                <field name="serial_number"/>
-                <field name="controller_id"/>
-                <field name="branch_id"/>
-                <field name="area_id"/>
-                <field name="last_seen_at"/>
-                <field name="status"
-                       widget="badge"
-                       decoration-success="status == 'online'"
-                       decoration-danger="status == 'offline'"
-                       decoration-warning="status == 'controller_offline'"/>
-                <field name="employee_sync_status" 
-                       widget="badge" 
-                       decoration-success="employee_sync_status == 'synced'" 
-                       decoration-danger="employee_sync_status == 'out_of_sync'"/>
-            </list>
-        </field>
-    </record>
+        <!-- ═══════════════════════════════════════════════════ -->
+        <!-- LIST VIEW DEVICE                                    -->
+        <!-- ═══════════════════════════════════════════════════ -->
+        <record id="t4_gate_keeper_device_view_list" model="ir.ui.view">
+            <field name="name">t4.gate_keeper.device.view.list</field>
+            <field name="model">t4.gate_keeper.device</field>
+            <field name="arch" type="xml">
+                <list string="Devices"
+                      default_group_by="area_id"
+                      decoration-success="status == 'online'"
+                      decoration-warning="status == 'controller_offline'"
+                      decoration-danger="status == 'offline'">
+                    <field name="name" string="Device Name"/>
+                    <field name="serial_number" string="Serial Number"/>
+                    <field name="vendor" string="Manufacturer"/>
+                    <field name="device_model_id" string="Model"/>
+                    <field name="controller_id" string="Controller"/>
+                    <field name="branch_id" string="Branch"/>
+                    <field name="area_id" string="Area"/>
+                    <field name="last_seen_at" string="Last Connection"/>
+                    <field name="status"
+                           string="Status"
+                           widget="badge"
+                           decoration-success="status == 'online'"
+                           decoration-warning="status == 'controller_offline'"
+                           decoration-danger="status == 'offline'"/>
+                    <field name="employee_sync_status"
+                           string="Employee Sync"
+                           widget="badge"
+                           decoration-success="employee_sync_status == 'synced'"
+                           decoration-danger="employee_sync_status == 'out_of_sync'"/>
+                </list>
+            </field>
+        </record>
 
-    <record id="t4_gate_keeper_device_view_form" model="ir.ui.view">
-        <field name="name">t4.gate_keeper.device.view.form</field>
-        <field name="model">t4.gate_keeper.device</field>
-        <field name="arch" type="xml">
-            <form>
-                <sheet>
-                    <group>
+        <!-- ═══════════════════════════════════════════════════ -->
+        <!-- KANBAN VIEW DEVICE                                  -->
+        <!-- ═══════════════════════════════════════════════════ -->
+        <record id="t4_gate_keeper_device_view_kanban" model="ir.ui.view">
+            <field name="name">t4.gate_keeper.device.view.kanban</field>
+            <field name="model">t4.gate_keeper.device</field>
+            <field name="arch" type="xml">
+                <kanban default_group_by="status" class="o_kanban_small_column" sample="1">
+                    <field name="id"/>
+                    <field name="name"/>
+                    <field name="serial_number"/>
+                    <field name="status"/>
+                    <field name="vendor"/>
+                    <field name="device_model_id"/>
+                    <field name="controller_id"/>
+                    <field name="area_id"/>
+                    <field name="last_seen_at"/>
+                    <templates>
+                        <t t-name="card">
+                            <div class="oe_kanban_global_click p-3 d-flex flex-column justify-content-between h-100">
+                                <div>
+                                    <div class="d-flex align-items-start justify-content-between mb-2 gap-2">
+                                        <h5 class="fw-bold mb-0" style="font-size: 14px; word-break: break-word;">
+                                            <field name="name"/>
+                                        </h5>
+                                        <span t-attf-class="badge rounded-pill flex-shrink-0"
+                                              t-attf-style="font-size: 10px; padding: 2px 7px;
+                                                #{record.status.raw_value == 'online' and 'background-color: #d1fae5; color: #065f46;' or
+                                                  record.status.raw_value == 'controller_offline' and 'background-color: #fef3c7; color: #92400e;' or
+                                                  'background-color: #fee2e2; color: #991b1b;'}">
+                                            <field name="status"/>
+                                        </span>
+                                    </div>
+                                    <div class="text-muted small mb-1" style="font-size: 11px;">
+                                        📟 SN: <field name="serial_number"/>
+                                    </div>
+                                    <div class="text-muted small mb-1" style="font-size: 11px;">
+                                        🎮 Controller: <field name="controller_id"/>
+                                    </div>
+                                    <div t-if="record.area_id.raw_value" class="text-muted small" style="font-size: 11px;">
+                                        🏢 Area: <field name="area_id"/>
+                                    </div>
+                                </div>
+                                <div t-if="record.last_seen_at.raw_value" class="border-top mt-2 pt-2 text-end text-muted" style="font-size: 10px;">
+                                    <span>Last Seen: <field name="last_seen_at"/></span>
+                                </div>
+                            </div>
+                        </t>
+                    </templates>
+                </kanban>
+            </field>
+        </record>
+
+        <!-- ═══════════════════════════════════════════════════ -->
+        <!-- FORM VIEW DEVICE                                    -->
+        <!-- ═══════════════════════════════════════════════════ -->
+        <record id="t4_gate_keeper_device_view_form" model="ir.ui.view">
+            <field name="name">t4.gate_keeper.device.view.form</field>
+            <field name="model">t4.gate_keeper.device</field>
+            <field name="arch" type="xml">
+                <form string="Device">
+                    <header>
+                        <field name="status" widget="statusbar" statusbar_visible="online,offline,controller_offline" readonly="1"/>
+                    </header>
+                    <sheet>
+                        <div class="oe_title">
+                            <label for="name" string="Device Name"/>
+                            <h1>
+                                <field name="name" placeholder="e.g. Lobby Entrance ZK K40"/>
+                            </h1>
+                        </div>
                         <group>
-                            <field name="name"/>
-                            <field name="controller_id"/>
-                            <field name="branch_id" readonly="1"/>
-                            <field name="timezone"/>
-                            <field name="area_id"/>
-                            <field name="status"/>
-                            <field name="employee_sync_status" 
-                                   widget="badge" 
-                                   decoration-success="employee_sync_status == 'synced'" 
-                                   decoration-danger="employee_sync_status == 'out_of_sync'"/>
+                            <group string="Connection Info">
+                                <field name="controller_id"/>
+                                <field name="port_or_channel"/>
+                                <field name="timezone"/>
+                                <field name="employee_sync_status"
+                                       widget="badge"
+                                       decoration-success="employee_sync_status == 'synced'"
+                                       decoration-danger="employee_sync_status == 'out_of_sync'"/>
+                            </group>
+                            <group string="Hardware &amp; Location">
+                                <field name="vendor"/>
+                                <field name="device_model_id"/>
+                                <field name="serial_number"/>
+                                <field name="firmware_version"/>
+                                <field name="system_version"/>
+                                <field name="area_id"/>
+                                <field name="branch_id" readonly="1"/>
+                            </group>
                         </group>
-                        <group>
-                            <field name="vendor"/>
-                            <field name="device_model_id"/>
-                            <field name="serial_number"/>
-                            <field name="port_or_channel"/>
-                            <field name="firmware_version"/>
-                            <field name="system_version"/>
+                        <group string="Audit Info">
+                            <group>
+                                <field name="last_seen_at" readonly="1"/>
+                                <field name="last_sync_at" readonly="1"/>
+                            </group>
+                            <group>
+                                <field name="installed_at"/>
+                            </group>
                         </group>
-                        <group string="Audit">
-                            <field name="last_seen_at" readonly="1"/>
-                            <field name="last_sync_at" readonly="1"/>
-                            <field name="installed_at"/>
-                        </group>
+                        <notebook>
+                            <!-- Tab: Supported Algorithms -->
+                            <page string="Supported Algorithms" name="supported_algorithms">
+                                <field name="algorithm_ids">
+                                    <list>
+                                        <field name="name"/>
+                                        <field name="algorithm_type"/>
+                                        <field name="version"/>
+                                        <field name="template_format"/>
+                                    </list>
+                                </field>
+                            </page>
+
+                            <!-- Tab: Status Logs -->
+                            <page string="Status Logs" name="status_logs">
+                                <field name="device_log_ids">
+                                    <list string="Status Logs" create="false" delete="false" edit="false">
+                                        <field name="changed_at" string="Changed At"/>
+                                        <field name="event_type" string="Event Type"/>
+                                        <field name="old_status" string="Old Status"/>
+                                        <field name="new_status" string="New Status"/>
+                                        <field name="note" string="Notes"/>
+                                    </list>
+                                </field>
+                            </page>
+                        </notebook>
+                    </sheet>
+                    <chatter/>
+                </form>
+            </field>
+        </record>
+
+        <!-- ═══════════════════════════════════════════════════ -->
+        <!-- SEARCH VIEW DEVICE                                  -->
+        <!-- ═══════════════════════════════════════════════════ -->
+        <record id="t4_gate_keeper_device_view_search" model="ir.ui.view">
+            <field name="name">t4.gate_keeper.device.view.search</field>
+            <field name="model">t4.gate_keeper.device</field>
+            <field name="arch" type="xml">
+                <search string="Search Devices">
+                    <field name="name" string="Device Name"/>
+                    <field name="serial_number" string="Serial Number"/>
+                    <field name="controller_id" string="Controller"/>
+                    <separator/>
+                    <filter string="Online" name="filter_online" domain="[('status', '=', 'online')]"/>
+                    <filter string="Offline" name="filter_offline" domain="[('status', '=', 'offline')]"/>
+                    <filter string="Controller Offline" name="filter_controller_offline" domain="[('status', '=', 'controller_offline')]"/>
+                    <group expand="1" string="Group By">
+                        <filter string="Controller" name="group_controller" context="{'group_by': 'controller_id'}"/>
+                        <filter string="Area" name="group_area" context="{'group_by': 'area_id'}"/>
+                        <filter string="Branch" name="group_branch" context="{'group_by': 'branch_id'}"/>
+                        <filter string="Status" name="group_status" context="{'group_by': 'status'}"/>
                     </group>
-                    <notebook>
-                        <page string="Supported Algorithms" name="supported_algorithms">
-                            <field name="algorithm_ids">
-                                <list>
-                                    <field name="name"/>
-                                    <field name="algorithm_type"/>
-                                    <field name="version"/>
-                                    <field name="template_format"/>
-                                </list>
-                            </field>
-                        </page>
-                    </notebook>
-                </sheet>
-            </form>
-        </field>
-    </record>
+                </search>
+            </field>
+        </record>
 
-    <record id="t4_gate_keeper_device_action" model="ir.actions.act_window">
-        <field name="name">Devices</field>
-        <field name="res_model">t4.gate_keeper.device</field>
-        <field name="view_mode">list,form</field>
-    </record>
+        <!-- ═══════════════════════════════════════════════════ -->
+        <!-- ACTION WINDOW DEVICE                                -->
+        <!-- ═══════════════════════════════════════════════════ -->
+        <record id="t4_gate_keeper_device_action" model="ir.actions.act_window">
+            <field name="name">Devices</field>
+            <field name="res_model">t4.gate_keeper.device</field>
+            <field name="view_mode">list,kanban,form</field>
+            <field name="search_view_id" ref="t4_gate_keeper_device_view_search"/>
+            <field name="context">{'search_default_group_area': 1}</field>
+            <field name="help" type="html">
+                <p class="o_view_nocontent_smiling_face">
+                    No devices registered yet!
+                </p>
+                <p>
+                    Register endpoints and pair them with Controllers to start accepting access transactions.
+                </p>
+            </field>
+        </record>
 
+    </data>
 </odoo>

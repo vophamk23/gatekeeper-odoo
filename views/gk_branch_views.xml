@@ -3,12 +3,12 @@
     <field name="name">t4.gate_keeper.branch.tree</field>
     <field name="model">t4.gate_keeper.branch</field>
     <field name="arch" type="xml">
-      <tree string="Branches">
+      <list string="Branches">
         <field name="name"/>
         <field name="company_id"/>
         <field name="timezone"/>
         <field name="active"/>
-      </tree>
+      </list>
     </field>
   </record>
 
@@ -28,17 +28,17 @@
           <notebook>
             <page string="Areas">
               <field name="area_ids">
-                <tree editable="bottom">
+                <list editable="bottom">
                   <field name="name"/>
-                </tree>
+                </list>
               </field>
             </page>
             <page string="Controllers">
               <field name="controller_ids">
-                <tree editable="bottom">
+                <list editable="bottom">
                   <field name="name"/>
                   <field name="status"/>
-                </tree>
+                </list>
               </field>
             </page>
             <page string="Devices">
@@ -53,6 +53,6 @@
   <record id="t4_gate_keeper_branch_action" model="ir.actions.act_window">
     <field name="name">Branches</field>
     <field name="res_model">t4.gate_keeper.branch</field>
-    <field name="view_mode">tree,form</field>
+    <field name="view_mode">list,form</field>
   </record>
 </odoo>

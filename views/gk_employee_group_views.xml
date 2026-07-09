@@ -1,46 +1,125 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
-    <record id="t4_gate_keeper_employee_group_view_list" model="ir.ui.view">
-        <field name="name">t4.gate_keeper.employee_group.view.list</field>
-        <field name="model">t4.gate_keeper.employee_group</field>
-        <field name="arch" type="xml">
-            <list string="Employee Groups">
-                <field name="name"/>
-                <field name="code"/>
-                <field name="branch_id"/>
-                <field name="active"/>
-            </list>
-        </field>
-    </record>
+    <data>
 
-    <record id="t4_gate_keeper_employee_group_view_form" model="ir.ui.view">
-        <field name="name">t4.gate_keeper.employee_group.view.form</field>
-        <field name="model">t4.gate_keeper.employee_group</field>
-        <field name="arch" type="xml">
-            <form string="Employee Group">
-                <sheet>
-                    <group>
-                        <group>
-                            <field name="name"/>
-                            <field name="code"/>
-                            <field name="active"/>
-                        </group>
-                        <group>
-                            <field name="branch_id"/>
-                        </group>
-                    </group>
-                    <group>
-                        <field name="employee_ids" widget="many2many_tags"/>
-                        <field name="description"/>
-                    </group>
-                </sheet>
-            </form>
-        </field>
-    </record>
+        <!-- ═══════════════════════════════════════════════════ -->
+        <!-- LIST VIEW                                           -->
+        <!-- ═══════════════════════════════════════════════════ -->
+        <record id="t4_gate_keeper_employee_group_view_list" model="ir.ui.view">
+            <field name="name">t4.gate_keeper.employee_group.view.list</field>
+            <field name="model">t4.gate_keeper.employee_group</field>
+            <field name="arch" type="xml">
+                <list string="Employee Groups" decoration-muted="not active">
+                    <field name="name" string="Group Name"/>
+                    <field name="code" string="Code"/>
+                    <field name="branch_id" string="Branch"/>
+                    <field name="description" string="Description" optional="show"/>
+                    <field name="active" string="Active" widget="boolean_toggle"/>
+                </list>
+            </field>
+        </record>
 
-    <record id="t4_gate_keeper_employee_group_action" model="ir.actions.act_window">
-        <field name="name">Employee Groups</field>
-        <field name="res_model">t4.gate_keeper.employee_group</field>
-        <field name="view_mode">list,form</field>
-    </record>
+        <!-- ═══════════════════════════════════════════════════ -->
+        <!-- FORM VIEW                                           -->
+        <!-- ═══════════════════════════════════════════════════ -->
+        <record id="t4_gate_keeper_employee_group_view_form" model="ir.ui.view">
+            <field name="name">t4.gate_keeper.employee_group.view.form</field>
+            <field name="model">t4.gate_keeper.employee_group</field>
+            <field name="arch" type="xml">
+                <form string="Employee Group">
+                    <sheet>
+                        <!-- Stat buttons -->
+                        <div class="oe_button_box" name="button_box">
+                            <button name="toggle_active"
+                                    type="object"
+                                    class="oe_stat_button"
+                                    icon="fa-archive">
+                                <field name="active"
+                                       widget="boolean_button"
+                                       options='{"terminology": "archive"}'/>
+                            </button>
+                        </div>
+
+                        <!-- Title -->
+                        <div class="oe_title">
+                            <label for="name" string="Group Name"/>
+                            <h1>
+                                <field name="name" placeholder="e.g. Staff, VIP, Contractors..."/>
+                            </h1>
+                        </div>
+
+                        <group>
+                            <group>
+                                <field name="code"/>
+                                <field name="branch_id"/>
+                            </group>
+                            <group>
+                                <field name="description" placeholder="Describe this group's purpose..."/>
+                            </group>
+                        </group>
+
+                        <notebook>
+                            <!-- Tab: Members -->
+                            <page string="Members" name="members">
+                                <field name="employee_ids" placeholder="Add employees to this group...">
+                                    <list string="Group Members">
+                                        <field name="emp_id" string="Employee ID"/>
+                                        <field name="name" string="Full Name"/>
+                                        <field name="hr_employee_id" string="HR Employee"/>
+                                        <field name="branch_id" string="Branch"/>
+                                        <field name="presence_state"
+                                               string="Presence"
+                                               widget="badge"
+                                               decoration-success="presence_state == 'inside'"
+                                               decoration-primary="presence_state == 'outside'"
+                                               decoration-muted="presence_state == 'unknown'"/>
+                                    </list>
+                                </field>
+                            </page>
+                        </notebook>
+                    </sheet>
+                </form>
+            </field>
+        </record>
+
+        <!-- ═══════════════════════════════════════════════════ -->
+        <!-- SEARCH VIEW                                         -->
+        <!-- ═══════════════════════════════════════════════════ -->
+        <record id="t4_gate_keeper_employee_group_view_search" model="ir.ui.view">
+            <field name="name">t4.gate_keeper.employee_group.view.search</field>
+            <field name="model">t4.gate_keeper.employee_group</field>
+            <field name="arch" type="xml">
+                <search string="Search Employee Groups">
+                    <field name="name" string="Group Name"/>
+                    <field name="code" string="Code"/>
+                    <field name="branch_id" string="Branch"/>
+                    <separator/>
+                    <filter string="Active" name="filter_active" domain="[('active', '=', True)]"/>
+                    <filter string="Archived" name="filter_inactive" domain="[('active', '=', False)]"/>
+                    <group expand="0" string="Group By">
+                        <filter string="Branch" name="group_by_branch" context="{'group_by': 'branch_id'}"/>
+                    </group>
+                </search>
+            </field>
+        </record>
+
+        <!-- ═══════════════════════════════════════════════════ -->
+        <!-- ACTION WINDOW                                       -->
+        <!-- ═══════════════════════════════════════════════════ -->
+        <record id="t4_gate_keeper_employee_group_action" model="ir.actions.act_window">
+            <field name="name">Employee Groups</field>
+            <field name="res_model">t4.gate_keeper.employee_group</field>
+            <field name="view_mode">list,form</field>
+            <field name="context">{"active_test": False, "search_default_group_by_branch": 1}</field>
+            <field name="help" type="html">
+                <p class="o_view_nocontent_smiling_face">
+                    No groups yet!
+                </p>
+                <p>
+                    Create groups (e.g., Staff, VIP, Contractors) to apply access policies.
+                </p>
+            </field>
+        </record>
+
+    </data>
 </odoo>

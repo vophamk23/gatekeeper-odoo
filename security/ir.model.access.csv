@@ -10,6 +10,12 @@ access_t4_gate_keeper_employee_biometric,t4.gate_keeper.employee.biometric,model
 access_t4_gate_keeper_area,t4.gate_keeper.area,model_t4_gate_keeper_area,base.group_user,1,1,1,1
 access_t4_gate_keeper_area_warning,t4.gate_keeper.area_warning,model_t4_gate_keeper_area_warning,base.group_user,1,1,1,1
 access_t4_gate_keeper_area_warning_type,t4.gate_keeper.area_warning_type,model_t4_gate_keeper_area_warning_type,base.group_user,1,1,1,1
+access_t4_gate_keeper_employee_group,t4.gate_keeper.employee_group,model_t4_gate_keeper_employee_group,base.group_user,1,1,1,1
+access_t4_gate_keeper_auth_info,t4.gate_keeper.auth_info,model_t4_gate_keeper_auth_info,base.group_user,1,1,1,1
+access_t4_gate_keeper_device_log,t4.gate_keeper.device_log,model_t4_gate_keeper_device_log,base.group_user,1,1,1,1
+access_t4_gate_keeper_alert_policy,t4.gate_keeper.alert_policy,model_t4_gate_keeper_alert_policy,base.group_user,1,1,1,1
+access_t4_gate_keeper_scheduler,t4.gate_keeper.scheduler,model_t4_gate_keeper_scheduler,base.group_user,1,1,1,1
+
 
 
 

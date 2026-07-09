@@ -1,0 +1,490 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+
+        <!-- 1. BIOMETRIC ALGORITHMS -->
+        <record id="algorithm_zk_finger" model="t4.gate_keeper.algorithm">
+            <field name="name">ZKTeco Fingerprint Recognition</field>
+            <field name="code">fingerprint_zk_v10</field>
+            <field name="algorithm_type">fingerprint</field>
+            <field name="version">10.0</field>
+            <field name="template_format">zk_ansi_378</field>
+            <field name="notes">Thuật toán quét vân tay ANSI-378 tiêu chuẩn của hãng ZKTeco.</field>
+        </record>
+
+        <record id="algorithm_hik_face" model="t4.gate_keeper.algorithm">
+            <field name="name">Hikvision Face 3D Recognition</field>
+            <field name="code">face_hik_v2.1</field>
+            <field name="algorithm_type">face</field>
+            <field name="version">2.1</field>
+            <field name="template_format">hik_face_feature</field>
+            <field name="notes">Thuật toán nhận diện khuôn mặt 3D chống giả mạo của Hikvision.</field>
+        </record>
+
+        <record id="algorithm_standard_card" model="t4.gate_keeper.algorithm">
+            <field name="name">Standard RFID Card Authentication</field>
+            <field name="code">card_standard</field>
+            <field name="algorithm_type">card</field>
+            <field name="version">1.0</field>
+            <field name="notes">Thuật toán đọc thẻ từ tần số 13.56MHz Mifare / 125KHz Proximity.</field>
+        </record>
+
+        <!-- 2. DEVICE MODELS -->
+        <record id="model_zk_speedface" model="t4.gate_keeper.device_model">
+            <field name="name">ZKTeco SpeedFace V5L</field>
+            <field name="algorithm_ids" eval="[(6, 0, [ref('algorithm_zk_finger'), ref('algorithm_hik_face'), ref('algorithm_standard_card')])]"/>
+        </record>
+
+        <record id="model_suprema_bioentry" model="t4.gate_keeper.device_model">
+            <field name="name">Suprema BioEntry W2</field>
+            <field name="algorithm_ids" eval="[(6, 0, [ref('algorithm_zk_finger'), ref('algorithm_standard_card')])]"/>
+        </record>
+
+        <record id="model_hik_dsk" model="t4.gate_keeper.device_model">
+            <field name="name">Hikvision DS-K1T671</field>
+            <field name="algorithm_ids" eval="[(6, 0, [ref('algorithm_hik_face'), ref('algorithm_standard_card')])]"/>
+        </record>
+
+        <!-- 3. BRANCHES -->
+        <record id="branch_hanoi_hq" model="t4.gate_keeper.branch">
+            <field name="name">Trụ sở chính - Hà Nội</field>
+            <field name="company_id" ref="base.main_company"/>
+            <field name="timezone">Asia/Ho_Chi_Minh</field>
+            <field name="address">Tòa nhà Keangnam, Mễ Trì, Nam Từ Liêm, Hà Nội</field>
+        </record>
+
+        <record id="branch_hcm_office" model="t4.gate_keeper.branch">
+            <field name="name">Chi nhánh TP. Hồ Chí Minh</field>
+            <field name="company_id" ref="base.main_company"/>
+            <field name="timezone">Asia/Ho_Chi_Minh</field>
+            <field name="address">Tòa nhà Bitexco, Bến Nghé, Quận 1, TP. Hồ Chí Minh</field>
+        </record>
+
+        <!-- 4. AREAS -->
+        <record id="area_hn_lobby" model="t4.gate_keeper.area">
+            <field name="name">Sảnh đón khách chính (Hanoi Lobby)</field>
+            <field name="branch_id" ref="branch_hanoi_hq"/>
+        </record>
+
+        <record id="area_hn_server" model="t4.gate_keeper.area">
+            <field name="name">Phòng máy chủ trung tâm (Server Room)</field>
+            <field name="branch_id" ref="branch_hanoi_hq"/>
+        </record>
+
+        <record id="area_hcm_warehouse" model="t4.gate_keeper.area">
+            <field name="name">Kho hàng thành phẩm (HCM Warehouse)</field>
+            <field name="branch_id" ref="branch_hcm_office"/>
+        </record>
+
+        <!-- 5. CONTROLLERS -->
+        <record id="controller_hn_lobby" model="t4.gate_keeper.controller">
+            <field name="name">Controller Sảnh chính (Hanoi Lobby)</field>
+            <field name="serial_number">CTRL-HN-LOBBY-01</field>
+            <field name="branch_id" ref="branch_hanoi_hq"/>
+            <field name="hardware_model">InBio Pro 460</field>
+            <field name="firmware_version">v2.4.1</field>
+            <field name="ip_address">192.168.10.210</field>
+            <field name="mac_address">00:17:0A:11:22:33</field>
+            <field name="connection_type">tcp_ip</field>
+            <field name="status">online</field>
+        </record>
+
+        <record id="controller_hn_server" model="t4.gate_keeper.controller">
+            <field name="name">Controller Phòng máy chủ (Hanoi Server Room)</field>
+            <field name="serial_number">CTRL-HN-SRV-01</field>
+            <field name="branch_id" ref="branch_hanoi_hq"/>
+            <field name="hardware_model">InBio Pro 260</field>
+            <field name="firmware_version">v2.4.1</field>
+            <field name="ip_address">192.168.10.211</field>
+            <field name="mac_address">00:17:0A:11:22:44</field>
+            <field name="connection_type">tcp_ip</field>
+            <field name="status">online</field>
+        </record>
+
+        <record id="controller_hcm_warehouse" model="t4.gate_keeper.controller">
+            <field name="name">Controller Kho HCM (HCM Warehouse)</field>
+            <field name="serial_number">CTRL-HCM-WHS-01</field>
+            <field name="branch_id" ref="branch_hcm_office"/>
+            <field name="hardware_model">InBio Pro 160</field>
+            <field name="firmware_version">v2.3.2</field>
+            <field name="ip_address">192.168.20.220</field>
+            <field name="mac_address">00:17:0A:22:33:44</field>
+            <field name="connection_type">tcp_ip</field>
+            <field name="status">online</field>
+        </record>
+
+        <!-- 6. DEVICES -->
+        <record id="device_hn_lobby_in" model="t4.gate_keeper.device">
+            <field name="name">Đầu đọc thẻ RFID Sảnh vào (Lobby Entry)</field>
+            <field name="controller_id" ref="controller_hn_lobby"/>
+            <field name="area_id" ref="area_hn_lobby"/>
+            <field name="vendor">ZKTeco</field>
+            <field name="device_model_id" ref="model_zk_speedface"/>
+            <field name="serial_number">DEV-HN-LOB-IN-01</field>
+            <field name="port_or_channel">Relay 1 / Input 1</field>
+            <field name="firmware_version">v1.2.0</field>
+            <field name="system_version">Linux 4.19</field>
+            <field name="status">online</field>
+        </record>
+
+        <record id="device_hn_lobby_out" model="t4.gate_keeper.device">
+            <field name="name">Đầu đọc thẻ RFID Sảnh ra (Lobby Exit)</field>
+            <field name="controller_id" ref="controller_hn_lobby"/>
+            <field name="area_id" ref="area_hn_lobby"/>
+            <field name="vendor">Suprema</field>
+            <field name="device_model_id" ref="model_suprema_bioentry"/>
+            <field name="serial_number">DEV-HN-LOB-OUT-01</field>
+            <field name="port_or_channel">Relay 2 / Input 2</field>
+            <field name="firmware_version">v1.0.5</field>
+            <field name="system_version">FreeRTOS v10</field>
+            <field name="status">online</field>
+        </record>
+
+        <record id="device_hn_server_face" model="t4.gate_keeper.device">
+            <field name="name">Nhận diện khuôn mặt Cửa máy chủ (Server Face Terminal)</field>
+            <field name="controller_id" ref="controller_hn_server"/>
+            <field name="area_id" ref="area_hn_server"/>
+            <field name="vendor">Hikvision</field>
+            <field name="device_model_id" ref="model_hik_dsk"/>
+            <field name="serial_number">DEV-HN-SRV-FACE-01</field>
+            <field name="port_or_channel">Relay 1 / Input 1</field>
+            <field name="firmware_version">v2.1.2</field>
+            <field name="system_version">Android 8.1</field>
+            <field name="status">online</field>
+        </record>
+
+        <record id="device_hcm_whse_finger" model="t4.gate_keeper.device">
+            <field name="name">Quét vân tay Cửa kho vào (HCM Whse Fingerprint)</field>
+            <field name="controller_id" ref="controller_hcm_warehouse"/>
+            <field name="area_id" ref="area_hcm_warehouse"/>
+            <field name="vendor">ZKTeco</field>
+            <field name="device_model_id" ref="model_zk_speedface"/>
+            <field name="serial_number">DEV-HCM-WHS-FGR-01</field>
+            <field name="port_or_channel">Relay 1 / Input 1</field>
+            <field name="firmware_version">v1.2.0</field>
+            <field name="system_version">Linux 4.19</field>
+            <field name="status">online</field>
+        </record>
+
+        <!-- ==================== DA NANG BRANCH EXPANSION ==================== -->
+        <!-- 1. BRANCH -->
+        <record id="branch_danang_office" model="t4.gate_keeper.branch">
+            <field name="name">Chi nhánh Đà Nẵng</field>
+            <field name="company_id" ref="base.main_company"/>
+            <field name="timezone">Asia/Ho_Chi_Minh</field>
+            <field name="address">Tòa nhà Indochina Riverside, 74 Bạch Đằng, Hải Châu, Đà Nẵng</field>
+        </record>
+
+        <!-- 2. AREAS -->
+        <record id="area_dn_tech" model="t4.gate_keeper.area">
+            <field name="name">Phòng Nghiên cứu &amp; Phát triển R&amp;D (Da Nang R&amp;D)</field>
+            <field name="branch_id" ref="branch_danang_office"/>
+        </record>
+
+        <record id="area_dn_director" model="t4.gate_keeper.area">
+            <field name="name">Phòng Ban Giám Đốc (Da Nang Boardroom)</field>
+            <field name="branch_id" ref="branch_danang_office"/>
+        </record>
+
+        <!-- 3. EMPLOYEE GROUPS -->
+        <record id="group_dn_tech" model="t4.gate_keeper.employee_group">
+            <field name="name">Phòng Kỹ thuật &amp; R&amp;D Đà Nẵng</field>
+            <field name="code">TECH_RD_DN</field>
+            <field name="branch_id" ref="branch_danang_office"/>
+            <field name="description">Nhóm nhân viên nghiên cứu phát triển công nghệ tại chi nhánh Đà Nẵng.</field>
+        </record>
+
+        <record id="group_dn_board" model="t4.gate_keeper.employee_group">
+            <field name="name">Ban Giám Đốc Đà Nẵng</field>
+            <field name="code">BOARD_DN</field>
+            <field name="branch_id" ref="branch_danang_office"/>
+            <field name="description">Nhóm lãnh đạo quản lý cấp cao tại chi nhánh Đà Nẵng.</field>
+        </record>
+
+        <!-- 4. CONTROLLER -->
+        <record id="controller_dn_main" model="t4.gate_keeper.controller">
+            <field name="name">Controller Trung tâm Chi nhánh Đà Nẵng</field>
+            <field name="serial_number">CTRL-DN-MAIN-01</field>
+            <field name="branch_id" ref="branch_danang_office"/>
+            <field name="hardware_model">InBio Pro 260</field>
+            <field name="firmware_version">v2.4.1</field>
+            <field name="ip_address">192.168.30.150</field>
+            <field name="mac_address">00:17:0A:33:44:55</field>
+            <field name="connection_type">tcp_ip</field>
+            <field name="status">online</field>
+        </record>
+
+        <!-- 5. DEVICES -->
+        <record id="device_dn_tech_in" model="t4.gate_keeper.device">
+            <field name="name">Đầu đọc thẻ RFID Phòng R&amp;D (R&amp;D Entry)</field>
+            <field name="controller_id" ref="controller_dn_main"/>
+            <field name="area_id" ref="area_dn_tech"/>
+            <field name="vendor">Suprema</field>
+            <field name="device_model_id" ref="model_suprema_bioentry"/>
+            <field name="serial_number">DEV-DN-RD-IN-01</field>
+            <field name="port_or_channel">Relay 1</field>
+            <field name="firmware_version">v1.0.5</field>
+            <field name="system_version">FreeRTOS v10</field>
+            <field name="status">online</field>
+        </record>
+
+        <record id="device_dn_director_in" model="t4.gate_keeper.device">
+            <field name="name">Nhận diện khuôn mặt Phòng Ban Giám Đốc (Boardroom Entry)</field>
+            <field name="controller_id" ref="controller_dn_main"/>
+            <field name="area_id" ref="area_dn_director"/>
+            <field name="vendor">Hikvision</field>
+            <field name="device_model_id" ref="model_hik_dsk"/>
+            <field name="serial_number">DEV-DN-EXEC-IN-01</field>
+            <field name="port_or_channel">Relay 2</field>
+            <field name="firmware_version">v2.1.2</field>
+            <field name="system_version">Android 8.1</field>
+            <field name="status">online</field>
+        </record>
+
+        <!-- ==================== EMPLOYEE GROUPS & POLICIES ==================== -->
+        <!-- 1. EMPLOYEE GROUPS (4 EQUIVALENT GROUPS PER BRANCH + 1 HEADQUARTERS SPECIAL GROUP) -->
+        
+        <!-- HANOI HQ GROUPS -->
+        <record id="group_hn_board" model="t4.gate_keeper.employee_group">
+            <field name="name">Ban Giám Đốc (Hanoi Board)</field>
+            <field name="code">BOARD_DEPT</field>
+            <field name="branch_id" ref="branch_hanoi_hq"/>
+            <field name="description">Ban lãnh đạo cấp cao của doanh nghiệp tại trụ sở chính Hà Nội.</field>
+        </record>
+
+        <record id="group_hn_it" model="t4.gate_keeper.employee_group">
+            <field name="name">Phòng Kỹ thuật IT (Hanoi IT)</field>
+            <field name="code">IT_DEPT</field>
+            <field name="branch_id" ref="branch_hanoi_hq"/>
+            <field name="description">Nhóm kỹ sư hệ thống, kỹ thuật viên quản trị hạ tầng IT tại Hà Nội.</field>
+        </record>
+
+        <record id="group_hn_hr" model="t4.gate_keeper.employee_group">
+            <field name="name">Phòng Hành chính Nhân sự (Hanoi HR)</field>
+            <field name="code">HR_DEPT</field>
+            <field name="branch_id" ref="branch_hanoi_hq"/>
+            <field name="description">Nhóm nhân sự phụ trách tuyển dụng và hành chính tại Hà Nội.</field>
+        </record>
+
+        <record id="group_hn_security" model="t4.gate_keeper.employee_group">
+            <field name="name">Đội Bảo vệ &amp; An ninh (Hanoi Security)</field>
+            <field name="code">SECURITY</field>
+            <field name="branch_id" ref="branch_hanoi_hq"/>
+            <field name="description">Nhóm nhân viên an ninh bảo vệ tại Hà Nội.</field>
+        </record>
+
+        <record id="group_hn_temp" model="t4.gate_keeper.employee_group">
+            <field name="name">Nhân viên Thời vụ / Nhà thầu (Hanoi Temp)</field>
+            <field name="code">TEMP_STAFF</field>
+            <field name="branch_id" ref="branch_hanoi_hq"/>
+            <field name="description">Nhóm nhân viên bán thời gian, nhà thầu ngoài tại Hà Nội.</field>
+        </record>
+
+        <!-- HCM OFFICE GROUPS -->
+        <record id="group_hcm_it" model="t4.gate_keeper.employee_group">
+            <field name="name">Phòng Kỹ thuật IT (HCM IT)</field>
+            <field name="code">IT_DEPT</field>
+            <field name="branch_id" ref="branch_hcm_office"/>
+            <field name="description">Nhóm kỹ sư hệ thống, kỹ thuật viên quản trị hạ tầng IT tại TP. HCM.</field>
+        </record>
+
+        <record id="group_hcm_hr" model="t4.gate_keeper.employee_group">
+            <field name="name">Phòng Hành chính Nhân sự (HCM HR)</field>
+            <field name="code">HR_DEPT</field>
+            <field name="branch_id" ref="branch_hcm_office"/>
+            <field name="description">Nhóm nhân sự phụ trách tuyển dụng và hành chính tại TP. HCM.</field>
+        </record>
+
+        <record id="group_hcm_security" model="t4.gate_keeper.employee_group">
+            <field name="name">Đội Bảo vệ &amp; An ninh (HCM Security)</field>
+            <field name="code">SECURITY</field>
+            <field name="branch_id" ref="branch_hcm_office"/>
+            <field name="description">Nhóm nhân viên an ninh bảo vệ tại TP. HCM.</field>
+        </record>
+
+        <record id="group_hcm_temp" model="t4.gate_keeper.employee_group">
+            <field name="name">Nhân viên Thời vụ / Nhà thầu (HCM Temp)</field>
+            <field name="code">TEMP_STAFF</field>
+            <field name="branch_id" ref="branch_hcm_office"/>
+            <field name="description">Nhóm nhân viên bán thời gian, nhà thầu ngoài tại TP. HCM.</field>
+        </record>
+
+        <!-- DA NANG OFFICE GROUPS -->
+        <record id="group_dn_it" model="t4.gate_keeper.employee_group">
+            <field name="name">Phòng Kỹ thuật IT (Da Nang IT)</field>
+            <field name="code">IT_DEPT</field>
+            <field name="branch_id" ref="branch_danang_office"/>
+            <field name="description">Nhóm kỹ sư hệ thống, kỹ thuật viên quản trị hạ tầng IT tại Đà Nẵng.</field>
+        </record>
+
+        <record id="group_dn_hr" model="t4.gate_keeper.employee_group">
+            <field name="name">Phòng Hành chính Nhân sự (Da Nang HR)</field>
+            <field name="code">HR_DEPT</field>
+            <field name="branch_id" ref="branch_danang_office"/>
+            <field name="description">Nhóm nhân sự phụ trách tuyển dụng và hành chính tại Đà Nẵng.</field>
+        </record>
+
+        <record id="group_dn_security" model="t4.gate_keeper.employee_group">
+            <field name="name">Đội Bảo vệ &amp; An ninh (Da Nang Security)</field>
+            <field name="code">SECURITY</field>
+            <field name="branch_id" ref="branch_danang_office"/>
+            <field name="description">Nhóm nhân viên an ninh bảo vệ tại Đà Nẵng.</field>
+        </record>
+
+        <record id="group_dn_temp" model="t4.gate_keeper.employee_group">
+            <field name="name">Nhân viên Thời vụ / Nhà thầu (Da Nang Temp)</field>
+            <field name="code">TEMP_STAFF</field>
+            <field name="branch_id" ref="branch_danang_office"/>
+            <field name="description">Nhóm nhân viên bán thời gian, nhà thầu ngoài tại Đà Nẵng.</field>
+        </record>
+
+        <!-- 2. HR EMPLOYEES -->
+        <record id="hr_emp_nguyen_board" model="hr.employee">
+            <field name="name">Nguyễn Văn Giám Đốc</field>
+            <field name="emp_id">EMP-HN-DIR-001</field>
+        </record>
+
+        <record id="hr_emp_nguyen_it" model="hr.employee">
+            <field name="name">Nguyễn Văn Kỹ Thuật</field>
+            <field name="emp_id">EMP-HN-IT-001</field>
+        </record>
+
+        <record id="hr_emp_tran_hr" model="hr.employee">
+            <field name="name">Trần Thị Hành Chính</field>
+            <field name="emp_id">EMP-HN-HR-001</field>
+        </record>
+
+        <record id="hr_emp_le_security" model="hr.employee">
+            <field name="name">Lê Văn Bảo Vệ</field>
+            <field name="emp_id">EMP-HN-SEC-001</field>
+        </record>
+
+        <record id="hr_emp_pham_temp" model="hr.employee">
+            <field name="name">Phạm Văn Thời Vụ</field>
+            <field name="emp_id">EMP-HCM-TMP-001</field>
+        </record>
+
+        <!-- 3. CONFIG DYNAMICALLY CREATED GATE KEEPER EMPLOYEES -->
+        <function model="t4.gate_keeper.employee" name="write">
+            <value model="t4.gate_keeper.employee" eval="obj().env['t4.gate_keeper.employee'].search([('emp_id', '=', 'EMP-HN-DIR-001')]).ids"/>
+            <value eval="{'branch_id': ref('branch_hanoi_hq'), 'group_ids': [(6, 0, [ref('group_hn_board')])] }"/>
+        </function>
+
+        <function model="t4.gate_keeper.employee" name="write">
+            <value model="t4.gate_keeper.employee" eval="obj().env['t4.gate_keeper.employee'].search([('emp_id', '=', 'EMP-HN-IT-001')]).ids"/>
+            <value eval="{'branch_id': ref('branch_hanoi_hq'), 'group_ids': [(6, 0, [ref('group_hn_it')])] }"/>
+        </function>
+
+        <function model="t4.gate_keeper.employee" name="write">
+            <value model="t4.gate_keeper.employee" eval="obj().env['t4.gate_keeper.employee'].search([('emp_id', '=', 'EMP-HN-HR-001')]).ids"/>
+            <value eval="{'branch_id': ref('branch_hanoi_hq'), 'group_ids': [(6, 0, [ref('group_hn_hr')])] }"/>
+        </function>
+
+        <function model="t4.gate_keeper.employee" name="write">
+            <value model="t4.gate_keeper.employee" eval="obj().env['t4.gate_keeper.employee'].search([('emp_id', '=', 'EMP-HN-SEC-001')]).ids"/>
+            <value eval="{'branch_id': ref('branch_hanoi_hq'), 'group_ids': [(6, 0, [ref('group_hn_security')])] }"/>
+        </function>
+
+        <function model="t4.gate_keeper.employee" name="write">
+            <value model="t4.gate_keeper.employee" eval="obj().env['t4.gate_keeper.employee'].search([('emp_id', '=', 'EMP-HCM-TMP-001')]).ids"/>
+            <value eval="{'branch_id': ref('branch_hcm_office'), 'group_ids': [(6, 0, [ref('group_hcm_temp')])] }"/>
+        </function>
+
+        <!-- 4. CARDS (AUTH INFO) -->
+        <record id="card_nguyen_board" model="t4.gate_keeper.auth_info">
+            <field name="employee_id" search="[('emp_id', '=', 'EMP-HN-DIR-001')]"/>
+            <field name="card_code">RFID-HN-DIR-01</field>
+            <field name="active" eval="True"/>
+            <field name="description">Thẻ VIP của Giám Đốc tại trụ sở chính Hà Nội.</field>
+        </record>
+
+        <record id="card_nguyen_it" model="t4.gate_keeper.auth_info">
+            <field name="employee_id" search="[('emp_id', '=', 'EMP-HN-IT-001')]"/>
+            <field name="card_code">RFID-HN-IT-01</field>
+            <field name="active" eval="True"/>
+            <field name="description">Thẻ Mifare phân quyền IT Hà Nội.</field>
+        </record>
+
+        <record id="card_tran_hr" model="t4.gate_keeper.auth_info">
+            <field name="employee_id" search="[('emp_id', '=', 'EMP-HN-HR-001')]"/>
+            <field name="card_code">RFID-HN-HR-01</field>
+            <field name="active" eval="True"/>
+            <field name="description">Thẻ Mifare phân quyền Hành chính Hà Nội.</field>
+        </record>
+
+        <record id="card_le_security" model="t4.gate_keeper.auth_info">
+            <field name="employee_id" search="[('emp_id', '=', 'EMP-HN-SEC-001')]"/>
+            <field name="card_code">RFID-HN-SEC-01</field>
+            <field name="active" eval="True"/>
+            <field name="description">Thẻ Proximity phân quyền Bảo vệ Hà Nội.</field>
+        </record>
+
+        <record id="card_pham_temp" model="t4.gate_keeper.auth_info">
+            <field name="employee_id" search="[('emp_id', '=', 'EMP-HCM-TMP-001')]"/>
+            <field name="card_code">RFID-HCM-TMP-01</field>
+            <field name="active" eval="True"/>
+            <field name="description">Thẻ Proximity cho CTV Thời vụ HCM.</field>
+        </record>
+
+        <!-- 5. ALERT POLICIES -->
+        
+        <!-- HANOI SECURITY POLICY -->
+        <record id="policy_server_restrict" model="t4.gate_keeper.alert_policy">
+            <field name="name">Chỉ kỹ thuật và bảo vệ được vào Phòng Máy Chủ (Hà Nội)</field>
+            <field name="code">POL-SRV-RESTRICT-HN</field>
+            <field name="warning_type_id" ref="warning_type_unauthorized_area"/>
+            <field name="priority">critical</field>
+            <field name="branch_ids" eval="[(6, 0, [ref('branch_hanoi_hq')])]"/>
+            <field name="area_ids" eval="[(6, 0, [ref('area_hn_server')])]"/>
+            <field name="allowed_group_ids" eval="[(6, 0, [ref('group_hn_it'), ref('group_hn_security'), ref('group_hn_board')])]"/>
+            <field name="description">Quy tắc nghiêm ngặt Hà Nội: Chỉ nhóm IT, Bảo vệ và Ban Giám Đốc Hà Nội được phép vào phòng máy chủ HN.</field>
+        </record>
+
+        <!-- DA NANG SECURITY POLICY -->
+        <record id="policy_tech_restrict_dn" model="t4.gate_keeper.alert_policy">
+            <field name="name">Chỉ kỹ thuật IT được vào Phòng R&amp;D (Đà Nẵng)</field>
+            <field name="code">POL-RD-RESTRICT-DN</field>
+            <field name="warning_type_id" ref="warning_type_unauthorized_area"/>
+            <field name="priority">critical</field>
+            <field name="branch_ids" eval="[(6, 0, [ref('branch_danang_office')])]"/>
+            <field name="area_ids" eval="[(6, 0, [ref('area_dn_tech')])]"/>
+            <field name="allowed_group_ids" eval="[(6, 0, [ref('group_dn_it')])]"/>
+            <field name="description">Quy tắc bảo mật Đà Nẵng: Chỉ nhóm IT Đà Nẵng được phép vào phòng nghiên cứu phát triển R&amp;D.</field>
+        </record>
+
+        <!-- UNIFIED TEMP STAFF CURFEW POLICY (ALL BRANCHES) -->
+        <record id="policy_temp_curfew" model="t4.gate_keeper.alert_policy">
+            <field name="name">Nhân viên thời vụ không được vào ngoài giờ và cuối tuần (Toàn quốc)</field>
+            <field name="code">POL-TEMP-CURFEW</field>
+            <field name="warning_type_id" ref="warning_type_unauthorized_time"/>
+            <field name="priority">high</field>
+            <field name="branch_ids" eval="[(6, 0, [ref('branch_hanoi_hq'), ref('branch_hcm_office'), ref('branch_danang_office')])]"/>
+            <field name="employee_group_ids" eval="[(6, 0, [ref('group_hn_temp'), ref('group_hcm_temp'), ref('group_dn_temp')])]"/>
+            <field name="start_hour">18.0</field>
+            <field name="end_hour">8.0</field>
+            <field name="apply_weekend" eval="True"/>
+            <field name="description">Cấm truy cập toàn quốc: Nhân viên thời vụ / nhà thầu tại tất cả chi nhánh không được phép vào ngoài giờ hành chính hoặc cuối tuần.</field>
+        </record>
+
+        <!-- ANTI-PASSBACK POLICY (ALL BRANCHES) -->
+        <record id="policy_apb_enforce" model="t4.gate_keeper.alert_policy">
+            <field name="name">Giám sát chống xoay vòng thẻ Anti-passback</field>
+            <field name="code">POL-APB-ENFORCE</field>
+            <field name="warning_type_id" ref="warning_type_invalid_sequence"/>
+            <field name="priority">critical</field>
+            <field name="branch_ids" eval="[(6, 0, [ref('branch_hanoi_hq'), ref('branch_hcm_office'), ref('branch_danang_office')])]"/>
+            <field name="description">Quy tắc chống quay vòng thẻ: Hệ thống sẽ giám sát trình tự ra/vào của tất cả nhân viên tại tất cả chi nhánh.</field>
+        </record>
+
+        <!-- UNKNOWN CARD POLICY (ALL BRANCHES) -->
+        <record id="policy_unknown_card_monitor" model="t4.gate_keeper.alert_policy">
+            <field name="name">Giám sát và phát hiện thẻ chưa đăng ký</field>
+            <field name="code">POL-UNKNOWN-CARD-MONITOR</field>
+            <field name="warning_type_id" ref="warning_type_unknown_card"/>
+            <field name="priority">critical</field>
+            <field name="branch_ids" eval="[(6, 0, [ref('branch_hanoi_hq'), ref('branch_hcm_office'), ref('branch_danang_office')])]"/>
+            <field name="description">Phát hiện xâm nhập: Tự động cảnh báo tức thời khi phát hiện mã thẻ RFID lạ hoặc vân tay/khuôn mặt không hợp lệ quẹt tại các thiết bị đầu cuối.</field>
+        </record>
+
+    </data>
+</odoo>

@@ -1,154 +1,125 @@
+<?xml version="1.0" encoding="utf-8"?>
 <odoo>
-  <!-- Root Menus -->
-  <menuitem id="t4_gate_keeper_menu_root" 
-            
-            name="Gate Keeper" 
-            
+
+  <!-- Root Menu -->
+  <menuitem id="t4_gate_keeper_menu_root"
+            name="Gate Keeper"
             sequence="90"/>
 
-
-  <!-- ### DASHBOARD -->
+  <!-- 1. DASHBOARD -->
   <menuitem id="t4_gate_keeper_dashboard_menu"
-
             name="Dashboard"
-
             parent="t4_gate_keeper_menu_root"
-
-            action="t4_gate_keeper_branch_action" 
-
-            sequence="10"/>
-  
-
-  <!-- <menuitem id="t4_gate_keeper_branch_menu" 
-  
-            name="Branches" 
-            
-            parent="t4_gate_keeper_dashboard_menu" 
-            
-            action="t4_gate_keeper_branch_action" 
-            
-            sequence="10"/> -->
-
-  <!-- 
-  <menuitem id="t4_gate_keeper_controller_menu" 
-            name="Controllers" 
-            parent="t4_gate_keeper_dashboard_menu" 
-            action="t4_gate_keeper_controller_action" 
-            sequence="20"/>
-  -->
-
-  <!--
-  <menuitem id="t4_gate_keeper_device_menu" 
-            name="Devices" 
-            parent="t4_gate_keeper_dashboard_menu" 
-            action="t4_gate_keeper_device_action" 
-            sequence="30"/>
-  -->
-
-
-
-  <!-- ### ACCESS LOGS -->
-  <menuitem id="t4_gate_keeper_access_log_menu" 
-  
-            name="Access Logs" 
-            
-            parent="t4_gate_keeper_menu_root" 
-            
-            action="t4_gate_keeper_access_log_action" 
-            
-            sequence="40"/>
-
-   <menuitem id="t4_gate_keeper_configuration_employee_menu"
-            name="Employee"
-
-            parent="t4_gate_keeper_menu_root"
-            
-            action="t4_gate_keeper_employee_action"
-
-            sequence="40"/>
-
-
-  <!-- ### CONFIGURATION -->
-  <menuitem id="t4_gate_keeper_configuration_menu"
-
-            name="Configuration"
-
-            parent="t4_gate_keeper_menu_root"
-
-            sequence="200"/>
-
-  <!-- CONFIG: warning tab -->
-  <menuitem id="t4_gate_keeper_configuration_warning_menu"
-            name="Area"
-            parent="t4_gate_keeper_configuration_menu"
-            sequence="150"/>
-
-    <menuitem id="t4_gate_keeper_area_menu" 
-            name="Areas" 
-            parent="t4_gate_keeper_configuration_warning_menu" 
-            action="t4_gate_keeper_area_action" 
+            action="t4_gate_keeper_branch_action"
             sequence="10"/>
 
-    <menuitem id="t4_gate_keeper_area_warning_type_menu" 
-            name="Warning Types" 
-            parent="t4_gate_keeper_configuration_warning_menu" 
-            action="t4_gate_keeper_area_warning_type_action" 
+  <!-- 2. SYSTEM -->
+  <menuitem id="t4_gate_keeper_system_menu"
+            name="System"
+            parent="t4_gate_keeper_menu_root"
             sequence="20"/>
 
-    <menuitem id="t4_gate_keeper_alert_policy_menu" 
-            name="Alert Policies" 
-            parent="t4_gate_keeper_configuration_warning_menu" 
-            action="t4_gate_keeper_alert_policy_action" 
+    <menuitem id="t4_gate_keeper_branch_menu"
+              name="Branches"
+              parent="t4_gate_keeper_system_menu"
+              action="t4_gate_keeper_branch_action"
+              sequence="10"/>
+
+    <menuitem id="t4_gate_keeper_area_menu"
+              name="Areas"
+              parent="t4_gate_keeper_system_menu"
+              action="t4_gate_keeper_area_action"
+              sequence="20"/>
+
+  <!-- 3. EMPLOYEES -->
+  <menuitem id="t4_gate_keeper_employee_root_menu"
+            name="Employees"
+            parent="t4_gate_keeper_menu_root"
             sequence="30"/>
 
-  <!-- CONFIG: device tab -->
-  <menuitem id="t4_gate_keeper_configuration_device_menu"
-            name="Device"
-            parent="t4_gate_keeper_configuration_menu"
-            sequence="200"/>
+    <menuitem id="t4_gate_keeper_employee_menu"
+              name="Employee List"
+              parent="t4_gate_keeper_employee_root_menu"
+              action="t4_gate_keeper_employee_action"
+              sequence="10"/>
 
+    <menuitem id="t4_gate_keeper_employee_group_menu"
+              name="Employee Groups"
+              parent="t4_gate_keeper_employee_root_menu"
+              action="t4_gate_keeper_employee_group_action"
+              sequence="20"/>
 
-    <menuitem id="t4_gate_keeper_algorithm_menu" 
-            name="Algorithms" 
-            parent="t4_gate_keeper_configuration_device_menu" 
-            action="t4_gate_keeper_algorithm_action" 
+    <menuitem id="t4_gate_keeper_auth_info_menu"
+              name="Auth Info (RFID)"
+              parent="t4_gate_keeper_employee_root_menu"
+              action="t4_gate_keeper_auth_info_action"
+              sequence="30"/>
+
+    <menuitem id="t4_gate_keeper_algorithm_menu"
+              name="Algorithms"
+              parent="t4_gate_keeper_employee_root_menu"
+              action="t4_gate_keeper_algorithm_action"
+              sequence="40"/>
+
+  <!-- 4. DEVICES -->
+  <menuitem id="t4_gate_keeper_devices_root_menu"
+            name="Devices"
+            parent="t4_gate_keeper_menu_root"
             sequence="40"/>
 
-    <menuitem id="t4_gate_keeper_configuration_device_list_menu" 
-            name="Devices" 
-            parent="t4_gate_keeper_configuration_device_menu" 
-            action="t4_gate_keeper_device_action" 
-            sequence="20"/>
+    <menuitem id="t4_gate_keeper_controller_menu"
+              name="Controllers"
+              parent="t4_gate_keeper_devices_root_menu"
+              action="t4_gate_keeper_controller_sync_action"
+              sequence="10"/>
 
-    <menuitem id="t4_gate_keeper_device_model_menu" 
-            name="Device Models" 
-            parent="t4_gate_keeper_configuration_device_menu" 
-            action="t4_gate_keeper_device_model_action" 
-            sequence="30"/>
+    <menuitem id="t4_gate_keeper_device_menu"
+              name="Devices"
+              parent="t4_gate_keeper_devices_root_menu"
+              action="t4_gate_keeper_device_action"
+              sequence="20"/>
 
-    <menuitem id="t4_gate_keeper_device_log_menu" 
-            name="Device Logs" 
-            parent="t4_gate_keeper_configuration_device_menu" 
-            action="t4_gate_keeper_device_log_action" 
-            sequence="35"/>
+    <menuitem id="t4_gate_keeper_device_model_menu"
+              name="Device Models"
+              parent="t4_gate_keeper_devices_root_menu"
+              action="t4_gate_keeper_device_model_action"
+              sequence="30"/>
 
-    <menuitem id="t4_gate_keeper_presence_state_menu" 
-            name="Presence States" 
-            parent="t4_gate_keeper_configuration_device_menu" 
-            action="t4_gate_keeper_presence_state_action" 
-            sequence="36"/>
+    <menuitem id="t4_gate_keeper_device_log_menu"
+              name="Device Logs"
+              parent="t4_gate_keeper_devices_root_menu"
+              action="t4_gate_keeper_device_log_action"
+              sequence="50"/>
 
-  <!-- CONFIG: controller tab -->
-  <menuitem id="t4_gate_keeper_configuration_controller_menu"
-            name="Controller"
-            parent="t4_gate_keeper_configuration_menu"
-            sequence="300"/>
-
-    <menuitem id="t4_gate_keeper_controller_sync_menu" 
-            name="Controllers" 
-            parent="t4_gate_keeper_configuration_controller_menu" 
-            action="t4_gate_keeper_controller_sync_action" 
+  <!-- 5. ACCESS LOGS -->
+  <menuitem id="t4_gate_keeper_access_log_menu"
+            name="Access Logs"
+            parent="t4_gate_keeper_menu_root"
+            action="t4_gate_keeper_access_log_action"
             sequence="50"/>
 
-  
+  <!-- 6. WARNINGS -->
+  <menuitem id="t4_gate_keeper_warnings_root_menu"
+            name="Warnings"
+            parent="t4_gate_keeper_menu_root"
+            sequence="60"/>
+
+    <menuitem id="t4_gate_keeper_area_warning_menu"
+              name="Area Warnings"
+              parent="t4_gate_keeper_warnings_root_menu"
+              action="t4_gate_keeper_area_warning_extra_action"
+              sequence="10"/>
+
+    <menuitem id="t4_gate_keeper_area_warning_type_menu"
+              name="Warning Types"
+              parent="t4_gate_keeper_warnings_root_menu"
+              action="t4_gate_keeper_area_warning_type_extra_action"
+              sequence="20"/>
+
+    <menuitem id="t4_gate_keeper_alert_policy_menu"
+              name="Alert Policies"
+              parent="t4_gate_keeper_warnings_root_menu"
+              action="t4_gate_keeper_alert_policy_action"
+              sequence="30"/>
+
 </odoo>

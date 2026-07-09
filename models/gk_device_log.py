@@ -7,7 +7,7 @@ from odoo import fields, models
 class GateKeeperDeviceLog(models.Model):
     _name = "t4.gate_keeper.device_log"
     _description = "Gate Keeper Device Log"
-    _order = "event_time desc"
+    _order = "changed_at desc"
 
     device_id = fields.Many2one(
         comodel_name="t4.gate_keeper.device",
@@ -37,9 +37,18 @@ class GateKeeperDeviceLog(models.Model):
         default="status_changed",
     )
 
-    event_time = fields.Datetime(
-        string="Event Time", default=fields.Datetime.now, required=True
+    changed_at = fields.Datetime(
+        string="Changed At",
+        default=fields.Datetime.now,
+        required=True,
+        help="Thời điểm thay đổi trạng thái.",
     )
-    status_from = fields.Char(string="Status From")
-    status_to = fields.Char(string="Status To")
-    notes = fields.Text(string="Notes")
+    old_status = fields.Char(
+        string="Old Status",
+        help="Trạng thái cũ trước khi thay đổi.",
+    )
+    new_status = fields.Char(
+        string="New Status",
+        help="Trạng thái mới sau khi thay đổi.",
+    )
+    note = fields.Text(string="Note")

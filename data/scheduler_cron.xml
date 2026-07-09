@@ -1,24 +1,46 @@
 <odoo>
 
+    <!-- Cập nhật trạng thái phần cứng (controller/device offline) — mỗi 1 phút -->
     <record id="ir_cron_controller_status" model="ir.cron">
-        <field name="name">Update Hardware Status</field>
+        <field name="name">GK: Cập nhật trạng thái phần cứng</field>
         <field name="model_id" ref="model_t4_gate_keeper_scheduler"/>
         <field name="state">code</field>
         <field name="code">model.cron_update_hardware_status()</field>
-
         <field name="interval_number">1</field>
         <field name="interval_type">minutes</field>
-
         <field name="active">True</field>
     </record>
 
+    <!-- Đồng bộ nhân viên HR sang Gate Keeper — mỗi 12 giờ -->
     <record id="ir_cron_sync_missing_employees" model="ir.cron">
-        <field name="name">Sync Missing Employees to Gate Keeper</field>
+        <field name="name">GK: Đồng bộ nhân viên từ HR</field>
         <field name="model_id" ref="model_t4_gate_keeper_scheduler"/>
         <field name="state">code</field>
         <field name="code">model.cron_sync_missing_employees()</field>
         <field name="interval_number">12</field>
         <field name="interval_type">hours</field>
+        <field name="active">True</field>
+    </record>
+
+    <!-- Leo thang cảnh báo chưa xử lý — mỗi 15 phút -->
+    <record id="ir_cron_escalate_warnings" model="ir.cron">
+        <field name="name">GK: Leo thang cảnh báo chưa xử lý</field>
+        <field name="model_id" ref="model_t4_gate_keeper_scheduler"/>
+        <field name="state">code</field>
+        <field name="code">model.cron_escalate_warnings()</field>
+        <field name="interval_number">15</field>
+        <field name="interval_type">minutes</field>
+        <field name="active">True</field>
+    </record>
+
+    <!-- Kiểm tra nhân viên ở lại quá giờ (overtime) — mỗi 30 phút -->
+    <record id="ir_cron_overtime_check" model="ir.cron">
+        <field name="name">GK: Kiểm tra overtime nhân viên</field>
+        <field name="model_id" ref="model_t4_gate_keeper_scheduler"/>
+        <field name="state">code</field>
+        <field name="code">model.cron_overtime_check()</field>
+        <field name="interval_number">30</field>
+        <field name="interval_type">minutes</field>
         <field name="active">True</field>
     </record>
 
