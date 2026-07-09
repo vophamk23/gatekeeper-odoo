@@ -4,7 +4,8 @@
         <field name="name">t4.gate_keeper.device_log.view.list</field>
         <field name="model">t4.gate_keeper.device_log</field>
         <field name="arch" type="xml">
-            <list string="Device Logs">
+            <list string="Device Logs" default_group_by="branch_id">
+                <field name="branch_id" optional="show"/>
                 <field name="device_id"/>
                 <field name="controller_id"/>
                 <field name="event_type"/>
@@ -31,6 +32,7 @@
                 <sheet>
                     <group>
                         <group>
+                            <field name="branch_id"/>
                             <field name="device_id"/>
                             <field name="controller_id"/>
                             <field name="event_type"/>
@@ -49,9 +51,28 @@
         </field>
     </record>
 
+    <record id="t4_gate_keeper_device_log_view_search" model="ir.ui.view">
+        <field name="name">t4.gate_keeper.device_log.view.search</field>
+        <field name="model">t4.gate_keeper.device_log</field>
+        <field name="arch" type="xml">
+            <search string="Search Device Logs">
+                <field name="device_id" string="Device"/>
+                <field name="controller_id" string="Controller"/>
+                <group expand="1" string="Group By">
+                    <filter string="Branch" name="group_branch" context="{'group_by': 'branch_id'}"/>
+                    <filter string="Controller" name="group_controller" context="{'group_by': 'controller_id'}"/>
+                    <filter string="Device" name="group_device" context="{'group_by': 'device_id'}"/>
+                    <filter string="Event Type" name="group_event_type" context="{'group_by': 'event_type'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
     <record id="t4_gate_keeper_device_log_action" model="ir.actions.act_window">
         <field name="name">Device Logs</field>
         <field name="res_model">t4.gate_keeper.device_log</field>
         <field name="view_mode">list,form</field>
+        <field name="search_view_id" ref="t4_gate_keeper_device_log_view_search"/>
+        <field name="context">{'search_default_group_branch': 1}</field>
     </record>
 </odoo>

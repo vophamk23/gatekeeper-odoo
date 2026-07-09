@@ -24,6 +24,14 @@ class GateKeeperDeviceLog(models.Model):
         readonly=True,
     )
 
+    branch_id = fields.Many2one(
+        comodel_name="t4.gate_keeper.branch",
+        string="Branch",
+        related="device_id.branch_id",
+        store=True,
+        readonly=True,
+    )
+
     event_type = fields.Selection(
         selection=[
             ("status_changed", "Status Changed"),

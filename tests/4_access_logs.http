@@ -182,3 +182,63 @@ Content-Type: application/json
         }
     ]
 }
+
+### 4.1.E Tải lô quẹt thẻ chứa Thẻ lạ / Chưa đăng ký (AccessLogUpload)
+# ------------------------------------------------------------------------------
+# CHỨC NĂNG: Thiết bị Hà Nội tải lên log của thẻ lạ quét tại sảnh.
+# ĐỐI TƯỢNG: Thẻ RFID-UNKNOWN-999 quét VÀO lúc 11:00:00.
+# KẾT QUẢ THÀNH CÔNG: 
+# - Tạo bản ghi Access Log nhưng không gắn với nhân viên nào (employee_id = False).
+# - Hệ thống tự động tạo cảnh báo bảo mật thẻ lạ (unknown_card) trong Area Warning.
+# ------------------------------------------------------------------------------
+POST http://localhost:8070/api/v1/AccessLogUpload
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+    "controller_id": "CTRL-HN-LOBBY-01",
+    "logs": [
+        {
+            "device_serial": "DEV-HN-LOB-IN-01",
+            "card_code": "RFID-UNKNOWN-999",
+            "access_time": "2026-07-09 11:00:00",
+            "direction": "in",
+            "verification_type": "card"
+        }
+    ]
+}
+
+### 4.1.F Tải log với Controller ID không tồn tại (Kiểm tra lỗi ValidationError)
+# ------------------------------------------------------------------------------
+# CHỨC NĂNG: Gửi yêu cầu với controller_id sai định dạng hoặc không có trong hệ thống.
+# KẾT QUẢ: Hệ thống báo lỗi ValidationError (400 Bad Request) bảo mật.
+# ------------------------------------------------------------------------------
+POST http://localhost:8070/api/v1/AccessLogUpload
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+    "controller_id": "CTRL-HN-INVALID-999",
+    "logs": [
+        {
+            "device_serial": "DEV-HN-LOB-IN-01",
+            "emp_id": "EMP-HN-IT-001",
+            "access_time": "2026-07-09 11:15:00",
+            "direction": "in",
+            "verification_type": "card"
+        }
+    ]
+}
+
+### 4.1.G Tải log thiếu trường bắt buộc logs (Kiểm tra lỗi Missing Data)
+# ------------------------------------------------------------------------------
+# CHỨC NĂNG: Gửi yêu cầu thiếu tham số logs.
+# KẾT QUẢ: Hệ thống báo lỗi Missing required field(s): logs (400 Bad Request).
+# ------------------------------------------------------------------------------
+POST http://localhost:8070/api/v1/AccessLogUpload
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+    "controller_id": "CTRL-HN-LOBBY-01"
+}

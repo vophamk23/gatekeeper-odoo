@@ -186,9 +186,11 @@ class T4GateKeeperController(models.Model):
 
         return {
             "message": "Success",
-            "status": "200 OK",
-            "controller_id": controller.id,
-            "name": controller.name,
+            "data": {
+                "status": "200 OK",
+                "controller_id": controller.id,
+                "name": controller.name,
+            }
         }
 
     # ----------------------------------------------------
@@ -216,10 +218,12 @@ class T4GateKeeperController(models.Model):
 
         return {
             "message": "Success",
-            "status": "200 OK",
-            "device_id": device.id,
-            "controller_name": device.controller_id.name,
-            "device_name": device.name,
+            "data": {
+                "status": "200 OK",
+                "device_id": device.id,
+                "controller_name": device.controller_id.name,
+                "device_name": device.name,
+            }
         }
 
     # ----------------------------------------------------
@@ -257,9 +261,11 @@ class T4GateKeeperController(models.Model):
 
         return {
             "message": "Success",
-            "status": "200 OK",
-            "timezone": controller.timezone or "Asia/Ho_Chi_Minh",
-            "devices": devices_data,
+            "data": {
+                "status": "200 OK",
+                "timezone": controller.timezone or "Asia/Ho_Chi_Minh",
+                "devices": devices_data,
+            }
         }
 
     # ----------------------------------------------------
@@ -297,7 +303,9 @@ class T4GateKeeperController(models.Model):
 
         return {
             "message": "Success",
-            "status": "200 OK",
+            "data": {
+                "status": "200 OK",
+            }
         }
 
     # ----------------------------------------------------
@@ -338,9 +346,11 @@ class T4GateKeeperController(models.Model):
 
         return {
             "message": "Success",
-            "status": "200 OK",
-            "sync_timestamp": fields.Datetime.to_string(fields.Datetime.now()),
-            "changes": sync_data,
+            "data": {
+                "status": "200 OK",
+                "sync_timestamp": fields.Datetime.to_string(fields.Datetime.now()),
+                "changes": sync_data,
+            }
         }
 
     # ----------------------------------------------------
@@ -362,11 +372,19 @@ class T4GateKeeperController(models.Model):
                 _("Không tìm thấy Controller hoặc Nhân viên hợp lệ")
             )
 
+        # Ràng buộc chi nhánh: Nhân viên phải thuộc cùng chi nhánh với Controller (hoặc là nhân viên dùng chung toàn hệ thống - không gán chi nhánh)
+        if employee.branch_id and controller.branch_id and employee.branch_id.id != controller.branch_id.id:
+            raise ValidationError(
+                _("Nhân viên không thuộc chi nhánh của bộ điều khiển này")
+            )
+
         supported_algos = controller.device_ids.mapped("device_model_id.algorithm_ids.id")
         biometrics = self.env["t4.gate_keeper.employee.biometric"].search([
             ("employee_id", "=", employee.id),
             ("algorithm_id", "in", supported_algos)
         ])
+
+        cards = employee.auth_info_ids.filtered(lambda a: a.active).mapped("card_code")
 
         templates = []
         for bio in biometrics:
@@ -380,10 +398,13 @@ class T4GateKeeperController(models.Model):
 
         return {
             "message": "Success",
-            "status": "200 OK",
-            "emp_id": employee.emp_id,
-            "name": employee.name,
-            "biometrics": templates,
+            "data": {
+                "status": "200 OK",
+                "emp_id": employee.emp_id,
+                "name": employee.name,
+                "cards": cards,
+                "biometrics": templates,
+            }
         }
 
     # ----------------------------------------------------
@@ -410,7 +431,9 @@ class T4GateKeeperController(models.Model):
 
         return {
             "message": "Success",
-            "status": "200 OK",
+            "data": {
+                "status": "200 OK",
+            }
         }
 
     # ----------------------------------------------------
@@ -476,8 +499,10 @@ class T4GateKeeperController(models.Model):
 
         return {
             "message": "Success",
-            "status": "200 OK",
-            "processed_count": created_count,
+            "data": {
+                "status": "200 OK",
+                "processed_count": created_count,
+            }
         }
 
     # ----------------------------------------------------
@@ -513,8 +538,10 @@ class T4GateKeeperController(models.Model):
 
         return {
             "message": "Success",
-            "status": "200 OK",
-            "commands": res,
+            "data": {
+                "status": "200 OK",
+                "commands": res,
+            }
         }
 
     # ----------------------------------------------------
@@ -541,7 +568,9 @@ class T4GateKeeperController(models.Model):
 
         return {
             "message": "Success",
-            "status": "200 OK",
+            "data": {
+                "status": "200 OK",
+            }
         }
 
     # Cấu hình ghi đè hàm write để xử lý logic ghi log trạng thái

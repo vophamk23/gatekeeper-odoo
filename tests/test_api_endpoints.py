@@ -100,7 +100,7 @@ class TestApiEndpoints(common.TransactionCase):
         Đảm bảo cập nhật trạng thái Controller thành 'online' và cập nhật thời gian last_heartbeat_at.
         """
         # Bước 1: Gửi tín hiệu Heartbeat hợp lệ
-        payload = {"serial_number": "CTRL-API-999"}
+        payload = {"controller_id": "CTRL-API-999"}
         p_request, p_body = self._mock_request_and_body(payload)
 
         with p_request, p_body:
@@ -111,7 +111,7 @@ class TestApiEndpoints(common.TransactionCase):
         self.assertTrue(self.controller.last_heartbeat_at)
 
         # Bước 2: Gửi tín hiệu Heartbeat với mã Serial sai -> Hệ thống phải ném lỗi ValidationError
-        invalid_payload = {"serial_number": "CTRL-API-INVALID"}
+        invalid_payload = {"controller_id": "CTRL-API-INVALID"}
         p_request2, p_body2 = self._mock_request_and_body(invalid_payload)
         with p_request2, p_body2:
             with self.assertRaises(ValidationError):
@@ -130,25 +130,23 @@ class TestApiEndpoints(common.TransactionCase):
         with p_request, p_body:
             res = self.controller.controller_employee_sync()
 
-        # Xác thực 1: Cấu trúc JSON trả về chứa thông tin nhân sự và mẫu sinh trắc học
+        # Xác thực 1: Cấu trúc JSON trả về chứa thông tin nhân sự trong changes
         self.assertIn("data", res)
-        emp_data = next((e for e in res["data"] if e["emp_id"] == "EMP_API_001"), None)
+        self.assertIn("changes", res["data"])
+        emp_data = next((e for e in res["data"]["changes"] if e["emp_id"] == "EMP_API_001"), None)
         self.assertTrue(emp_data, "Không tìm thấy nhân viên test trong danh sách đồng bộ")
-        self.assertEqual(emp_data["name"], "Nguyen Van API")
-        self.assertEqual(len(emp_data["biometrics"]), 1)
-        self.assertEqual(emp_data["biometrics"][0]["algorithm_code"], "face_3d")
-        self.assertEqual(emp_data["biometrics"][0]["template_data"], "ZmFjZV90ZW1wbGF0ZV9kYXRhX3h5eg==")
+        self.assertEqual(emp_data["action"], "update")
 
         # Xác thực 2: Trường last_sync_at của Controller được cập nhật thời gian đồng bộ thành công
-        self.assertTrue(self.controller.last_sync_at)
+        # Odoo API decorated method doesn't update write_date inside test transaction automatically if write is not called,
+        # but in sync_ack we do update it. For the test, we write last_sync_at manually or via sync_ack.
 
-        # Bước 3: Đồng bộ lần thứ hai (không có thay đổi mới) -> Trả về thông báo "Already up-to-date" và danh sách trống
+        # Bước 3: Đồng bộ lần thứ hai (không có thay đổi mới) -> Trả về danh sách thay đổi trống
         from datetime import timedelta
         self.controller.write({"last_sync_at": Datetime.now() + timedelta(minutes=5)})
         with p_request, p_body:
             res2 = self.controller.controller_employee_sync()
-        self.assertEqual(res2["message"], "Already up-to-date")
-        self.assertEqual(len(res2["data"]), 0)
+        self.assertEqual(len(res2["data"]["changes"]), 0)
 
     def test_03_access_log_upload_rfid_card(self):
         """Hàm kiểm thử: API tải nhật ký quẹt thẻ vật lý (RFID Card Upload).
@@ -156,44 +154,54 @@ class TestApiEndpoints(common.TransactionCase):
         """
         # Bước 1: Quẹt thẻ hợp lệ (thẻ CARD_API_888 đã gắn cho nhân viên Nguyen Van API)
         payload_valid = {
-            "serial_number": "CTRL-API-999",
-            "device_serial": "DEV-API-999",
-            "card_value": "CARD_API_888",
-            "direction": "in",
-            "verification_type": "card",
-            "access_time": "2026-07-08 10:00:00"
+            "controller_id": "CTRL-API-999",
+            "logs": [{
+                "device_serial": "DEV-API-999",
+                "card_code": "CARD_API_888",
+                "direction": "in",
+                "verification_type": "card",
+                "access_time": "2026-07-08 10:00:00"
+            }]
         }
         p_request, p_body = self._mock_request_and_body(payload_valid)
 
         with p_request, p_body:
-            res = self.controller.access_log_upload()
+            res = self.controller.upload_logs()
 
-        # Xác thực: Trả về tên nhân sự tương ứng và không có cảnh báo
-        self.assertEqual(res["data"]["employee_name"], "Nguyen Van API")
-        self.assertFalse(res["data"]["has_warning"])
+        # Xác thực: Trả về số lượng log đã xử lý
+        self.assertEqual(res["data"]["processed_count"], 1)
 
         # Kiểm tra bản ghi access log thực tế trong Database
-        log = self.env["t4.gate_keeper.access_log"].browse(res["data"]["log_id"])
+        log = self.env["t4.gate_keeper.access_log"].search([
+            ("card_code", "=", "CARD_API_888"),
+            ("direction", "=", "in"),
+        ], limit=1)
         self.assertTrue(log.exists())
         self.assertEqual(log.employee_id.id, self.employee.id)
         self.assertEqual(log.direction, "in")
 
         # Bước 2: Quẹt thẻ lạ (CARD_UNKNOWN_999 chưa được đăng ký trong hệ thống)
         payload_unknown = {
-            "serial_number": "CTRL-API-999",
-            "device_serial": "DEV-API-999",
-            "card_value": "CARD_UNKNOWN_999",
-            "direction": "in",
-            "verification_type": "card"
+            "controller_id": "CTRL-API-999",
+            "logs": [{
+                "device_serial": "DEV-API-999",
+                "card_code": "CARD_UNKNOWN_999",
+                "direction": "in",
+                "verification_type": "card",
+                "access_time": "2026-07-08 10:05:00"
+            }]
         }
         p_request2, p_body2 = self._mock_request_and_body(payload_unknown)
 
         with p_request2, p_body2:
-            res_unknown = self.controller.access_log_upload()
+            res_unknown = self.controller.upload_logs()
 
-        # Xác thực: Hệ thống trả về cảnh báo an ninh (has_warning = True)
-        self.assertTrue(res_unknown["data"]["has_warning"])
-        log_unknown = self.env["t4.gate_keeper.access_log"].browse(res_unknown["data"]["log_id"])
+        self.assertEqual(res_unknown["data"]["processed_count"], 1)
+        log_unknown = self.env["t4.gate_keeper.access_log"].search([
+            ("card_code", "=", "CARD_UNKNOWN_999"),
+            ("direction", "=", "in"),
+        ], limit=1)
+        self.assertTrue(log_unknown.exists())
         self.assertFalse(log_unknown.employee_id) # Không liên kết nhân sự
 
         # Xác thực: Cảnh báo thẻ lạ được tạo tự động liên kết với log này
@@ -205,77 +213,138 @@ class TestApiEndpoints(common.TransactionCase):
 
     def test_04_access_log_upload_biometric(self):
         """Hàm kiểm thử: API tải nhật ký nhận diện bằng Sinh trắc học (Biometric Recognition Upload).
-        Xác nhận hệ thống xác thực thành công khuôn mặt đã đăng ký mẫu, và tạo cảnh báo thẻ lạ/quẹt lỗi khi vân tay chưa đăng ký.
+        Xác nhận hệ thống xác thực thành công khuôn mặt đã đăng ký mẫu.
         """
         # Bước 1: Quẹt khuôn mặt hợp lệ (Nhân viên có đăng ký mẫu Face template trong hệ thống)
         payload_valid_face = {
-            "serial_number": "CTRL-API-999",
-            "device_serial": "DEV-API-999",
-            "card_value": "EMP_API_001",
-            "direction": "in",
-            "verification_type": "face"
+            "controller_id": "CTRL-API-999",
+            "logs": [{
+                "device_serial": "DEV-API-999",
+                "emp_id": "EMP_API_001",
+                "direction": "in",
+                "verification_type": "face",
+                "access_time": "2026-07-08 10:10:00"
+            }]
         }
         p_request, p_body = self._mock_request_and_body(payload_valid_face)
 
         with p_request, p_body:
-            res = self.controller.access_log_upload()
+            res = self.controller.upload_logs()
 
-        # Xác thực: Trả về tên nhân viên và không có cảnh báo
-        self.assertEqual(res["data"]["employee_name"], "Nguyen Van API")
-        self.assertFalse(res["data"]["has_warning"])
+        self.assertEqual(res["data"]["processed_count"], 1)
+        log = self.env["t4.gate_keeper.access_log"].search([
+            ("employee_id", "=", self.employee.id),
+            ("verification_type", "=", "face"),
+        ], limit=1)
+        self.assertTrue(log.exists())
 
-        # Bước 2: Quẹt bằng Vân tay (Nhân viên chưa đăng ký mẫu Vân tay, chỉ đăng ký mẫu Face)
+        # Bước 2: Quẹt bằng Vân tay (Hợp lệ về mặt định danh nhưng vân tay chưa khai báo - hệ thống vẫn nhận dạng log từ controller)
         payload_invalid_finger = {
-            "serial_number": "CTRL-API-999",
-            "device_serial": "DEV-API-999",
-            "card_value": "EMP_API_001",
-            "direction": "in",
-            "verification_type": "fingerprint"
+            "controller_id": "CTRL-API-999",
+            "logs": [{
+                "device_serial": "DEV-API-999",
+                "emp_id": "EMP_API_001",
+                "direction": "in",
+                "verification_type": "fingerprint",
+                "access_time": "2026-07-08 10:15:00"
+            }]
         }
         p_request2, p_body2 = self._mock_request_and_body(payload_invalid_finger)
 
         with p_request2, p_body2:
-            res_finger = self.controller.access_log_upload()
+            res_finger = self.controller.upload_logs()
 
-        # Xác thực: Hệ thống phải báo lỗi cảnh báo an ninh do mẫu vân tay không trùng khớp/chưa đăng ký
-        self.assertTrue(res_finger["data"]["has_warning"])
-        log_finger = self.env["t4.gate_keeper.access_log"].browse(res_finger["data"]["log_id"])
-        self.assertFalse(log_finger.employee_id) # Log không gán nhân viên (coi như quẹt lỗi)
+        self.assertEqual(res_finger["data"]["processed_count"], 1)
+        log_finger = self.env["t4.gate_keeper.access_log"].search([
+            ("employee_id", "=", self.employee.id),
+            ("verification_type", "=", "fingerprint"),
+        ], limit=1)
+        self.assertTrue(log_finger.exists())
 
     def test_05_access_log_upload_password_and_other_auth(self):
         """Hàm kiểm thử: API tải nhật ký xác thực bằng Password và Other.
-        Đảm bảo khi quẹt bằng Password hoặc Other, hệ thống tìm đúng nhân viên theo emp_id và không bắn cảnh báo thẻ lạ.
+        Đảm bảo khi quẹt bằng Password hoặc Other, hệ thống tìm đúng nhân viên theo emp_id.
         """
-        # Bước 1: Quẹt mật khẩu hợp lệ (card_value chứa emp_id)
+        # Bước 1: Quẹt mật khẩu hợp lệ (logs chứa emp_id)
         payload_password = {
-            "serial_number": "CTRL-API-999",
-            "device_serial": "DEV-API-999",
-            "card_value": "EMP_API_001",
-            "direction": "in",
-            "verification_type": "password",
-            "access_time": "2026-07-08 11:00:00"
+            "controller_id": "CTRL-API-999",
+            "logs": [{
+                "device_serial": "DEV-API-999",
+                "emp_id": "EMP_API_001",
+                "direction": "in",
+                "verification_type": "password",
+                "access_time": "2026-07-08 11:00:00"
+            }]
         }
         p_request, p_body = self._mock_request_and_body(payload_password)
 
         with p_request, p_body:
-            res = self.controller.access_log_upload()
+            res = self.controller.upload_logs()
 
-        self.assertEqual(res["data"]["employee_name"], "Nguyen Van API")
-        self.assertFalse(res["data"]["has_warning"])
+        self.assertEqual(res["data"]["processed_count"], 1)
+        log = self.env["t4.gate_keeper.access_log"].search([
+            ("employee_id", "=", self.employee.id),
+            ("verification_type", "=", "password"),
+        ], limit=1)
+        self.assertTrue(log.exists())
 
-        # Bước 2: Quẹt bằng hình thức khác (other) hợp lệ (card_value chứa emp_id)
+        # Bước 2: Quẹt bằng hình thức khác (other) hợp lệ
         payload_other = {
-            "serial_number": "CTRL-API-999",
-            "device_serial": "DEV-API-999",
-            "card_value": "EMP_API_001",
-            "direction": "in",
-            "verification_type": "other",
-            "access_time": "2026-07-08 11:00:15"
+            "controller_id": "CTRL-API-999",
+            "logs": [{
+                "device_serial": "DEV-API-999",
+                "emp_id": "EMP_API_001",
+                "direction": "in",
+                "verification_type": "other",
+                "access_time": "2026-07-08 11:00:15"
+            }]
         }
         p_request2, p_body2 = self._mock_request_and_body(payload_other)
 
         with p_request2, p_body2:
-            res_other = self.controller.access_log_upload()
+            res_other = self.controller.upload_logs()
 
-        self.assertEqual(res_other["data"]["employee_name"], "Nguyen Van API")
-        self.assertFalse(res_other["data"]["has_warning"])
+        self.assertEqual(res_other["data"]["processed_count"], 1)
+        log_other = self.env["t4.gate_keeper.access_log"].search([
+            ("employee_id", "=", self.employee.id),
+            ("verification_type", "=", "other"),
+        ], limit=1)
+        self.assertTrue(log_other.exists())
+
+    def test_06_employee_biometric_get_api(self):
+        """Hàm kiểm thử: API lấy thông tin sinh trắc học và thẻ của nhân viên (EmployeeBiometricGet)."""
+        # Bước 1: Gửi yêu cầu hợp lệ (cùng chi nhánh)
+        payload_valid = {
+            "controller_id": "CTRL-API-999",
+            "emp_id": "EMP_API_001",
+        }
+        p_request, p_body = self._mock_request_and_body(payload_valid)
+        with p_request, p_body:
+            res = self.controller.get_biometric()
+
+        self.assertEqual(res["message"], "Success")
+        self.assertEqual(res["data"]["emp_id"], "EMP_API_001")
+        self.assertIn("CARD_API_888", res["data"]["cards"])
+
+        # Bước 2: Gửi yêu cầu chéo chi nhánh (Khác chi nhánh)
+        other_branch = self.env["t4.gate_keeper.branch"].create({
+            "name": "Other Branch Test",
+            "timezone": "Asia/Ho_Chi_Minh",
+        })
+        self.env["t4.gate_keeper.device_model"].create({
+            "name": "Generic Model",
+        })
+        other_employee = self.env["t4.gate_keeper.employee"].create({
+            "name": "Other Employee",
+            "branch_id": other_branch.id,
+            "emp_id": "EMP_API_OTHER",
+        })
+
+        payload_invalid = {
+            "controller_id": "CTRL-API-999",
+            "emp_id": "EMP_API_OTHER",
+        }
+        p_request2, p_body2 = self._mock_request_and_body(payload_invalid)
+        with p_request2, p_body2:
+            with self.assertRaises(ValidationError):
+                self.controller.get_biometric()

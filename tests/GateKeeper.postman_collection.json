@@ -1,0 +1,3267 @@
+{
+    "info": {
+        "name": "T4 Gate Keeper API - Full Automation Test",
+        "description": "Bộ sưu tập đầy đủ 100% các kịch bản kiểm thử API kết nối phần cứng hệ thống Gate Keeper.",
+        "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+    },
+    "item": [
+        {
+            "name": "1. Đăng ký thiết bị (Device Registration)",
+            "item": [
+                {
+                    "name": "# ==============================================================================",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json",
+                                "type": "text"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/api/v1/auth/token",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "auth",
+                                "token"
+                            ]
+                        },
+                        "description": "==============================================================================\nNHÓM 1: KHỞI ĐỘNG & ĐĂNG KÝ THIẾT BỊ (DEVICE REGISTRATION)\n==============================================================================\n@name login\n------------------------------------------------------------------------------\nCHỨC NĂNG: Đăng nhập hệ thống qua chuẩn OAuth2 để lấy Access Token (Bearer Token).\nKẾT QUẢ THÀNH CÔNG: Trả về 200 OK kèm mã token xác thực có thời hạn 24 giờ.\nREST Client sẽ tự động lưu token này vào biến toàn cục {{token}}.\nCÁC TRƯỜNG CẬP NHẬT: Tạo bản ghi token mới trong bảng `core.api.token`.\n------------------------------------------------------------------------------",
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"client_id\": \"app_bf343cac68c93ecce3f2f56e753999c1\",\n    \"client_secret\": \"client_secret_123456\",\n    \"grant_type\": \"client_credentials\"\n}"
+                        }
+                    },
+                    "response": [],
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test(\"Đăng nhập thành công - HTTP 200\", function () {",
+                                    "    pm.response.to.have.status(200);",
+                                    "});",
+                                    "",
+                                    "pm.test(\"Lưu Token\", function () {",
+                                    "    var jsonData = pm.response.json();",
+                                    "    if (jsonData && jsonData.api_token && jsonData.api_token.token) {",
+                                    "        pm.globals.set(\"token\", jsonData.api_token.token);",
+                                    "    }",
+                                    "});"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "1.1.A Đăng ký Bộ điều khiển Sảnh chính Hà Nội (ControllerRegister)",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json",
+                                "type": "text"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/api/v1/ControllerRegister",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "ControllerRegister"
+                            ]
+                        },
+                        "description": "------------------------------------------------------------------------------\nCHỨC NĂNG: Bộ điều khiển sảnh gửi cấu hình mạng khi khởi động lên Odoo.\nKẾT QUẢ THÀNH CÔNG:\n- Bộ điều khiển trên Odoo chuyển sang trạng thái \"Online\" (màu xanh lá).\n- Tự động cascade (đồng bộ) chuyển toàn bộ các đầu đọc con sảnh sang trạng thái \"Online\".\nCÁC TRƯỜNG CẬP NHẬT TRÊN ODOO:\n- Model `t4.gate_keeper.controller` (Mã CTRL-HN-LOBBY-01):\n* `status` -> 'online'\n* `ip_address` -> '192.168.10.210'\n* `mac_address` -> '00:17:0A:11:22:33'\n* `firmware_version` -> 'v2.1.0'\n* `last_heartbeat_at` -> Thời gian hiện tại.\n- Model `t4.gate_keeper.device` (Đầu đọc con):\n* `status` -> 'online' (Cho cả đầu đọc sảnh vào và sảnh ra).\n------------------------------------------------------------------------------",
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"controller_id\": \"CTRL-HN-LOBBY-01\",\n    \"hardware_model\": \"T4-GATE-PRO\",\n    \"firmware_version\": \"v2.1.0\",\n    \"ip_address\": \"192.168.10.210\",\n    \"mac_address\": \"00:17:0A:11:22:33\",\n    \"connection_type\": \"tcp_ip\"\n}"
+                        }
+                    },
+                    "response": [],
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test(\"Kiểm tra HTTP Status 200\", function () {",
+                                    "    pm.response.to.have.status(200);",
+                                    "});"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "1.1.B Đăng ký Bộ điều khiển Phòng Máy Chủ Hà Nội (ControllerRegister)",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json",
+                                "type": "text"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/api/v1/ControllerRegister",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "ControllerRegister"
+                            ]
+                        },
+                        "description": "------------------------------------------------------------------------------\nCHỨC NĂNG: Bộ điều khiển phòng máy chủ Hà Nội gửi cấu hình mạng khi khởi động.\nKẾT QUẢ THÀNH CÔNG:\n- Bộ điều khiển phòng máy chủ trên Odoo chuyển sang trạng thái \"Online\".\n- Đầu đọc nhận diện khuôn mặt phòng máy chủ chuyển sang trạng thái \"Online\".\nCÁC TRƯỜNG CẬP NHẬT TRÊN ODOO:\n- Model `t4.gate_keeper.controller` (Mã CTRL-HN-SRV-01):\n* `status` -> 'online'\n* `ip_address` -> '192.168.10.211'\n* `mac_address` -> '00:17:0A:11:22:44'\n* `firmware_version` -> 'v2.4.1'\n* `last_heartbeat_at` -> Thời gian hiện tại.\n- Model `t4.gate_keeper.device` (Đầu đọc khuôn mặt máy chủ):\n* `status` -> 'online'\n------------------------------------------------------------------------------",
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"controller_id\": \"CTRL-HN-SRV-01\",\n    \"hardware_model\": \"InBio Pro 260\",\n    \"firmware_version\": \"v2.4.1\",\n    \"ip_address\": \"192.168.10.211\",\n    \"mac_address\": \"00:17:0A:11:22:44\",\n    \"connection_type\": \"tcp_ip\"\n}"
+                        }
+                    },
+                    "response": [],
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test(\"Kiểm tra HTTP Status 200\", function () {",
+                                    "    pm.response.to.have.status(200);",
+                                    "});"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "1.1.C Đăng ký Bộ điều khiển Kho HCM (ControllerRegister)",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json",
+                                "type": "text"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/api/v1/ControllerRegister",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "ControllerRegister"
+                            ]
+                        },
+                        "description": "------------------------------------------------------------------------------\nCHỨC NĂNG: Bộ điều khiển kho hàng HCM gửi cấu hình mạng khi khởi động lên Odoo.\nKẾT QUẢ THÀNH CÔNG:\n- Bộ điều khiển trên Odoo chuyển sang trạng thái \"Online\".\n- Đầu đọc vân tay cửa kho chuyển sang trạng thái \"Online\".\nCÁC TRƯỜNG CẬP NHẬT TRÊN ODOO:\n- Model `t4.gate_keeper.controller` (Mã CTRL-HCM-WHS-01):\n* `status` -> 'online'\n* `ip_address` -> '192.168.20.220'\n* `mac_address` -> '00:17:0A:22:33:44'\n* `firmware_version` -> 'v2.3.2'\n* `last_heartbeat_at` -> Thời gian hiện tại.\n- Model `t4.gate_keeper.device` (Đầu đọc vân tay kho):\n* `status` -> 'online'\n------------------------------------------------------------------------------",
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"controller_id\": \"CTRL-HCM-WHS-01\",\n    \"hardware_model\": \"InBio Pro 160\",\n    \"firmware_version\": \"v2.3.2\",\n    \"ip_address\": \"192.168.20.220\",\n    \"mac_address\": \"00:17:0A:22:33:44\",\n    \"connection_type\": \"tcp_ip\"\n}"
+                        }
+                    },
+                    "response": [],
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test(\"Kiểm tra HTTP Status 200\", function () {",
+                                    "    pm.response.to.have.status(200);",
+                                    "});"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "1.1.D Đăng ký Bộ điều khiển Chi nhánh Đà Nẵng (ControllerRegister)",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json",
+                                "type": "text"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/api/v1/ControllerRegister",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "ControllerRegister"
+                            ]
+                        },
+                        "description": "------------------------------------------------------------------------------\nCHỨC NĂNG: Bộ điều khiển Đà Nẵng gửi cấu hình mạng khi khởi động lên Odoo.\nKẾT QUẢ THÀNH CÔNG:\n- Bộ điều khiển trên Odoo chuyển sang trạng thái \"Online\".\n- Đầu đọc phòng R&D và Phòng Giám Đốc Đà Nẵng chuyển sang trạng thái \"Online\".\nCÁC TRƯỜNG CẬP NHẬT TRÊN ODOO:\n- Model `t4.gate_keeper.controller` (Mã CTRL-DN-MAIN-01):\n* `status` -> 'online'\n* `ip_address` -> '192.168.30.150'\n* `mac_address` -> '00:17:0A:33:44:55'\n* `firmware_version` -> 'v2.4.1'\n* `last_heartbeat_at` -> Thời gian hiện tại.\n- Model `t4.gate_keeper.device` (Đầu đọc con Đà Nẵng):\n* `status` -> 'online'\n------------------------------------------------------------------------------",
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"controller_id\": \"CTRL-DN-MAIN-01\",\n    \"hardware_model\": \"InBio Pro 260\",\n    \"firmware_version\": \"v2.4.1\",\n    \"ip_address\": \"192.168.30.150\",\n    \"mac_address\": \"00:17:0A:33:44:55\",\n    \"connection_type\": \"tcp_ip\"\n}"
+                        }
+                    },
+                    "response": [],
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test(\"Kiểm tra HTTP Status 200\", function () {",
+                                    "    pm.response.to.have.status(200);",
+                                    "});"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "1.2.A Đăng ký đầu đọc Sảnh vào Hà Nội (DeviceRegister)",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json",
+                                "type": "text"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/api/v1/DeviceRegister",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "DeviceRegister"
+                            ]
+                        },
+                        "description": "------------------------------------------------------------------------------\nCHỨC NĂNG: Đăng ký thông tin chi tiết của đầu đọc thẻ từ sảnh vào Hà Nội.\nKẾT QUẢ THÀNH CÔNG: Đầu đọc con đổi từ trạng thái không xác định sang \"Online\".\nCÁC TRƯỜNG CẬP NHẬT TRÊN ODOO:\n- Model `t4.gate_keeper.device` (Mã DEV-HN-LOB-IN-01):\n* `status` -> 'online'\n* `firmware_version` -> 'v1.2.0'\n* `port_or_channel` -> 'Relay 1 / Input 1'\n* `system_version` -> 'Linux 4.19'\n------------------------------------------------------------------------------",
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"device_sn\": \"DEV-HN-LOB-IN-01\",\n    \"area\": \"Sảnh đón khách chính (Hanoi Lobby)\",\n    \"device-model\": \"ZKTeco SpeedFace V5L\",\n    \"firmware_version\": \"v1.2.0\",\n    \"port/channel\": \"Relay 1 / Input 1\",\n    \"system_version\": \"Linux 4.19\"\n}"
+                        }
+                    },
+                    "response": [],
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test(\"Kiểm tra HTTP Status 200\", function () {",
+                                    "    pm.response.to.have.status(200);",
+                                    "});"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "1.2.B Đăng ký đầu đọc Sảnh ra Hà Nội (DeviceRegister)",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json",
+                                "type": "text"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/api/v1/DeviceRegister",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "DeviceRegister"
+                            ]
+                        },
+                        "description": "------------------------------------------------------------------------------\nCHỨC NĂNG: Đăng ký thông tin chi tiết của đầu đọc thẻ từ sảnh ra Hà Nội.\nKẾT QUẢ THÀNH CÔNG: Đầu đọc con đổi từ trạng thái không xác định sang \"Online\".\nCÁC TRƯỜNG CẬP NHẬT TRÊN ODOO:\n- Model `t4.gate_keeper.device` (Mã DEV-HN-LOB-OUT-01):\n* `status` -> 'online'\n* `firmware_version` -> 'v1.0.5'\n* `port_or_channel` -> 'Relay 2 / Input 2'\n* `system_version` -> 'FreeRTOS v10'\n------------------------------------------------------------------------------",
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"device_sn\": \"DEV-HN-LOB-OUT-01\",\n    \"area\": \"Sảnh đón khách chính (Hanoi Lobby)\",\n    \"device-model\": \"Suprema BioEntry W2\",\n    \"firmware_version\": \"v1.0.5\",\n    \"port/channel\": \"Relay 2 / Input 2\",\n    \"system_version\": \"FreeRTOS v10\"\n}"
+                        }
+                    },
+                    "response": [],
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test(\"Kiểm tra HTTP Status 200\", function () {",
+                                    "    pm.response.to.have.status(200);",
+                                    "});"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "1.2.C Đăng ký nhận diện khuôn mặt phòng máy chủ Hà Nội (DeviceRegister)",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json",
+                                "type": "text"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/api/v1/DeviceRegister",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "DeviceRegister"
+                            ]
+                        },
+                        "description": "------------------------------------------------------------------------------\nCHỨC NĂNG: Đăng ký thông tin chi tiết đầu đọc khuôn mặt phòng máy chủ.\nKẾT QUẢ THÀNH CÔNG: Đầu đọc con đổi từ trạng thái không xác định sang \"Online\".\nCÁC TRƯỜNG CẬP NHẬT TRÊN ODOO:\n- Model `t4.gate_keeper.device` (Mã DEV-HN-SRV-FACE-01):\n* `status` -> 'online'\n* `firmware_version` -> 'v2.1.2'\n* `port_or_channel` -> 'Relay 1 / Input 1'\n* `system_version` -> 'Android 8.1'\n------------------------------------------------------------------------------",
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"device_sn\": \"DEV-HN-SRV-FACE-01\",\n    \"area\": \"Phòng máy chủ trung tâm (Server Room)\",\n    \"device-model\": \"Hikvision DS-K1T671\",\n    \"firmware_version\": \"v2.1.2\",\n    \"port/channel\": \"Relay 1 / Input 1\",\n    \"system_version\": \"Android 8.1\"\n}"
+                        }
+                    },
+                    "response": [],
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test(\"Kiểm tra HTTP Status 200\", function () {",
+                                    "    pm.response.to.have.status(200);",
+                                    "});"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "1.2.D Đăng ký đầu đọc Quét vân tay Cửa kho HCM (DeviceRegister)",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json",
+                                "type": "text"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/api/v1/DeviceRegister",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "DeviceRegister"
+                            ]
+                        },
+                        "description": "------------------------------------------------------------------------------\nCHỨC NĂNG: Đăng ký thông tin chi tiết của đầu đọc vân tay cửa kho HCM.\nKẾT QUẢ THÀNH CÔNG: Thiết bị con đổi trạng thái sang \"Online\".\nCÁC TRƯỜNG CẬP NHẬT TRÊN ODOO:\n- Model `t4.gate_keeper.device` (Mã DEV-HCM-WHS-FGR-01):\n* `status` -> 'online'\n* `firmware_version` -> 'v1.2.0'\n* `port_or_channel` -> 'Relay 1 / Input 1'\n* `system_version` -> 'Linux 4.19'\n------------------------------------------------------------------------------",
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"device_sn\": \"DEV-HCM-WHS-FGR-01\",\n    \"area\": \"Kho hàng thành phẩm (HCM Warehouse)\",\n    \"device-model\": \"ZKTeco SpeedFace V5L\",\n    \"firmware_version\": \"v1.2.0\",\n    \"port/channel\": \"Relay 1 / Input 1\",\n    \"system_version\": \"Linux 4.19\"\n}"
+                        }
+                    },
+                    "response": [],
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test(\"Kiểm tra HTTP Status 200\", function () {",
+                                    "    pm.response.to.have.status(200);",
+                                    "});"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "1.2.E Đăng ký đầu đọc thẻ RFID phòng R&D Đà Nẵng (DeviceRegister)",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json",
+                                "type": "text"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/api/v1/DeviceRegister",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "DeviceRegister"
+                            ]
+                        },
+                        "description": "------------------------------------------------------------------------------\nCHỨC NĂNG: Đăng ký thông tin chi tiết đầu đọc phòng R&D Đà Nẵng.\nKẾT QUẢ THÀNH CÔNG: Thiết bị con đổi trạng thái sang \"Online\".\nCÁC TRƯỜNG CẬP NHẬT TRÊN ODOO:\n- Model `t4.gate_keeper.device` (Mã DEV-DN-RD-IN-01):\n* `status` -> 'online'\n* `firmware_version` -> 'v1.0.5'\n* `port_or_channel` -> 'Relay 1'\n* `system_version` -> 'FreeRTOS v10'\n------------------------------------------------------------------------------",
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"device_sn\": \"DEV-DN-RD-IN-01\",\n    \"area\": \"Phòng Nghiên cứu & Phát triển R&D (Da Nang R&D)\",\n    \"device-model\": \"Suprema BioEntry W2\",\n    \"firmware_version\": \"v1.0.5\",\n    \"port/channel\": \"Relay 1\",\n    \"system_version\": \"FreeRTOS v10\"\n}"
+                        }
+                    },
+                    "response": [],
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test(\"Kiểm tra HTTP Status 200\", function () {",
+                                    "    pm.response.to.have.status(200);",
+                                    "});"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "1.2.F Đăng ký đầu đọc khuôn mặt phòng Giám đốc Đà Nẵng (DeviceRegister)",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json",
+                                "type": "text"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/api/v1/DeviceRegister",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "DeviceRegister"
+                            ]
+                        },
+                        "description": "------------------------------------------------------------------------------\nCHỨC NĂNG: Đăng ký thông tin chi tiết của đầu đọc phòng Giám đốc Đà Nẵng.\nKẾT QUẢ THÀNH CÔNG: Thiết bị con đổi trạng thái sang \"Online\".\nCÁC TRƯỜNG CẬP NHẬT TRÊN ODOO:\n- Model `t4.gate_keeper.device` (Mã DEV-DN-EXEC-IN-01):\n* `status` -> 'online'\n* `firmware_version` -> 'v2.1.2'\n* `port_or_channel` -> 'Relay 2'\n* `system_version` -> 'Android 8.1'\n------------------------------------------------------------------------------",
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"device_sn\": \"DEV-DN-EXEC-IN-01\",\n    \"area\": \"Phòng Ban Giám Đốc (Da Nang Boardroom)\",\n    \"device-model\": \"Hikvision DS-K1T671\",\n    \"firmware_version\": \"v2.1.2\",\n    \"port/channel\": \"Relay 2\",\n    \"system_version\": \"Android 8.1\"\n}"
+                        }
+                    },
+                    "response": [],
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test(\"Kiểm tra HTTP Status 200\", function () {",
+                                    "    pm.response.to.have.status(200);",
+                                    "});"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "1.3.A Tải Cấu hình hoạt động của Controller Sảnh chính Hà Nội (ControllerGetConfig)",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json",
+                                "type": "text"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/api/v1/ControllerGetConfig",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "ControllerGetConfig"
+                            ]
+                        },
+                        "description": "------------------------------------------------------------------------------\nCHỨC NĂNG: Bộ điều khiển sảnh tải cấu hình hoạt động từ server về bộ nhớ đệm local.\nKẾT QUẢ THÀNH CÔNG: Trả về múi giờ 'Asia/Ho_Chi_Minh' và danh sách các đầu đọc con sảnh.\nCÁC TRƯỜNG CẬP NHẬT TRÊN ODOO: Không ghi nhận (Đây là API truy vấn lấy dữ liệu dạng Read-only).\n------------------------------------------------------------------------------",
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"serial_number\": \"CTRL-HN-LOBBY-01\"\n}"
+                        }
+                    },
+                    "response": [],
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test(\"Kiểm tra HTTP Status 200\", function () {",
+                                    "    pm.response.to.have.status(200);",
+                                    "});"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "1.3.B Tải Cấu hình hoạt động của Controller Chi nhánh Đà Nẵng (ControllerGetConfig)",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json",
+                                "type": "text"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/api/v1/ControllerGetConfig",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "ControllerGetConfig"
+                            ]
+                        },
+                        "description": "------------------------------------------------------------------------------\nCHỨC NĂNG: Bộ điều khiển Đà Nẵng tải cấu hình từ server Odoo về.\nKẾT QUẢ THÀNH CÔNG: Trả về múi giờ 'Asia/Ho_Chi_Minh' và danh sách đầu đọc/thuật toán tương ứng.\nCÁC TRƯỜNG CẬP NHẬT TRÊN ODOO: Không ghi nhận (Read-only).\n------------------------------------------------------------------------------",
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"serial_number\": \"CTRL-DN-MAIN-01\"\n}"
+                        }
+                    },
+                    "response": [],
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test(\"Kiểm tra HTTP Status 200\", function () {",
+                                    "    pm.response.to.have.status(200);",
+                                    "});"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "1.3.C Tải Cấu hình hoạt động của Controller Phòng Máy Chủ Hà Nội (ControllerGetConfig)",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json",
+                                "type": "text"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/api/v1/ControllerGetConfig",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "ControllerGetConfig"
+                            ]
+                        },
+                        "description": "------------------------------------------------------------------------------\nCHỨC NĂNG: Bộ điều khiển phòng máy chủ Hà Nội tải cấu hình hoạt động từ server về.\nKẾT QUẢ THÀNH CÔNG: Trả về múi giờ 'Asia/Ho_Chi_Minh' và đầu đọc khuôn mặt phòng máy chủ.\nCÁC TRƯỜNG CẬP NHẬT TRÊN ODOO: Không ghi nhận (Read-only).\n------------------------------------------------------------------------------",
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"serial_number\": \"CTRL-HN-SRV-01\"\n}"
+                        }
+                    },
+                    "response": [],
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test(\"Kiểm tra HTTP Status 200\", function () {",
+                                    "    pm.response.to.have.status(200);",
+                                    "});"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "1.3.D Tải Cấu hình hoạt động của Controller Kho hàng HCM (ControllerGetConfig)",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json",
+                                "type": "text"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/api/v1/ControllerGetConfig",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "ControllerGetConfig"
+                            ]
+                        },
+                        "description": "------------------------------------------------------------------------------\nCHỨC NĂNG: Bộ điều khiển kho hàng HCM tải cấu hình hoạt động từ server về.\nKẾT QUẢ THÀNH CÔNG: Trả về múi giờ 'Asia/Ho_Chi_Minh' và đầu đọc quét vân tay.\nCÁC TRƯỜNG CẬP NHẬT TRÊN ODOO: Không ghi nhận (Read-only).\n------------------------------------------------------------------------------",
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"serial_number\": \"CTRL-HCM-WHS-01\"\n}"
+                        }
+                    },
+                    "response": [],
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test(\"Kiểm tra HTTP Status 200\", function () {",
+                                    "    pm.response.to.have.status(200);",
+                                    "});"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "name": "2. Giám sát trạng thái (Monitoring & Heartbeat)",
+            "item": [
+                {
+                    "name": "# ==============================================================================",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json",
+                                "type": "text"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/api/v1/auth/token",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "auth",
+                                "token"
+                            ]
+                        },
+                        "description": "==============================================================================\nNHÓM 2: GIÁM SÁT TRẠNG THÁI (MONITORING & HEARTBEAT)\n==============================================================================\n@name login\n------------------------------------------------------------------------------\nCHỨC NĂNG: Đăng nhập hệ thống qua chuẩn OAuth2 để lấy Access Token (Bearer Token).\nKẾT QUẢ THÀNH CÔNG: Trả về 200 OK kèm mã token xác thực có thời hạn 24 giờ.\nREST Client sẽ tự động lưu token này vào biến toàn cục {{token}}.\nCÁC TRƯỜNG CẬP NHẬT: Tạo bản ghi token mới trong bảng `core.api.token`.\n------------------------------------------------------------------------------",
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"client_id\": \"app_bf343cac68c93ecce3f2f56e753999c1\",\n    \"client_secret\": \"client_secret_123456\",\n    \"grant_type\": \"client_credentials\"\n}"
+                        }
+                    },
+                    "response": [],
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test(\"Đăng nhập thành công - HTTP 200\", function () {",
+                                    "    pm.response.to.have.status(200);",
+                                    "});",
+                                    "",
+                                    "pm.test(\"Lưu Token\", function () {",
+                                    "    var jsonData = pm.response.json();",
+                                    "    if (jsonData && jsonData.api_token && jsonData.api_token.token) {",
+                                    "        pm.globals.set(\"token\", jsonData.api_token.token);",
+                                    "    }",
+                                    "});"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "2.1.A Gửi nhịp tim định kỳ của Controller Sảnh Hà Nội (Heartbeat)",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json",
+                                "type": "text"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/api/v1/ControllerHeartbeat",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "ControllerHeartbeat"
+                            ]
+                        },
+                        "description": "------------------------------------------------------------------------------\nCHỨC NĂNG: Bộ điều khiển Hà Nội báo cáo nhịp tim \"sống\" định kỳ kèm trạng thái của các đầu đọc.\nKẾT QUẢ THÀNH CÔNG:\n- Cập nhật thời điểm nhận nhịp tim cuối của Controller.\n- Giữ trạng thái của 2 đầu đọc sảnh là \"Online\".\nCÁC TRƯỜNG CẬP NHẬT TRÊN ODOO:\n- Model `t4.gate_keeper.controller` (Mã CTRL-HN-LOBBY-01):\n* `last_heartbeat_at` -> Thời gian hiện tại.\n- Model `t4.gate_keeper.device` (Mã DEV-HN-LOB-IN-01 & DEV-HN-LOB-OUT-01):\n* `status` -> 'online' (Nếu trước đó bị offline thì đổi sang online).\n------------------------------------------------------------------------------",
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"controller_id\": \"CTRL-HN-LOBBY-01\",\n    \"devices_status\": [\n        {\n            \"device_sn\": \"DEV-HN-LOB-IN-01\",\n            \"status\": \"online\"\n        },\n        {\n            \"device_sn\": \"DEV-HN-LOB-OUT-01\",\n            \"status\": \"online\"\n        }\n    ]\n}"
+                        }
+                    },
+                    "response": [],
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test(\"Kiểm tra HTTP Status 200\", function () {",
+                                    "    pm.response.to.have.status(200);",
+                                    "});"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "2.1.B Gửi nhịp tim định kỳ của Controller Phòng Máy Chủ Hà Nội (Heartbeat)",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json",
+                                "type": "text"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/api/v1/ControllerHeartbeat",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "ControllerHeartbeat"
+                            ]
+                        },
+                        "description": "------------------------------------------------------------------------------\nCHỨC NĂNG: Bộ điều khiển phòng máy chủ Hà Nội báo cáo nhịp tim sống.\nKẾT QUẢ THÀNH CÔNG:\n- Cập nhật thời điểm nhận nhịp tim cuối của Controller phòng máy chủ.\n- Giữ trạng thái đầu đọc nhận diện khuôn mặt cửa máy chủ là \"Online\".\nCÁC TRƯỜNG CẬP NHẬT TRÊN ODOO:\n- Model `t4.gate_keeper.controller` (Mã CTRL-HN-SRV-01):\n* `last_heartbeat_at` -> Thời gian hiện tại.\n- Model `t4.gate_keeper.device` (Mã DEV-HN-SRV-FACE-01):\n* `status` -> 'online'.\n------------------------------------------------------------------------------",
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"controller_id\": \"CTRL-HN-SRV-01\",\n    \"devices_status\": [\n        {\n            \"device_sn\": \"DEV-HN-SRV-FACE-01\",\n            \"status\": \"online\"\n        }\n    ]\n}"
+                        }
+                    },
+                    "response": [],
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test(\"Kiểm tra HTTP Status 200\", function () {",
+                                    "    pm.response.to.have.status(200);",
+                                    "});"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "2.1.C Gửi nhịp tim định kỳ của Controller Kho hàng HCM (Heartbeat)",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json",
+                                "type": "text"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/api/v1/ControllerHeartbeat",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "ControllerHeartbeat"
+                            ]
+                        },
+                        "description": "------------------------------------------------------------------------------\nCHỨC NĂNG: Bộ điều khiển kho HCM báo cáo nhịp tim định kỳ.\nKẾT QUẢ THÀNH CÔNG:\n- Cập nhật thời điểm nhận nhịp tim cuối của Controller kho HCM.\n- Giữ trạng thái đầu đọc vân tay cửa kho là \"Online\".\nCÁC TRƯỜNG CẬP NHẬT TRÊN ODOO:\n- Model `t4.gate_keeper.controller` (Mã CTRL-HCM-WHS-01):\n* `last_heartbeat_at` -> Thời gian hiện tại.\n- Model `t4.gate_keeper.device` (Mã DEV-HCM-WHS-FGR-01):\n* `status` -> 'online'.\n------------------------------------------------------------------------------",
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"controller_id\": \"CTRL-HCM-WHS-01\",\n    \"devices_status\": [\n        {\n            \"device_sn\": \"DEV-HCM-WHS-FGR-01\",\n            \"status\": \"online\"\n        }\n    ]\n}"
+                        }
+                    },
+                    "response": [],
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test(\"Kiểm tra HTTP Status 200\", function () {",
+                                    "    pm.response.to.have.status(200);",
+                                    "});"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "2.1.D Gửi nhịp tim định kỳ của Controller Chi nhánh Đà Nẵng (Heartbeat)",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json",
+                                "type": "text"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/api/v1/ControllerHeartbeat",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "ControllerHeartbeat"
+                            ]
+                        },
+                        "description": "------------------------------------------------------------------------------\nCHỨC NĂNG: Bộ điều khiển Đà Nẵng báo cáo nhịp tim sống định kỳ kèm trạng thái của các đầu đọc.\nKẾT QUẢ THÀNH CÔNG:\n- Cập nhật thời điểm nhận nhịp tim cuối của Controller Đà Nẵng.\n- Giữ trạng thái các đầu đọc con Đà Nẵng là \"Online\".\nCÁC TRƯỜNG CẬP NHẬT TRÊN ODOO:\n- Model `t4.gate_keeper.controller` (Mã CTRL-DN-MAIN-01):\n* `last_heartbeat_at` -> Thời gian hiện tại.\n- Model `t4.gate_keeper.device` (Mã DEV-DN-RD-IN-01 & DEV-DN-EXEC-IN-01):\n* `status` -> 'online'.\n------------------------------------------------------------------------------",
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"controller_id\": \"CTRL-DN-MAIN-01\",\n    \"devices_status\": [\n        {\n            \"device_sn\": \"DEV-DN-RD-IN-01\",\n            \"status\": \"online\"\n        },\n        {\n            \"device_sn\": \"DEV-DN-EXEC-IN-01\",\n            \"status\": \"online\"\n        }\n    ]\n}"
+                        }
+                    },
+                    "response": [],
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test(\"Kiểm tra HTTP Status 200\", function () {",
+                                    "    pm.response.to.have.status(200);",
+                                    "});"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "name": "3. Đồng bộ nhân sự & Sinh trắc (Biometric Sync)",
+            "item": [
+                {
+                    "name": "# ==============================================================================",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json",
+                                "type": "text"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/api/v1/auth/token",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "auth",
+                                "token"
+                            ]
+                        },
+                        "description": "==============================================================================\nNHÓM 3: ĐỒNG BỘ NHÂN VIÊN & DỮ LIỆU SINH TRẮC HỌC (EMPLOYEE SYNC)\n==============================================================================\n@name login\n------------------------------------------------------------------------------\nCHỨC NĂNG: Đăng nhập hệ thống qua chuẩn OAuth2 để lấy Access Token (Bearer Token).\nKẾT QUẢ THÀNH CÔNG: Trả về 200 OK kèm mã token xác thực có thời hạn 24 giờ.\nREST Client sẽ tự động lưu token này vào biến toàn cục {{token}}.\nCÁC TRƯỜNG CẬP NHẬT: Tạo bản ghi token mới trong bảng `core.api.token`.\n------------------------------------------------------------------------------",
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"client_id\": \"app_bf343cac68c93ecce3f2f56e753999c1\",\n    \"client_secret\": \"client_secret_123456\",\n    \"grant_type\": \"client_credentials\"\n}"
+                        }
+                    },
+                    "response": [],
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test(\"Đăng nhập thành công - HTTP 200\", function () {",
+                                    "    pm.response.to.have.status(200);",
+                                    "});",
+                                    "",
+                                    "pm.test(\"Lưu Token\", function () {",
+                                    "    var jsonData = pm.response.json();",
+                                    "    if (jsonData && jsonData.api_token && jsonData.api_token.token) {",
+                                    "        pm.globals.set(\"token\", jsonData.api_token.token);",
+                                    "    }",
+                                    "});"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "3.1.A Truy vấn danh sách nhân viên thay đổi của Sảnh Hà Nội (ControllerEmployeeSync)",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json",
+                                "type": "text"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/api/v1/ControllerEmployeeSync",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "ControllerEmployeeSync"
+                            ]
+                        },
+                        "description": "------------------------------------------------------------------------------\nCHỨC NĂNG: Thiết bị Hà Nội hỏi Odoo xem từ mốc đồng bộ trước có nhân viên nào mới/sửa đổi/bị xóa hay không.\nKẾT QUẢ THÀNH CÔNG: Trả về danh sách mã nhân viên (`emp_id`) cần đồng bộ cập nhật.\nCÁC TRƯỜNG CẬP NHẬT TRÊN ODOO: Không ghi dữ liệu mới lên database (Read-only query).\n------------------------------------------------------------------------------",
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"serial_number\": \"CTRL-HN-LOBBY-01\",\n    \"last_sync_at\": \"2026-07-01 08:00:00\"\n}"
+                        }
+                    },
+                    "response": [],
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test(\"Kiểm tra HTTP Status 200\", function () {",
+                                    "    pm.response.to.have.status(200);",
+                                    "});"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "3.1.B Truy vấn danh sách nhân viên thay đổi của Phòng Máy Chủ Hà Nội (ControllerEmployeeSync)",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json",
+                                "type": "text"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/api/v1/ControllerEmployeeSync",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "ControllerEmployeeSync"
+                            ]
+                        },
+                        "description": "------------------------------------------------------------------------------\nCHỨC NĂNG: Thiết bị phòng máy chủ Hà Nội truy vấn danh sách thay đổi nhân sự.\nKẾT QUẢ THÀNH CÔNG: Trả về danh sách nhân viên có quyền truy cập máy chủ (IT, Bảo vệ, Giám đốc).\nCÁC TRƯỜNG CẬP NHẬT TRÊN ODOO: Không ghi dữ liệu mới.\n------------------------------------------------------------------------------",
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"serial_number\": \"CTRL-HN-SRV-01\",\n    \"last_sync_at\": \"2026-07-01 08:00:00\"\n}"
+                        }
+                    },
+                    "response": [],
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test(\"Kiểm tra HTTP Status 200\", function () {",
+                                    "    pm.response.to.have.status(200);",
+                                    "});"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "3.1.C Truy vấn danh sách nhân viên thay đổi của Kho HCM (ControllerEmployeeSync)",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json",
+                                "type": "text"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/api/v1/ControllerEmployeeSync",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "ControllerEmployeeSync"
+                            ]
+                        },
+                        "description": "------------------------------------------------------------------------------\nCHỨC NĂNG: Thiết bị kho HCM hỏi Odoo xem từ mốc đồng bộ trước có nhân viên nào thay đổi không.\nKẾT QUẢ THÀNH CÔNG: Trả về danh sách mã nhân viên (`emp_id`) thay đổi của kho HCM.\nCÁC TRƯỜNG CẬP NHẬT TRÊN ODOO: Không ghi dữ liệu mới lên database (Read-only query).\n------------------------------------------------------------------------------",
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"serial_number\": \"CTRL-HCM-WHS-01\",\n    \"last_sync_at\": \"2026-07-01 08:00:00\"\n}"
+                        }
+                    },
+                    "response": [],
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test(\"Kiểm tra HTTP Status 200\", function () {",
+                                    "    pm.response.to.have.status(200);",
+                                    "});"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "3.1.D Truy vấn danh sách nhân viên thay đổi của Chi nhánh Đà Nẵng (ControllerEmployeeSync)",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json",
+                                "type": "text"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/api/v1/ControllerEmployeeSync",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "ControllerEmployeeSync"
+                            ]
+                        },
+                        "description": "------------------------------------------------------------------------------\nCHỨC NĂNG: Thiết bị Đà Nẵng truy vấn danh sách thay đổi nhân sự.\nKẾT QUẢ THÀNH CÔNG: Trả về danh sách nhân viên thuộc chi nhánh Đà Nẵng.\nCÁC TRƯỜNG CẬP NHẬT TRÊN ODOO: Không ghi dữ liệu mới.\n------------------------------------------------------------------------------",
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"serial_number\": \"CTRL-DN-MAIN-01\",\n    \"last_sync_at\": \"2026-07-01 08:00:00\"\n}"
+                        }
+                    },
+                    "response": [],
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test(\"Kiểm tra HTTP Status 200\", function () {",
+                                    "    pm.response.to.have.status(200);",
+                                    "});"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "3.2.A Tải chi tiết dữ liệu sinh trắc học của Nguyễn Văn Kỹ Thuật (EmployeeBiometricGet)",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json",
+                                "type": "text"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/api/v1/EmployeeBiometricGet",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "EmployeeBiometricGet"
+                            ]
+                        },
+                        "description": "------------------------------------------------------------------------------\nCHỨC NĂNG: Thiết bị Hà Nội tải chi tiết dữ liệu thẻ từ / mã pin / vân tay của EMP-HN-IT-001.\nKẾT QUẢ THÀNH CÔNG: Trả về mã thẻ `RFID-HN-IT-01` và chuỗi sinh trắc học vân tay Base64 để lưu vào bộ nhớ máy.\nCÁC TRƯỜNG CẬP NHẬT TRÊN ODOO: Không ghi dữ liệu mới lên database (Read-only query).\n------------------------------------------------------------------------------",
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"controller_id\": \"CTRL-HN-LOBBY-01\",\n    \"emp_id\": \"EMP-HN-IT-001\"\n}"
+                        }
+                    },
+                    "response": [],
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test(\"Kiểm tra HTTP Status 200\", function () {",
+                                    "    pm.response.to.have.status(200);",
+                                    "});"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "3.2.B Tải chi tiết dữ liệu sinh trắc học của Nguyễn Văn Giám Đốc (EmployeeBiometricGet)",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json",
+                                "type": "text"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/api/v1/EmployeeBiometricGet",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "EmployeeBiometricGet"
+                            ]
+                        },
+                        "description": "------------------------------------------------------------------------------\nCHỨC NĂNG: Thiết bị Hà Nội tải chi tiết dữ liệu sinh trắc khuôn mặt của EMP-HN-DIR-001.\nKẾT QUẢ THÀNH CÔNG: Trả về thông tin thẻ `RFID-HN-DIR-01` và chuỗi khuôn mặt Base64 của Giám Đốc.\nCÁC TRƯỜNG CẬP NHẬT TRÊN ODOO: Không ghi dữ liệu mới lên database (Read-only query).\n------------------------------------------------------------------------------",
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"controller_id\": \"CTRL-HN-LOBBY-01\",\n    \"emp_id\": \"EMP-HN-DIR-001\"\n}"
+                        }
+                    },
+                    "response": [],
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test(\"Kiểm tra HTTP Status 200\", function () {",
+                                    "    pm.response.to.have.status(200);",
+                                    "});"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "3.2.C Tải chi tiết dữ liệu sinh trắc học của Phạm Văn Thời Vụ (EmployeeBiometricGet)",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json",
+                                "type": "text"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/api/v1/EmployeeBiometricGet",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "EmployeeBiometricGet"
+                            ]
+                        },
+                        "description": "------------------------------------------------------------------------------\nCHỨC NĂNG: Thiết bị kho HCM tải chi tiết dữ liệu thẻ từ của nhân viên thời vụ EMP-HCM-TMP-001.\nKẾT QUẢ THÀNH CÔNG: Trả về mã thẻ `RFID-HCM-TMP-01` của nhân viên thời vụ HCM.\nCÁC TRƯỜNG CẬP NHẬT TRÊN ODOO: Không ghi dữ liệu mới lên database (Read-only query).\n------------------------------------------------------------------------------",
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"controller_id\": \"CTRL-HCM-WHS-01\",\n    \"emp_id\": \"EMP-HCM-TMP-001\"\n}"
+                        }
+                    },
+                    "response": [],
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test(\"Kiểm tra HTTP Status 200\", function () {",
+                                    "    pm.response.to.have.status(200);",
+                                    "});"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "3.2.D Tải chi tiết dữ liệu sinh trắc học của Lê Văn Bảo Vệ (EmployeeBiometricGet)",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json",
+                                "type": "text"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/api/v1/EmployeeBiometricGet",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "EmployeeBiometricGet"
+                            ]
+                        },
+                        "description": "------------------------------------------------------------------------------\nCHỨC NĂNG: Thiết bị Hà Nội tải chi tiết dữ liệu của Bảo vệ EMP-HN-SEC-001.\nKẾT QUẢ THÀNH CÔNG: Trả về mã thẻ `RFID-HN-SEC-01` và chuỗi vân tay Base64.\nCÁC TRƯỜNG CẬP NHẬT TRÊN ODOO: Không ghi dữ liệu mới.\n------------------------------------------------------------------------------",
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"controller_id\": \"CTRL-HN-LOBBY-01\",\n    \"emp_id\": \"EMP-HN-SEC-001\"\n}"
+                        }
+                    },
+                    "response": [],
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test(\"Kiểm tra HTTP Status 200\", function () {",
+                                    "    pm.response.to.have.status(200);",
+                                    "});"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "3.3.A Xác nhận hoàn tất đồng bộ thành công của Sảnh Hà Nội (ControllerSyncAck)",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json",
+                                "type": "text"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/api/v1/ControllerSyncAck",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "ControllerSyncAck"
+                            ]
+                        },
+                        "description": "------------------------------------------------------------------------------\nCHỨC NĂNG: Thiết bị Hà Nội báo cho Odoo biết đã hoàn thành tải và nạp xong toàn bộ dữ liệu.\nKẾT QUẢ THÀNH CÔNG:\n- Cập nhật mốc thời gian đồng bộ cuối cùng của bộ điều khiển.\n- Đổi trạng thái đồng bộ nhân viên thành \"Synced\" (màu xanh lá) trên Odoo.\nCÁC TRƯỜNG CẬP NHẬT TRÊN ODOO:\n- Model `t4.gate_keeper.controller` (Mã CTRL-HN-LOBBY-01):\n* `last_sync_at` -> '2026-07-09 23:00:00' (Mốc thời gian gửi lên)\n* `employee_sync_status` -> 'synced' (Chuyển sang màu xanh lá)\n------------------------------------------------------------------------------",
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"controller_id\": \"CTRL-HN-LOBBY-01\"\n}"
+                        }
+                    },
+                    "response": [],
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test(\"Kiểm tra HTTP Status 200\", function () {",
+                                    "    pm.response.to.have.status(200);",
+                                    "});"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "3.3.B Xác nhận hoàn tất đồng bộ thành công của Máy Chủ Hà Nội (ControllerSyncAck)",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json",
+                                "type": "text"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/api/v1/ControllerSyncAck",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "ControllerSyncAck"
+                            ]
+                        },
+                        "description": "------------------------------------------------------------------------------\nCHỨC NĂNG: Thiết bị phòng máy chủ Hà Nội báo cáo đã đồng bộ xong.\nKẾT QUẢ THÀNH CÔNG: Cập nhật Last Sync và chuyển trạng thái thành Synced.\nCÁC TRƯỜNG CẬP NHẬT TRÊN ODOO:\n- Model `t4.gate_keeper.controller` (Mã CTRL-HN-SRV-01):\n* `last_sync_at` -> '2026-07-09 23:02:00'\n* `employee_sync_status` -> 'synced'\n------------------------------------------------------------------------------",
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"controller_id\": \"CTRL-HN-SRV-01\"\n}"
+                        }
+                    },
+                    "response": [],
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test(\"Kiểm tra HTTP Status 200\", function () {",
+                                    "    pm.response.to.have.status(200);",
+                                    "});"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "3.3.C Xác nhận hoàn tất đồng bộ thành công của Kho HCM (ControllerSyncAck)",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json",
+                                "type": "text"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/api/v1/ControllerSyncAck",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "ControllerSyncAck"
+                            ]
+                        },
+                        "description": "------------------------------------------------------------------------------\nCHỨC NĂNG: Thiết bị kho HCM báo cho Odoo biết đã nạp xong dữ liệu nhân sự.\nKẾT QUẢ THÀNH CÔNG:\n- Cập nhật mốc thời gian đồng bộ cuối của kho HCM.\n- Chuyển trạng thái đồng bộ kho HCM thành \"Synced\" (màu xanh lá).\nCÁC TRƯỜNG CẬP NHẬT TRÊN ODOO:\n- Model `t4.gate_keeper.controller` (Mã CTRL-HCM-WHS-01):\n* `last_sync_at` -> '2026-07-09 23:05:00'\n* `employee_sync_status` -> 'synced'\n------------------------------------------------------------------------------",
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"controller_id\": \"CTRL-HCM-WHS-01\"\n}"
+                        }
+                    },
+                    "response": [],
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test(\"Kiểm tra HTTP Status 200\", function () {",
+                                    "    pm.response.to.have.status(200);",
+                                    "});"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "3.3.D Xác nhận hoàn tất đồng bộ thành công của Đà Nẵng (ControllerSyncAck)",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json",
+                                "type": "text"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/api/v1/ControllerSyncAck",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "ControllerSyncAck"
+                            ]
+                        },
+                        "description": "------------------------------------------------------------------------------\nCHỨC NĂNG: Thiết bị Đà Nẵng báo cáo đã nạp xong dữ liệu.\nKẾT QUẢ THÀNH CÔNG: Cập nhật mốc thời gian đồng bộ Đà Nẵng và chuyển sang Synced.\nCÁC TRƯỜNG CẬP NHẬT TRÊN ODOO:\n- Model `t4.gate_keeper.controller` (Mã CTRL-DN-MAIN-01):\n* `last_sync_at` -> '2026-07-09 23:10:00'\n* `employee_sync_status` -> 'synced'\n------------------------------------------------------------------------------",
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"controller_id\": \"CTRL-DN-MAIN-01\"\n}"
+                        }
+                    },
+                    "response": [],
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test(\"Kiểm tra HTTP Status 200\", function () {",
+                                    "    pm.response.to.have.status(200);",
+                                    "});"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "name": "4. Nhật ký ra vào (Access Logs)",
+            "item": [
+                {
+                    "name": "# ==============================================================================",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json",
+                                "type": "text"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/api/v1/auth/token",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "auth",
+                                "token"
+                            ]
+                        },
+                        "description": "==============================================================================\nNHÓM 4: NHẬT KÝ SỰ KIỆN RA VÀO (ACCESS LOGS)\n==============================================================================\n@name login\n------------------------------------------------------------------------------\nCHỨC NĂNG: Đăng nhập hệ thống qua chuẩn OAuth2 để lấy Access Token (Bearer Token).\nKẾT QUẢ THÀNH CÔNG: Trả về 200 OK kèm mã token xác thực có thời hạn 24 giờ.\nREST Client sẽ tự động lưu token này vào biến toàn cục {{token}}.\nCÁC TRƯỜNG CẬP NHẬT: Tạo bản ghi token mới trong bảng `core.api.token`.\n------------------------------------------------------------------------------",
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"client_id\": \"app_bf343cac68c93ecce3f2f56e753999c1\",\n    \"client_secret\": \"client_secret_123456\",\n    \"grant_type\": \"client_credentials\"\n}"
+                        }
+                    },
+                    "response": [],
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test(\"Đăng nhập thành công - HTTP 200\", function () {",
+                                    "    pm.response.to.have.status(200);",
+                                    "});",
+                                    "",
+                                    "pm.test(\"Lưu Token\", function () {",
+                                    "    var jsonData = pm.response.json();",
+                                    "    if (jsonData && jsonData.api_token && jsonData.api_token.token) {",
+                                    "        pm.globals.set(\"token\", jsonData.api_token.token);",
+                                    "    }",
+                                    "});"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "4.1.A Tải lô quẹt thẻ giờ hành chính của nhóm nhân sự Hà Nội (AccessLogUpload)",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json",
+                                "type": "text"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/api/v1/AccessLogUpload",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "AccessLogUpload"
+                            ]
+                        },
+                        "description": "------------------------------------------------------------------------------\nCHỨC NĂNG: Thiết bị Hà Nội đẩy hàng loạt nhật ký quẹt thẻ offline của nhân viên lên Odoo.\nĐỐI TƯỢNG:\n- Nguyễn Văn Kỹ Thuật (EMP-HN-IT-001) quẹt VÀO lúc 08:30 và RA lúc 17:30.\n- Trần Thị Hành Chính (EMP-HN-HR-001) quẹt VÀO lúc 08:15 và RA lúc 17:15.\nKẾT QUẢ THÀNH CÔNG:\n- Tạo 4 bản ghi lịch sử ra vào thành công trong phân hệ Access Logs của Odoo.\n- Hệ thống tự động tìm đúng nhân viên thông qua mã thẻ RFID để gán vào log.\n- Cập nhật trạng thái vị trí hiện tại của Kỹ Thuật và Hành Chính thành \"Đang ở ngoài\" (vì lượt quẹt cuối là Out).\n- Không tạo cảnh báo vi phạm an ninh (vì quẹt thẻ đúng giờ hành chính và thẻ đã đăng ký).\nCÁC TRƯỜNG CẬP NHẬT TRÊN ODOO:\n- Model `t4.gate_keeper.access_log`: Tạo mới 4 bản ghi tương ứng.\n- Model `t4.gate_keeper.employee` (Nhân viên IT & HR):\n* `last_action` -> 'out'\n* `last_action_time` -> Cập nhật thời gian ra tương ứng ('2026-07-09 17:30:00' và '17:15:00').\n------------------------------------------------------------------------------",
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"controller_id\": \"CTRL-HN-LOBBY-01\",\n    \"logs\": [\n        {\n            \"device_serial\": \"DEV-HN-LOB-IN-01\",\n            \"emp_id\": \"EMP-HN-IT-001\",\n            \"card_code\": \"RFID-HN-IT-01\",\n            \"access_time\": \"2026-07-09 08:30:00\",\n            \"direction\": \"in\",\n            \"verification_type\": \"card\"\n        },\n        {\n            \"device_serial\": \"DEV-HN-LOB-IN-01\",\n            \"emp_id\": \"EMP-HN-HR-001\",\n            \"card_code\": \"RFID-HN-HR-01\",\n            \"access_time\": \"2026-07-09 08:15:00\",\n            \"direction\": \"in\",\n            \"verification_type\": \"card\"\n        },\n        {\n            \"device_serial\": \"DEV-HN-LOB-OUT-01\",\n            \"emp_id\": \"EMP-HN-HR-001\",\n            \"card_code\": \"RFID-HN-HR-01\",\n            \"access_time\": \"2026-07-09 17:15:00\",\n            \"direction\": \"out\",\n            \"verification_type\": \"card\"\n        },\n        {\n            \"device_serial\": \"DEV-HN-LOB-OUT-01\",\n            \"emp_id\": \"EMP-HN-IT-001\",\n            \"card_code\": \"RFID-HN-IT-01\",\n            \"access_time\": \"2026-07-09 17:30:00\",\n            \"direction\": \"out\",\n            \"verification_type\": \"card\"\n        }\n    ]\n}"
+                        }
+                    },
+                    "response": [],
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test(\"Kiểm tra HTTP Status 200\", function () {",
+                                    "    pm.response.to.have.status(200);",
+                                    "});"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "4.1.B Tải lô quẹt khuôn mặt Cửa Máy Chủ Hà Nội (AccessLogUpload)",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json",
+                                "type": "text"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/api/v1/AccessLogUpload",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "AccessLogUpload"
+                            ]
+                        },
+                        "description": "------------------------------------------------------------------------------\nCHỨC NĂNG: Bộ điều khiển phòng máy chủ tải log nhận diện khuôn mặt ra vào.\nĐỐI TƯỢNG: Nguyễn Văn Giám Đốc (EMP-HN-DIR-001) quẹt VÀO lúc 10:00 và RA lúc 10:30.\nKẾT QUẢ THÀNH CÔNG: Tạo 2 bản ghi Access Log. Cập nhật vị trí Giám đốc thành \"Đang ở ngoài\".\nCÁC TRƯỜNG CẬP NHẬT TRÊN ODOO:\n- Model `t4.gate_keeper.access_log`: Tạo mới 2 bản ghi.\n- Model `t4.gate_keeper.employee` (EMP-HN-DIR-001):\n* `last_action` -> 'out'\n* `last_action_time` -> '2026-07-09 10:30:00'\n------------------------------------------------------------------------------",
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"controller_id\": \"CTRL-HN-SRV-01\",\n    \"logs\": [\n        {\n            \"device_serial\": \"DEV-HN-SRV-FACE-01\",\n            \"emp_id\": \"EMP-HN-DIR-001\",\n            \"access_time\": \"2026-07-09 10:00:00\",\n            \"direction\": \"in\",\n            \"verification_type\": \"face\"\n        },\n        {\n            \"device_serial\": \"DEV-HN-SRV-FACE-01\",\n            \"emp_id\": \"EMP-HN-DIR-001\",\n            \"access_time\": \"2026-07-09 10:30:00\",\n            \"direction\": \"out\",\n            \"verification_type\": \"face\"\n        }\n    ]\n}"
+                        }
+                    },
+                    "response": [],
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test(\"Kiểm tra HTTP Status 200\", function () {",
+                                    "    pm.response.to.have.status(200);",
+                                    "});"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "4.1.C Tải lô quẹt vân tay Cửa kho hàng HCM (AccessLogUpload)",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json",
+                                "type": "text"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/api/v1/AccessLogUpload",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "AccessLogUpload"
+                            ]
+                        },
+                        "description": "------------------------------------------------------------------------------\nCHỨC NĂNG: Bộ điều khiển kho hàng HCM tải log vân tay của nhân viên thời vụ.\nĐỐI TƯỢNG: Phạm Văn Thời Vụ (EMP-HCM-TMP-001) quẹt vân tay VÀO lúc 09:00:00 và RA lúc 12:00:00.\nKẾT QUẢ THÀNH CÔNG: Tạo 2 bản ghi Access Log. Cập nhật vị trí CTV thành \"Đang ở ngoài\".\nCÁC TRƯỜNG CẬP NHẬT TRÊN ODOO:\n- Model `t4.gate_keeper.access_log`: Tạo mới 2 bản ghi.\n- Model `t4.gate_keeper.employee` (EMP-HCM-TMP-001):\n* `last_action` -> 'out'\n* `last_action_time` -> '2026-07-09 12:00:00'\n------------------------------------------------------------------------------",
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"controller_id\": \"CTRL-HCM-WHS-01\",\n    \"logs\": [\n        {\n            \"device_serial\": \"DEV-HCM-WHS-FGR-01\",\n            \"emp_id\": \"EMP-HCM-TMP-001\",\n            \"card_code\": \"RFID-HCM-TMP-01\",\n            \"access_time\": \"2026-07-09 09:00:00\",\n            \"direction\": \"in\",\n            \"verification_type\": \"fingerprint\"\n        },\n        {\n            \"device_serial\": \"DEV-HCM-WHS-FGR-01\",\n            \"emp_id\": \"EMP-HCM-TMP-001\",\n            \"card_code\": \"RFID-HCM-TMP-01\",\n            \"access_time\": \"2026-07-09 12:00:00\",\n            \"direction\": \"out\",\n            \"verification_type\": \"fingerprint\"\n        }\n    ]\n}"
+                        }
+                    },
+                    "response": [],
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test(\"Kiểm tra HTTP Status 200\", function () {",
+                                    "    pm.response.to.have.status(200);",
+                                    "});"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "4.1.D Tải lô quẹt thẻ của nhóm nhân sự chi nhánh Đà Nẵng (AccessLogUpload)",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json",
+                                "type": "text"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/api/v1/AccessLogUpload",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "AccessLogUpload"
+                            ]
+                        },
+                        "description": "------------------------------------------------------------------------------\nCHỨC NĂNG: Bộ điều khiển Đà Nẵng tải log quẹt nhận diện khuôn mặt của Giám Đốc lên Odoo.\nĐỐI TƯỢNG: Nguyễn Văn Giám Đốc (EMP-HN-DIR-001) quẹt VÀO lúc 09:00:00.\nKẾT QUẢ THÀNH CÔNG:\n- Tạo 1 bản ghi Access Log quẹt nhận diện khuôn mặt thành công trên Odoo.\n- Cập nhật vị trí Giám đốc thành \"Đang ở trong chi nhánh\".\nCÁC TRƯỜNG CẬP NHẬT TRÊN ODOO:\n- Model `t4.gate_keeper.access_log`: Tạo mới 1 bản ghi.\n- Model `t4.gate_keeper.employee` (Mã EMP-HN-DIR-001):\n* `last_action` -> 'in'\n* `last_action_time` -> '2026-07-09 09:00:00'\n------------------------------------------------------------------------------",
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"controller_id\": \"CTRL-DN-MAIN-01\",\n    \"logs\": [\n        {\n            \"device_serial\": \"DEV-DN-EXEC-IN-01\",\n            \"emp_id\": \"EMP-HN-DIR-001\",\n            \"access_time\": \"2026-07-09 09:00:00\",\n            \"direction\": \"in\",\n            \"verification_type\": \"face\"\n        }\n    ]\n}"
+                        }
+                    },
+                    "response": [],
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test(\"Kiểm tra HTTP Status 200\", function () {",
+                                    "    pm.response.to.have.status(200);",
+                                    "});"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "4.1.E Tải lô quẹt thẻ chứa Thẻ lạ / Chưa đăng ký (AccessLogUpload)",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json",
+                                "type": "text"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/api/v1/AccessLogUpload",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "AccessLogUpload"
+                            ]
+                        },
+                        "description": "------------------------------------------------------------------------------\nCHỨC NĂNG: Thiết bị Hà Nội tải lên log của thẻ lạ quét tại sảnh.\nĐỐI TƯỢNG: Thẻ RFID-UNKNOWN-999 quét VÀO lúc 11:00:00.\nKẾT QUẢ THÀNH CÔNG:\n- Tạo bản ghi Access Log nhưng không gắn với nhân viên nào (employee_id = False).\n- Hệ thống tự động tạo cảnh báo bảo mật thẻ lạ (unknown_card) trong Area Warning.\n------------------------------------------------------------------------------",
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"controller_id\": \"CTRL-HN-LOBBY-01\",\n    \"logs\": [\n        {\n            \"device_serial\": \"DEV-HN-LOB-IN-01\",\n            \"card_code\": \"RFID-UNKNOWN-999\",\n            \"access_time\": \"2026-07-09 11:00:00\",\n            \"direction\": \"in\",\n            \"verification_type\": \"card\"\n        }\n    ]\n}"
+                        }
+                    },
+                    "response": [],
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test(\"Kiểm tra HTTP Status 200\", function () {",
+                                    "    pm.response.to.have.status(200);",
+                                    "});"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "4.1.F Tải log với Controller ID không tồn tại (Kiểm tra lỗi ValidationError)",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json",
+                                "type": "text"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/api/v1/AccessLogUpload",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "AccessLogUpload"
+                            ]
+                        },
+                        "description": "------------------------------------------------------------------------------\nCHỨC NĂNG: Gửi yêu cầu với controller_id sai định dạng hoặc không có trong hệ thống.\nKẾT QUẢ: Hệ thống báo lỗi ValidationError (400 Bad Request) bảo mật.\n------------------------------------------------------------------------------",
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"controller_id\": \"CTRL-HN-INVALID-999\",\n    \"logs\": [\n        {\n            \"device_serial\": \"DEV-HN-LOB-IN-01\",\n            \"emp_id\": \"EMP-HN-IT-001\",\n            \"access_time\": \"2026-07-09 11:15:00\",\n            \"direction\": \"in\",\n            \"verification_type\": \"card\"\n        }\n    ]\n}"
+                        }
+                    },
+                    "response": [],
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test(\"Kiểm tra HTTP Status 400\", function () {",
+                                    "    pm.response.to.have.status(400);",
+                                    "});"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "4.1.G Tải log thiếu trường bắt buộc logs (Kiểm tra lỗi Missing Data)",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json",
+                                "type": "text"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/api/v1/AccessLogUpload",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "AccessLogUpload"
+                            ]
+                        },
+                        "description": "------------------------------------------------------------------------------\nCHỨC NĂNG: Gửi yêu cầu thiếu tham số logs.\nKẾT QUẢ: Hệ thống báo lỗi Missing required field(s): logs (400 Bad Request).\n------------------------------------------------------------------------------",
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"controller_id\": \"CTRL-HN-LOBBY-01\"\n}"
+                        }
+                    },
+                    "response": [],
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test(\"Kiểm tra HTTP Status 400\", function () {",
+                                    "    pm.response.to.have.status(400);",
+                                    "});"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "name": "5. Lệnh điều khiển từ xa (Remote Commands)",
+            "item": [
+                {
+                    "name": "# ==============================================================================",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json",
+                                "type": "text"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/api/v1/auth/token",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "auth",
+                                "token"
+                            ]
+                        },
+                        "description": "==============================================================================\nNHÓM 5: NHÓM LỆNH ĐIỀU KHIỂN TỪ XA (REMOTE COMMANDS)\n==============================================================================\n@name login\n------------------------------------------------------------------------------\nCHỨC NĂNG: Đăng nhập hệ thống qua chuẩn OAuth2 để lấy Access Token (Bearer Token).\nKẾT QUẢ THÀNH CÔNG: Trả về 200 OK kèm mã token xác thực có thời hạn 24 giờ.\nREST Client sẽ tự động lưu token này vào biến toàn cục {{token}}.\nCÁC TRƯỜNG CẬP NHẬT: Tạo bản ghi token mới trong bảng `core.api.token`.\n------------------------------------------------------------------------------",
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"client_id\": \"app_bf343cac68c93ecce3f2f56e753999c1\",\n    \"client_secret\": \"client_secret_123456\",\n    \"grant_type\": \"client_credentials\"\n}"
+                        }
+                    },
+                    "response": [],
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test(\"Đăng nhập thành công - HTTP 200\", function () {",
+                                    "    pm.response.to.have.status(200);",
+                                    "});",
+                                    "",
+                                    "pm.test(\"Lưu Token\", function () {",
+                                    "    var jsonData = pm.response.json();",
+                                    "    if (jsonData && jsonData.api_token && jsonData.api_token.token) {",
+                                    "        pm.globals.set(\"token\", jsonData.api_token.token);",
+                                    "    }",
+                                    "});"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "5.1.A Quét tìm các lệnh điều khiển từ xa đang chờ của Sảnh Hà Nội (ControllerCommandPoll)",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json",
+                                "type": "text"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/api/v1/ControllerCommandPoll",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "ControllerCommandPoll"
+                            ]
+                        },
+                        "description": "------------------------------------------------------------------------------\nCHỨC NĂNG: Bộ điều khiển sảnh Hà Nội quét tìm các lệnh mở/đóng cửa do người dùng nhấn trên Odoo.\nKẾT QUẢ THÀNH CÔNG:\n- Trả về danh sách lệnh điều khiển đang ở trạng thái 'Chờ gửi' (pending) của Controller này.\n- Thiết bị nhận gói tin sẽ kích hoạt tín hiệu rơ-le mở/đóng khóa cửa vật lý tương ứng.\nCÁC TRƯỜNG CẬP NHẬT TRÊN ODOO:\n- Model `t4.gate_keeper.command` (Các lệnh của Controller này đang có `state == 'pending'`):\n* `state` -> 'sending' (Chuyển sang Đang gửi để tránh gửi trùng lặp).\n* `sent_at` -> Thời gian hiện tại.\n------------------------------------------------------------------------------",
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"controller_id\": \"CTRL-HN-LOBBY-01\"\n}"
+                        }
+                    },
+                    "response": [],
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test(\"Kiểm tra HTTP Status 200\", function () {",
+                                    "    pm.response.to.have.status(200);",
+                                    "});"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "5.1.B Quét tìm các lệnh điều khiển từ xa đang chờ của Máy Chủ Hà Nội (ControllerCommandPoll)",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json",
+                                "type": "text"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/api/v1/ControllerCommandPoll",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "ControllerCommandPoll"
+                            ]
+                        },
+                        "description": "------------------------------------------------------------------------------\nCHỨC NĂNG: Bộ điều khiển máy chủ Hà Nội quét tìm lệnh điều khiển từ xa.\nKẾT QUẢ THÀNH CÔNG: Trả về danh sách lệnh pending cho máy chủ.\nCÁC TRƯỜNG CẬP NHẬT TRÊN ODOO:\n- Model `t4.gate_keeper.command`:\n* `state` -> 'sending'\n* `sent_at` -> Thời gian hiện tại.\n------------------------------------------------------------------------------",
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"controller_id\": \"CTRL-HN-SRV-01\"\n}"
+                        }
+                    },
+                    "response": [],
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test(\"Kiểm tra HTTP Status 200\", function () {",
+                                    "    pm.response.to.have.status(200);",
+                                    "});"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "5.1.C Quét tìm các lệnh điều khiển từ xa đang chờ của Kho HCM (ControllerCommandPoll)",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json",
+                                "type": "text"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/api/v1/ControllerCommandPoll",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "ControllerCommandPoll"
+                            ]
+                        },
+                        "description": "------------------------------------------------------------------------------\nCHỨC NĂNG: Bộ điều khiển kho HCM quét tìm lệnh điều khiển từ xa.\nKẾT QUẢ THÀNH CÔNG: Trả về danh sách lệnh pending cho kho HCM.\nCÁC TRƯỜNG CẬP NHẬT TRÊN ODOO:\n- Model `t4.gate_keeper.command`:\n* `state` -> 'sending'\n* `sent_at` -> Thời gian hiện tại.\n------------------------------------------------------------------------------",
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"controller_id\": \"CTRL-HCM-WHS-01\"\n}"
+                        }
+                    },
+                    "response": [],
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test(\"Kiểm tra HTTP Status 200\", function () {",
+                                    "    pm.response.to.have.status(200);",
+                                    "});"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "5.1.D Quét tìm các lệnh điều khiển từ xa đang chờ của Đà Nẵng (ControllerCommandPoll)",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json",
+                                "type": "text"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/api/v1/ControllerCommandPoll",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "ControllerCommandPoll"
+                            ]
+                        },
+                        "description": "------------------------------------------------------------------------------\nCHỨC NĂNG: Bộ điều khiển Đà Nẵng quét tìm các lệnh mở/đóng cửa đang chờ.\nKẾT QUẢ THÀNH CÔNG: Trả về danh sách lệnh đang chờ xử lý của Đà Nẵng.\nCÁC TRƯỜNG CẬP NHẬT TRÊN ODOO:\n- Model `t4.gate_keeper.command`:\n* `state` -> 'sending'\n* `sent_at` -> Thời gian hiện tại.\n------------------------------------------------------------------------------",
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"controller_id\": \"CTRL-DN-MAIN-01\"\n}"
+                        }
+                    },
+                    "response": [],
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test(\"Kiểm tra HTTP Status 200\", function () {",
+                                    "    pm.response.to.have.status(200);",
+                                    "});"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "5.2.A Gửi báo cáo kết quả thực thi lệnh từ Sảnh Hà Nội (ControllerCommandAck)",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json",
+                                "type": "text"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/api/v1/ControllerCommandAck",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "ControllerCommandAck"
+                            ]
+                        },
+                        "description": "------------------------------------------------------------------------------\nCHỨC NĂNG: Bộ điều khiển sảnh báo cáo kết quả kích hoạt rơ-le cơ học (Mở khóa cửa thành công).\nKẾT QUẢ THÀNH CÔNG: Lệnh Command trên Odoo chuyển sang trạng thái \"Thành công\" (success).\nCÁC TRƯỜNG CẬP NHẬT TRÊN ODOO:\n- Model `t4.gate_keeper.command`:\n* `state` -> 'success'\n* `execution_message` -> 'Relay activated successfully. Door opened.'\n* `executed_at` -> Thời gian hiện tại.\nMẹo: Hãy đổi \"command_id\" thành ID thực tế được trả về từ kết quả của API 5.1 tương ứng.\n------------------------------------------------------------------------------",
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"controller_id\": \"CTRL-HN-LOBBY-01\",\n    \"command_id\": 1,\n    \"execution_message\": \"Relay activated successfully. Door opened.\"\n}"
+                        }
+                    },
+                    "response": [],
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test(\"Kiểm tra HTTP Status 200\", function () {",
+                                    "    pm.response.to.have.status(200);",
+                                    "});"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "5.2.B Gửi báo cáo kết quả thực thi lệnh từ Máy Chủ Hà Nội (ControllerCommandAck)",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json",
+                                "type": "text"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/api/v1/ControllerCommandAck",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "ControllerCommandAck"
+                            ]
+                        },
+                        "description": "",
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"controller_id\": \"CTRL-HN-SRV-01\",\n    \"command_id\": 2,\n    \"execution_message\": \"Face Terminal triggered relay. Door unlocked.\"\n}"
+                        }
+                    },
+                    "response": [],
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test(\"Kiểm tra HTTP Status 200\", function () {",
+                                    "    pm.response.to.have.status(200);",
+                                    "});"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "5.2.C Gửi báo cáo kết quả thực thi lệnh từ Kho HCM (ControllerCommandAck)",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json",
+                                "type": "text"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/api/v1/ControllerCommandAck",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "ControllerCommandAck"
+                            ]
+                        },
+                        "description": "",
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"controller_id\": \"CTRL-HCM-WHS-01\",\n    \"command_id\": 3,\n    \"execution_message\": \"Warehouse fingerprint controller closed relay.\"\n}"
+                        }
+                    },
+                    "response": [],
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test(\"Kiểm tra HTTP Status 200\", function () {",
+                                    "    pm.response.to.have.status(200);",
+                                    "});"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "5.2.D Gửi báo cáo kết quả thực thi lệnh từ Đà Nẵng (ControllerCommandAck)",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json",
+                                "type": "text"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/api/v1/ControllerCommandAck",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "ControllerCommandAck"
+                            ]
+                        },
+                        "description": "",
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"controller_id\": \"CTRL-DN-MAIN-01\",\n    \"command_id\": 4,\n    \"execution_message\": \"Da Nang main controller activated relay 2 successfully.\"\n}"
+                        }
+                    },
+                    "response": [],
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test(\"Kiểm tra HTTP Status 200\", function () {",
+                                    "    pm.response.to.have.status(200);",
+                                    "});"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "name": "6. Kịch bản nâng cao & Cảnh báo (Edge Cases & Warnings)",
+            "item": [
+                {
+                    "name": "# ==============================================================================",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json",
+                                "type": "text"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/api/v1/auth/token",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "auth",
+                                "token"
+                            ]
+                        },
+                        "description": "==============================================================================\nNHÓM 6: CÁC KỊCH BẢN KIỂM THỬ NÂNG CAO (EDGE CASES & VIOLATIONS BATCH)\n==============================================================================\n@name login\n------------------------------------------------------------------------------\nCHỨC NĂNG: Đăng nhập hệ thống qua chuẩn OAuth2 để lấy Access Token (Bearer Token).\nKẾT QUẢ THÀNH CÔNG: Trả về 200 OK kèm mã token xác thực có thời hạn 24 giờ.\nREST Client sẽ tự động lưu token này vào biến toàn cục {{token}}.\nCÁC TRƯỜNG CẬP NHẬT: Tạo bản ghi token mới trong bảng `core.api.token`.\n------------------------------------------------------------------------------",
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"client_id\": \"app_bf343cac68c93ecce3f2f56e753999c1\",\n    \"client_secret\": \"client_secret_123456\",\n    \"grant_type\": \"client_credentials\"\n}"
+                        }
+                    },
+                    "response": [],
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test(\"Đăng nhập thành công - HTTP 200\", function () {",
+                                    "    pm.response.to.have.status(200);",
+                                    "});",
+                                    "",
+                                    "pm.test(\"Lưu Token\", function () {",
+                                    "    var jsonData = pm.response.json();",
+                                    "    if (jsonData && jsonData.api_token && jsonData.api_token.token) {",
+                                    "        pm.globals.set(\"token\", jsonData.api_token.token);",
+                                    "    }",
+                                    "});"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "6.1.A Giả lập Đầu đọc sảnh vào Hà Nội mất kết nối (Heartbeat - Device Offline)",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json",
+                                "type": "text"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/api/v1/ControllerHeartbeat",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "ControllerHeartbeat"
+                            ]
+                        },
+                        "description": "------------------------------------------------------------------------------\nCHỨC NĂNG: Bộ điều khiển báo cáo thiết bị con DEV-HN-LOB-IN-01 bị mất mạng/mất nguồn.\nKẾT QUẢ THÀNH CÔNG:\n- Đầu đọc sảnh vào chuyển sang màu đỏ (Offline) trên Odoo.\n- Tự động tạo bản ghi Cảnh báo sự cố thiết bị mới ở menu Warnings.\nCÁC TRƯỜNG CẬP NHẬT TRÊN ODOO:\n- Model `t4.gate_keeper.device` (Mã DEV-HN-LOB-IN-01):\n* `status` -> 'offline'\n- Model `t4.gate_keeper.area_warning` (Cảnh báo sự cố):\n* Tạo mới 1 bản ghi warning với:\n* `device_id` -> Liên kết tới đầu đọc sảnh vào.\n* `warning_type_id` -> Cảnh báo lỗi thiết bị (`device_issue`).\n* `state` -> 'active' (Hoạt động).\n* `description` -> \"Device DEV-HN-LOB-IN-01 is offline.\"\n------------------------------------------------------------------------------",
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"controller_id\": \"CTRL-HN-LOBBY-01\",\n    \"devices_status\": [\n        {\n            \"device_sn\": \"DEV-HN-LOB-IN-01\",\n            \"status\": \"offline\"\n        }\n    ]\n}"
+                        }
+                    },
+                    "response": [],
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test(\"Kiểm tra HTTP Status 200\", function () {",
+                                    "    pm.response.to.have.status(200);",
+                                    "});"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "6.1.B Giả lập Đầu đọc phòng máy chủ Hà Nội mất kết nối (Heartbeat - Device Offline)",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json",
+                                "type": "text"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/api/v1/ControllerHeartbeat",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "ControllerHeartbeat"
+                            ]
+                        },
+                        "description": "------------------------------------------------------------------------------\nCHỨC NĂNG: Bộ điều khiển báo cáo đầu đọc khuôn mặt máy chủ bị mất mạng.\nKẾT QUẢ THÀNH CÔNG: Đầu đọc chuyển sang offline và sinh cảnh báo lỗi thiết bị.\nCÁC TRƯỜNG CẬP NHẬT TRÊN ODOO:\n- Model `t4.gate_keeper.device` (Mã DEV-HN-SRV-FACE-01):\n* `status` -> 'offline'\n- Model `t4.gate_keeper.area_warning`:\n* Tạo mới 1 bản ghi cảnh báo lỗi thiết bị (`device_issue`) trạng thái active.\n------------------------------------------------------------------------------",
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"controller_id\": \"CTRL-HN-SRV-01\",\n    \"devices_status\": [\n        {\n            \"device_sn\": \"DEV-HN-SRV-FACE-01\",\n            \"status\": \"offline\"\n        }\n    ]\n}"
+                        }
+                    },
+                    "response": [],
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test(\"Kiểm tra HTTP Status 200\", function () {",
+                                    "    pm.response.to.have.status(200);",
+                                    "});"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "6.1.C Giả lập Đầu đọc quét vân tay cửa kho HCM mất kết nối (Heartbeat - Device Offline)",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json",
+                                "type": "text"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/api/v1/ControllerHeartbeat",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "ControllerHeartbeat"
+                            ]
+                        },
+                        "description": "------------------------------------------------------------------------------\nCHỨC NĂNG: Bộ điều khiển kho HCM báo đầu đọc vân tay bị mất mạng.\nKẾT QUẢ THÀNH CÔNG: Đầu đọc kho chuyển sang offline và sinh cảnh báo lỗi thiết bị.\nCÁC TRƯỜNG CẬP NHẬT TRÊN ODOO:\n- Model `t4.gate_keeper.device` (Mã DEV-HCM-WHS-FGR-01):\n* `status` -> 'offline'\n- Model `t4.gate_keeper.area_warning`:\n* Tạo mới 1 bản ghi cảnh báo lỗi thiết bị (`device_issue`) trạng thái active.\n------------------------------------------------------------------------------",
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"controller_id\": \"CTRL-HCM-WHS-01\",\n    \"devices_status\": [\n        {\n            \"device_sn\": \"DEV-HCM-WHS-FGR-01\",\n            \"status\": \"offline\"\n        }\n    ]\n}"
+                        }
+                    },
+                    "response": [],
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test(\"Kiểm tra HTTP Status 200\", function () {",
+                                    "    pm.response.to.have.status(200);",
+                                    "});"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "6.1.D Giả lập Đầu đọc phòng R&D Đà Nẵng mất kết nối (Heartbeat - Device Offline)",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json",
+                                "type": "text"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/api/v1/ControllerHeartbeat",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "ControllerHeartbeat"
+                            ]
+                        },
+                        "description": "------------------------------------------------------------------------------\nCHỨC NĂNG: Bộ điều khiển báo cáo đầu đọc R&D Đà Nẵng bị mất mạng.\nKẾT QUẢ THÀNH CÔNG:\n- Đầu đọc R&D Đà Nẵng chuyển sang trạng thái \"Offline\" màu đỏ.\n- Tự động sinh ra cảnh báo sự cố `device_issue` của chi nhánh Đà Nẵng.\nCÁC TRƯỜNG CẬP NHẬT TRÊN ODOO:\n- Model `t4.gate_keeper.device` (Mã DEV-DN-RD-IN-01):\n* `status` -> 'offline'\n- Model `t4.gate_keeper.area_warning`:\n* Tạo mới 1 bản ghi cảnh báo lỗi thiết bị hoạt động (`device_issue`) trạng thái active.\n------------------------------------------------------------------------------",
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"controller_id\": \"CTRL-DN-MAIN-01\",\n    \"devices_status\": [\n        {\n            \"device_sn\": \"DEV-DN-RD-IN-01\",\n            \"status\": \"offline\"\n        }\n    ]\n}"
+                        }
+                    },
+                    "response": [],
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test(\"Kiểm tra HTTP Status 200\", function () {",
+                                    "    pm.response.to.have.status(200);",
+                                    "});"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "6.2.A Giả lập Nhóm quẹt thẻ ngoài giờ làm việc hành chính Hà Nội (Giờ giới nghiêm)",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json",
+                                "type": "text"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/api/v1/AccessLogUpload",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "AccessLogUpload"
+                            ]
+                        },
+                        "description": "------------------------------------------------------------------------------\nCHỨC NĂNG: Đẩy lô log quẹt thẻ lúc NỬA ĐÊM (23:45:00) vi phạm giờ làm việc hành chính của chi nhánh.\nĐỐI TƯỢNG:\n- Nguyễn Văn Kỹ Thuật (EMP-HN-IT-001) quẹt VÀO lúc 23:45:00.\n- Lê Văn Bảo Vệ (EMP-HN-SEC-001) quẹt RA lúc 23:48:00.\nKẾT QUẢ THÀNH CÔNG:\n- Odoo lưu thành công 2 sự kiện quẹt thẻ.\n- Tự động đối chiếu múi giờ chi nhánh, phát hiện ngoài giờ làm việc (08:00 - 17:00).\n- Tự động tạo 2 bản ghi Cảnh báo vi phạm giờ giới nghiêm cho cả 2 nhân viên.\nCÁC TRƯỜNG CẬP NHẬT TRÊN ODOO:\n- Model `t4.gate_keeper.access_log`: Tạo mới 2 bản ghi.\n- Model `t4.gate_keeper.area_warning`:\n* Tạo mới 2 bản ghi cảnh báo với `warning_type_id` = Truy cập không hợp lệ (`invalid_access`), trạng thái `state` = 'active', mô tả chi tiết vi phạm giờ giới nghiêm ban đêm.\n------------------------------------------------------------------------------",
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"controller_id\": \"CTRL-HN-LOBBY-01\",\n    \"logs\": [\n        {\n            \"device_serial\": \"DEV-HN-LOB-IN-01\",\n            \"emp_id\": \"EMP-HN-IT-001\",\n            \"card_code\": \"RFID-HN-IT-01\",\n            \"access_time\": \"2026-07-09 23:45:00\",\n            \"direction\": \"in\",\n            \"verification_type\": \"card\"\n        },\n        {\n            \"device_serial\": \"DEV-HN-LOB-OUT-01\",\n            \"emp_id\": \"EMP-HN-SEC-001\",\n            \"card_code\": \"RFID-HN-SEC-01\",\n            \"access_time\": \"2026-07-09 23:48:00\",\n            \"direction\": \"out\",\n            \"verification_type\": \"card\"\n        }\n    ]\n}"
+                        }
+                    },
+                    "response": [],
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test(\"Kiểm tra HTTP Status 200\", function () {",
+                                    "    pm.response.to.have.status(200);",
+                                    "});"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "6.2.B Giả lập Nhân viên thời vụ HCM quẹt giờ cấm (Giờ giới nghiêm thời vụ)",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json",
+                                "type": "text"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/api/v1/AccessLogUpload",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "AccessLogUpload"
+                            ]
+                        },
+                        "description": "------------------------------------------------------------------------------\nCHỨC NĂNG: Đẩy log nhân viên thời vụ quẹt thẻ tại HCM lúc 22:00:00.\nĐỐI TƯỢNG: Phạm Văn Thời Vụ (EMP-HCM-TMP-001) quẹt thẻ lúc 22:00:00 tại HCM Warehouse.\nKẾT QUẢ THÀNH CÔNG:\n- Log quẹt thẻ lưu thành công.\n- Hệ thống kích hoạt chính sách bảo mật POL-TEMP-CURFEW (Cấm nhân viên thời vụ sau 18:00) và tự động tạo Cảnh báo vi phạm giờ giới nghiêm của CTV.\nCÁC TRƯỜNG CẬP NHẬT TRÊN ODOO:\n- Model `t4.gate_keeper.access_log`: Tạo mới 1 bản ghi.\n- Model `t4.gate_keeper.area_warning`:\n* Tạo mới 1 bản ghi cảnh báo loại `invalid_access` trạng thái active với mô tả vi phạm giờ giới nghiêm của CTV thời vụ.\n------------------------------------------------------------------------------",
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"controller_id\": \"CTRL-HCM-WHS-01\",\n    \"logs\": [\n        {\n            \"device_serial\": \"DEV-HCM-WHS-FGR-01\",\n            \"emp_id\": \"EMP-HCM-TMP-001\",\n            \"card_code\": \"RFID-HCM-TMP-01\",\n            \"access_time\": \"2026-07-09 22:00:00\",\n            \"direction\": \"in\",\n            \"verification_type\": \"card\"\n        }\n    ]\n}"
+                        }
+                    },
+                    "response": [],
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test(\"Kiểm tra HTTP Status 200\", function () {",
+                                    "    pm.response.to.have.status(200);",
+                                    "});"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "6.3.A Giả lập Nhóm quẹt thẻ lạ chưa đăng ký ở Hà Nội (Batch Unknown Cards)",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json",
+                                "type": "text"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/api/v1/AccessLogUpload",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "AccessLogUpload"
+                            ]
+                        },
+                        "description": "------------------------------------------------------------------------------\nCHỨC NĂNG: Người lạ quẹt 2 mã thẻ chưa được đăng ký trong Odoo.\nĐỐI TƯỢNG: Thẻ RFID-UNKNOWN-8888 và RFID-UNKNOWN-9999 tại sảnh Hà Nội.\nKẾT QUẢ THÀNH CÔNG:\n- Odoo lưu thành công 2 sự kiện quẹt thẻ (trường Nhân viên bỏ trống vì không nhận diện được).\n- Kích hoạt chính sách bảo mật POL-UNKNOWN-CARD-MONITOR và dựng 2 Cảnh báo thẻ lạ xâm nhập khẩn cấp.\nCÁC TRƯỜNG CẬP NHẬT TRÊN ODOO:\n- Model `t4.gate_keeper.access_log`: Tạo mới 2 bản ghi (trường `employee_id` = False).\n- Model `t4.gate_keeper.area_warning`:\n* Tạo mới 2 bản ghi cảnh báo loại `invalid_access` trạng thái `active` báo động có đối tượng dùng thẻ lạ xâm nhập.\n------------------------------------------------------------------------------",
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"controller_id\": \"CTRL-HN-LOBBY-01\",\n    \"logs\": [\n        {\n            \"device_serial\": \"DEV-HN-LOB-IN-01\",\n            \"card_code\": \"RFID-UNKNOWN-8888\",\n            \"access_time\": \"2026-07-09 10:00:00\",\n            \"direction\": \"in\",\n            \"verification_type\": \"card\"\n        },\n        {\n            \"device_serial\": \"DEV-HN-LOB-IN-01\",\n            \"card_code\": \"RFID-UNKNOWN-9999\",\n            \"access_time\": \"2026-07-09 10:05:00\",\n            \"direction\": \"in\",\n            \"verification_type\": \"card\"\n        }\n    ]\n}"
+                        }
+                    },
+                    "response": [],
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test(\"Kiểm tra HTTP Status 200\", function () {",
+                                    "    pm.response.to.have.status(200);",
+                                    "});"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "6.3.B Giả lập Nhóm quẹt thẻ lạ chưa đăng ký ở phòng Giám đốc Đà Nẵng (Batch Unknown Cards)",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json",
+                                "type": "text"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/api/v1/AccessLogUpload",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "AccessLogUpload"
+                            ]
+                        },
+                        "description": "------------------------------------------------------------------------------\nCHỨC NĂNG: Người lạ quẹt 2 thẻ lạ tại cửa phòng Giám đốc Đà Nẵng.\nĐỐI TƯỢNG: Thẻ RFID-UNKNOWN-3333 và RFID-UNKNOWN-4444 tại Đà Nẵng.\nKẾT QUẢ THÀNH CÔNG: Log lưu thành công, sinh 2 cảnh báo xâm nhập phòng VIP khẩn cấp.\nCÁC TRƯỜNG CẬP NHẬT TRÊN ODOO:\n- Model `t4.gate_keeper.access_log`: Tạo mới 2 bản ghi.\n- Model `t4.gate_keeper.area_warning`:\n* Tạo mới 2 bản ghi cảnh báo xâm nhập của thẻ lạ trạng thái active tại Đà Nẵng.\n------------------------------------------------------------------------------",
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"controller_id\": \"CTRL-DN-MAIN-01\",\n    \"logs\": [\n        {\n            \"device_serial\": \"DEV-DN-EXEC-IN-01\",\n            \"card_code\": \"RFID-UNKNOWN-3333\",\n            \"access_time\": \"2026-07-09 11:00:00\",\n            \"direction\": \"in\",\n            \"verification_type\": \"card\"\n        },\n        {\n            \"device_serial\": \"DEV-DN-EXEC-IN-01\",\n            \"card_code\": \"RFID-UNKNOWN-4444\",\n            \"access_time\": \"2026-07-09 11:05:00\",\n            \"direction\": \"in\",\n            \"verification_type\": \"card\"\n        }\n    ]\n}"
+                        }
+                    },
+                    "response": [],
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test(\"Kiểm tra HTTP Status 200\", function () {",
+                                    "    pm.response.to.have.status(200);",
+                                    "});"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "6.4.A Giả lập Vi phạm quy tắc khu vực cấm - Unauthorized Area Access (Hà Nội)",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json",
+                                "type": "text"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/api/v1/AccessLogUpload",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "AccessLogUpload"
+                            ]
+                        },
+                        "description": "------------------------------------------------------------------------------\nCHỨC NĂNG: Nhân sự phòng HR quẹt thẻ vào phòng máy chủ bảo mật.\nĐỐI TƯỢNG: Trần Thị Hành Chính (EMP-HN-HR-001) quẹt thẻ vào cửa phòng máy chủ.\nKẾT QUẢ THÀNH CÔNG:\n- Log quẹt thẻ lưu thành công.\n- Kích hoạt chính sách bảo mật POL-SRV-RESTRICT-HN (Cấm HR vào phòng máy chủ).\n- Tự động tạo Cảnh báo truy cập sai khu vực trong Area Warning.\nCÁC TRƯỜNG CẬP NHẬT TRÊN ODOO:\n- Model `t4.gate_keeper.access_log`: Tạo mới 1 bản ghi.\n- Model `t4.gate_keeper.area_warning`:\n* Tạo mới 1 bản ghi cảnh báo với warning_type_id liên kết đến `unauthorized_area` (state = warning).\n------------------------------------------------------------------------------",
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"controller_id\": \"CTRL-HN-SRV-01\",\n    \"logs\": [\n        {\n            \"device_serial\": \"DEV-HN-SRV-FACE-01\",\n            \"emp_id\": \"EMP-HN-HR-001\",\n            \"card_code\": \"RFID-HN-HR-01\",\n            \"access_time\": \"2026-07-09 14:00:00\",\n            \"direction\": \"in\",\n            \"verification_type\": \"card\"\n        }\n    ]\n}"
+                        }
+                    },
+                    "response": [],
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test(\"Kiểm tra HTTP Status 200\", function () {",
+                                    "    pm.response.to.have.status(200);",
+                                    "});"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "6.5.A Giả lập Vi phạm trình tự ra vào liên tiếp - Anti-passback (Hà Nội)",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json",
+                                "type": "text"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/api/v1/AccessLogUpload",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "AccessLogUpload"
+                            ]
+                        },
+                        "description": "------------------------------------------------------------------------------\nCHỨC NĂNG: Nhân viên quẹt thẻ VÀO liên tiếp 2 lần tại cùng khu vực mà không quẹt RA.\nĐỐI TƯỢNG: Nguyễn Văn Kỹ Thuật (EMP-HN-IT-001) quẹt VÀO lúc 15:00 và VÀO tiếp lúc 15:05.\nKẾT QUẢ THÀNH CÔNG:\n- Ghi nhận log quẹt thẻ lần 2 thành công.\n- Kích hoạt quy tắc chống xoay vòng thẻ POL-APB-ENFORCE.\n- Tự động tạo Cảnh báo vi phạm trình tự ra vào (invalid_sequence / Anti-passback) cho lượt quẹt thứ 2.\nCÁC TRƯỜNG CẬP NHẬT TRÊN ODOO:\n- Model `t4.gate_keeper.access_log`: Tạo mới 2 bản ghi.\n- Model `t4.gate_keeper.area_warning`:\n* Tạo mới 1 bản ghi cảnh báo loại `invalid_sequence` trạng thái active đối với nhân viên Kỹ Thuật.\n------------------------------------------------------------------------------",
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"controller_id\": \"CTRL-HN-LOBBY-01\",\n    \"logs\": [\n        {\n            \"device_serial\": \"DEV-HN-LOB-IN-01\",\n            \"emp_id\": \"EMP-HN-IT-001\",\n            \"card_code\": \"RFID-HN-IT-01\",\n            \"access_time\": \"2026-07-09 15:00:00\",\n            \"direction\": \"in\",\n            \"verification_type\": \"card\"\n        },\n        {\n            \"device_serial\": \"DEV-HN-LOB-IN-01\",\n            \"emp_id\": \"EMP-HN-IT-001\",\n            \"card_code\": \"RFID-HN-IT-01\",\n            \"access_time\": \"2026-07-09 15:05:00\",\n            \"direction\": \"in\",\n            \"verification_type\": \"card\"\n        }\n    ]\n}"
+                        }
+                    },
+                    "response": [],
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test(\"Kiểm tra HTTP Status 200\", function () {",
+                                    "    pm.response.to.have.status(200);",
+                                    "});"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ]
+                }
+            ]
+        }
+    ],
+    "variable": [
+        {
+            "key": "baseUrl",
+            "value": "http://localhost:8070",
+            "type": "string"
+        }
+    ]
+}

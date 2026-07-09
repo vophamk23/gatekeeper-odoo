@@ -160,8 +160,7 @@ Authorization: Bearer {{token}}
 Content-Type: application/json
 
 {
-    "controller_id": "CTRL-HN-LOBBY-01",
-    "sync_timestamp": "2026-07-09 23:00:00"
+    "controller_id": "CTRL-HN-LOBBY-01"
 }
 
 ### 3.3.B Xác nhận hoàn tất đồng bộ thành công của Máy Chủ Hà Nội (ControllerSyncAck)
@@ -178,8 +177,7 @@ Authorization: Bearer {{token}}
 Content-Type: application/json
 
 {
-    "controller_id": "CTRL-HN-SRV-01",
-    "sync_timestamp": "2026-07-09 23:02:00"
+    "controller_id": "CTRL-HN-SRV-01"
 }
 
 ### 3.3.C Xác nhận hoàn tất đồng bộ thành công của Kho HCM (ControllerSyncAck)
@@ -198,8 +196,7 @@ Authorization: Bearer {{token}}
 Content-Type: application/json
 
 {
-    "controller_id": "CTRL-HCM-WHS-01",
-    "sync_timestamp": "2026-07-09 23:05:00"
+    "controller_id": "CTRL-HCM-WHS-01"
 }
 
 ### 3.3.D Xác nhận hoàn tất đồng bộ thành công của Đà Nẵng (ControllerSyncAck)
@@ -216,6 +213,5 @@ Authorization: Bearer {{token}}
 Content-Type: application/json
 
 {
-    "controller_id": "CTRL-DN-MAIN-01",
-    "sync_timestamp": "2026-07-09 23:10:00"
+    "controller_id": "CTRL-DN-MAIN-01"
 }

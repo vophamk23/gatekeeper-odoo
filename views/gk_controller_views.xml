@@ -6,7 +6,7 @@
         <field name="name">t4.gate_keeper.controller.view.list</field>
         <field name="model">t4.gate_keeper.controller</field>
         <field name="arch" type="xml">
-            <list>
+            <list default_group_by="branch_id">
                 <field name="name"/>
                 <field name="branch_id"/>
                 <field name="last_heartbeat_at"/>
@@ -69,10 +69,30 @@
         </field>
     </record>
 
+    <record id="t4_gate_keeper_controller_view_search" model="ir.ui.view">
+        <field name="name">t4.gate_keeper.controller.view.search</field>
+        <field name="model">t4.gate_keeper.controller</field>
+        <field name="arch" type="xml">
+            <search string="Search Controllers">
+                <field name="name" string="Controller Name"/>
+                <field name="serial_number" string="Serial Number"/>
+                <separator/>
+                <filter string="Online" name="filter_online" domain="[('status', '=', 'online')]"/>
+                <filter string="Offline" name="filter_offline" domain="[('status', '=', 'offline')]"/>
+                <group expand="1" string="Group By">
+                    <filter string="Branch" name="group_branch" context="{'group_by': 'branch_id'}"/>
+                    <filter string="Status" name="group_status" context="{'group_by': 'status'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
     <record id="t4_gate_keeper_controller_action" model="ir.actions.act_window">
         <field name="name">Controllers</field>
         <field name="res_model">t4.gate_keeper.controller</field>
         <field name="view_mode">list,form</field>
+        <field name="search_view_id" ref="t4_gate_keeper_controller_view_search"/>
+        <field name="context">{'search_default_group_branch': 1}</field>
     </record>
 
 </odoo>

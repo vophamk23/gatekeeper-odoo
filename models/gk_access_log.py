@@ -46,6 +46,10 @@ class GateKeeperAccessLog(models.Model):
         string="Verification Type",
         default="card",
     )
+    card_code = fields.Char(
+        string="Card Code",
+        help="RFID card code swiped."
+    )
     sync_status = fields.Selection(
         [("success", "Success"), ("fail", "Fail"), ("updating", "Updating")],
         string="Sync Status",

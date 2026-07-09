@@ -266,3 +266,73 @@ Content-Type: application/json
         }
     ]
 }
+
+### 6.4.A Giả lập Vi phạm quy tắc khu vực cấm - Unauthorized Area Access (Hà Nội)
+# ------------------------------------------------------------------------------
+# CHỨC NĂNG: Nhân sự phòng HR quẹt thẻ vào phòng máy chủ bảo mật.
+# ĐỐI TƯỢNG: Trần Thị Hành Chính (EMP-HN-HR-001) quẹt thẻ vào cửa phòng máy chủ.
+# KẾT QUẢ THÀNH CÔNG: 
+# - Log quẹt thẻ lưu thành công.
+# - Kích hoạt chính sách bảo mật POL-SRV-RESTRICT-HN (Cấm HR vào phòng máy chủ).
+# - Tự động tạo Cảnh báo truy cập sai khu vực trong Area Warning.
+# CÁC TRƯỜNG CẬP NHẬT TRÊN ODOO:
+# - Model `t4.gate_keeper.access_log`: Tạo mới 1 bản ghi.
+# - Model `t4.gate_keeper.area_warning`:
+#   * Tạo mới 1 bản ghi cảnh báo với warning_type_id liên kết đến `unauthorized_area` (state = warning).
+# ------------------------------------------------------------------------------
+POST http://localhost:8070/api/v1/AccessLogUpload
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+    "controller_id": "CTRL-HN-SRV-01",
+    "logs": [
+        {
+            "device_serial": "DEV-HN-SRV-FACE-01",
+            "emp_id": "EMP-HN-HR-001",
+            "card_code": "RFID-HN-HR-01",
+            "access_time": "2026-07-09 14:00:00",
+            "direction": "in",
+            "verification_type": "card"
+        }
+    ]
+}
+
+### 6.5.A Giả lập Vi phạm trình tự ra vào liên tiếp - Anti-passback (Hà Nội)
+# ------------------------------------------------------------------------------
+# CHỨC NĂNG: Nhân viên quẹt thẻ VÀO liên tiếp 2 lần tại cùng khu vực mà không quẹt RA.
+# ĐỐI TƯỢNG: Nguyễn Văn Kỹ Thuật (EMP-HN-IT-001) quẹt VÀO lúc 15:00 và VÀO tiếp lúc 15:05.
+# KẾT QUẢ THÀNH CÔNG:
+# - Ghi nhận log quẹt thẻ lần 2 thành công.
+# - Kích hoạt quy tắc chống xoay vòng thẻ POL-APB-ENFORCE.
+# - Tự động tạo Cảnh báo vi phạm trình tự ra vào (invalid_sequence / Anti-passback) cho lượt quẹt thứ 2.
+# CÁC TRƯỜNG CẬP NHẬT TRÊN ODOO:
+# - Model `t4.gate_keeper.access_log`: Tạo mới 2 bản ghi.
+# - Model `t4.gate_keeper.area_warning`:
+#   * Tạo mới 1 bản ghi cảnh báo loại `invalid_sequence` trạng thái active đối với nhân viên Kỹ Thuật.
+# ------------------------------------------------------------------------------
+POST http://localhost:8070/api/v1/AccessLogUpload
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+    "controller_id": "CTRL-HN-LOBBY-01",
+    "logs": [
+        {
+            "device_serial": "DEV-HN-LOB-IN-01",
+            "emp_id": "EMP-HN-IT-001",
+            "card_code": "RFID-HN-IT-01",
+            "access_time": "2026-07-09 15:00:00",
+            "direction": "in",
+            "verification_type": "card"
+        },
+        {
+            "device_serial": "DEV-HN-LOB-IN-01",
+            "emp_id": "EMP-HN-IT-001",
+            "card_code": "RFID-HN-IT-01",
+            "access_time": "2026-07-09 15:05:00",
+            "direction": "in",
+            "verification_type": "card"
+        }
+    ]
+}
