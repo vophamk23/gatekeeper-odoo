@@ -15,6 +15,7 @@ access_t4_gate_keeper_auth_info,t4.gate_keeper.auth_info,model_t4_gate_keeper_au
 access_t4_gate_keeper_device_log,t4.gate_keeper.device_log,model_t4_gate_keeper_device_log,base.group_user,1,1,1,1
 access_t4_gate_keeper_alert_policy,t4.gate_keeper.alert_policy,model_t4_gate_keeper_alert_policy,base.group_user,1,1,1,1
 access_t4_gate_keeper_scheduler,t4.gate_keeper.scheduler,model_t4_gate_keeper_scheduler,base.group_user,1,1,1,1
+access_t4_gate_keeper_command,t4.gate_keeper.command,model_t4_gate_keeper_command,base.group_user,1,1,1,1
 
 
 

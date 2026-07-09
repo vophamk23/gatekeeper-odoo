@@ -1,0 +1,148 @@
+# ==============================================================================
+# NHÓM 5: NHÓM LỆNH ĐIỀU KHIỂN TỪ XA (REMOTE COMMANDS)
+# ==============================================================================
+
+# @name login
+# ------------------------------------------------------------------------------
+# CHỨC NĂNG: Đăng nhập hệ thống qua chuẩn OAuth2 để lấy Access Token (Bearer Token).
+# KẾT QUẢ THÀNH CÔNG: Trả về 200 OK kèm mã token xác thực có thời hạn 24 giờ.
+#                     REST Client sẽ tự động lưu token này vào biến toàn cục {{token}}.
+# CÁC TRƯỜNG CẬP NHẬT: Tạo bản ghi token mới trong bảng `core.api.token`.
+# ------------------------------------------------------------------------------
+POST http://localhost:8070/api/v1/auth/token
+Content-Type: application/json
+
+{
+    "client_id": "app_bf343cac68c93ecce3f2f56e753999c1",
+    "client_secret": "client_secret_123456",
+    "grant_type": "client_credentials"
+}
+
+### Lưu Access Token từ phản hồi của server
+@token = {{login.response.body.api_token.token}}
+
+
+### 5.1.A Quét tìm các lệnh điều khiển từ xa đang chờ của Sảnh Hà Nội (ControllerCommandPoll)
+# ------------------------------------------------------------------------------
+# CHỨC NĂNG: Bộ điều khiển sảnh Hà Nội quét tìm các lệnh mở/đóng cửa do người dùng nhấn trên Odoo.
+# KẾT QUẢ THÀNH CÔNG: 
+# - Trả về danh sách lệnh điều khiển đang ở trạng thái 'Chờ gửi' (pending) của Controller này.
+# - Thiết bị nhận gói tin sẽ kích hoạt tín hiệu rơ-le mở/đóng khóa cửa vật lý tương ứng.
+# CÁC TRƯỜNG CẬP NHẬT TRÊN ODOO:
+# - Model `t4.gate_keeper.command` (Các lệnh của Controller này đang có `state == 'pending'`):
+#   * `state` -> 'sending' (Chuyển sang Đang gửi để tránh gửi trùng lặp).
+#   * `sent_at` -> Thời gian hiện tại.
+# ------------------------------------------------------------------------------
+POST http://localhost:8070/api/v1/ControllerCommandPoll
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+    "controller_id": "CTRL-HN-LOBBY-01"
+}
+
+### 5.1.B Quét tìm các lệnh điều khiển từ xa đang chờ của Máy Chủ Hà Nội (ControllerCommandPoll)
+# ------------------------------------------------------------------------------
+# CHỨC NĂNG: Bộ điều khiển máy chủ Hà Nội quét tìm lệnh điều khiển từ xa.
+# KẾT QUẢ THÀNH CÔNG: Trả về danh sách lệnh pending cho máy chủ.
+# CÁC TRƯỜNG CẬP NHẬT TRÊN ODOO:
+# - Model `t4.gate_keeper.command`:
+#   * `state` -> 'sending'
+#   * `sent_at` -> Thời gian hiện tại.
+# ------------------------------------------------------------------------------
+POST http://localhost:8070/api/v1/ControllerCommandPoll
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+    "controller_id": "CTRL-HN-SRV-01"
+}
+
+### 5.1.C Quét tìm các lệnh điều khiển từ xa đang chờ của Kho HCM (ControllerCommandPoll)
+# ------------------------------------------------------------------------------
+# CHỨC NĂNG: Bộ điều khiển kho HCM quét tìm lệnh điều khiển từ xa.
+# KẾT QUẢ THÀNH CÔNG: Trả về danh sách lệnh pending cho kho HCM.
+# CÁC TRƯỜNG CẬP NHẬT TRÊN ODOO:
+# - Model `t4.gate_keeper.command`:
+#   * `state` -> 'sending'
+#   * `sent_at` -> Thời gian hiện tại.
+# ------------------------------------------------------------------------------
+POST http://localhost:8070/api/v1/ControllerCommandPoll
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+    "controller_id": "CTRL-HCM-WHS-01"
+}
+
+### 5.1.D Quét tìm các lệnh điều khiển từ xa đang chờ của Đà Nẵng (ControllerCommandPoll)
+# ------------------------------------------------------------------------------
+# CHỨC NĂNG: Bộ điều khiển Đà Nẵng quét tìm các lệnh mở/đóng cửa đang chờ.
+# KẾT QUẢ THÀNH CÔNG: Trả về danh sách lệnh đang chờ xử lý của Đà Nẵng.
+# CÁC TRƯỜNG CẬP NHẬT TRÊN ODOO:
+# - Model `t4.gate_keeper.command`:
+#   * `state` -> 'sending'
+#   * `sent_at` -> Thời gian hiện tại.
+# ------------------------------------------------------------------------------
+POST http://localhost:8070/api/v1/ControllerCommandPoll
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+    "controller_id": "CTRL-DN-MAIN-01"
+}
+
+
+### 5.2.A Gửi báo cáo kết quả thực thi lệnh từ Sảnh Hà Nội (ControllerCommandAck)
+# ------------------------------------------------------------------------------
+# CHỨC NĂNG: Bộ điều khiển sảnh báo cáo kết quả kích hoạt rơ-le cơ học (Mở khóa cửa thành công).
+# KẾT QUẢ THÀNH CÔNG: Lệnh Command trên Odoo chuyển sang trạng thái "Thành công" (success).
+# CÁC TRƯỜNG CẬP NHẬT TRÊN ODOO:
+# - Model `t4.gate_keeper.command`:
+#   * `state` -> 'success'
+#   * `execution_message` -> 'Relay activated successfully. Door opened.'
+#   * `executed_at` -> Thời gian hiện tại.
+# Mẹo: Hãy đổi "command_id" thành ID thực tế được trả về từ kết quả của API 5.1 tương ứng.
+# ------------------------------------------------------------------------------
+POST http://localhost:8070/api/v1/ControllerCommandAck
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+    "controller_id": "CTRL-HN-LOBBY-01",
+    "command_id": 1,
+    "execution_message": "Relay activated successfully. Door opened."
+}
+
+### 5.2.B Gửi báo cáo kết quả thực thi lệnh từ Máy Chủ Hà Nội (ControllerCommandAck)
+POST http://localhost:8070/api/v1/ControllerCommandAck
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+    "controller_id": "CTRL-HN-SRV-01",
+    "command_id": 2,
+    "execution_message": "Face Terminal triggered relay. Door unlocked."
+}
+
+### 5.2.C Gửi báo cáo kết quả thực thi lệnh từ Kho HCM (ControllerCommandAck)
+POST http://localhost:8070/api/v1/ControllerCommandAck
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+    "controller_id": "CTRL-HCM-WHS-01",
+    "command_id": 3,
+    "execution_message": "Warehouse fingerprint controller closed relay."
+}
+
+### 5.2.D Gửi báo cáo kết quả thực thi lệnh từ Đà Nẵng (ControllerCommandAck)
+POST http://localhost:8070/api/v1/ControllerCommandAck
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+    "controller_id": "CTRL-DN-MAIN-01",
+    "command_id": 4,
+    "execution_message": "Da Nang main controller activated relay 2 successfully."
+}

@@ -17,3 +17,4 @@ from . import gk_access_log
 from . import gk_alert_policy
 from . import gk_area_warning
 from . import gk_scheduler
+from . import gk_command

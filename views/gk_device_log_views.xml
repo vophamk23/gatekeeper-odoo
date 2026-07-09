@@ -9,8 +9,16 @@
                 <field name="controller_id"/>
                 <field name="event_type"/>
                 <field name="changed_at"/>
-                <field name="old_status"/>
-                <field name="new_status"/>
+                <field name="old_status"
+                       widget="badge"
+                       decoration-success="old_status == 'online'"
+                       decoration-warning="old_status == 'controller_offline'"
+                       decoration-danger="old_status == 'offline'"/>
+                <field name="new_status"
+                       widget="badge"
+                       decoration-success="new_status == 'online'"
+                       decoration-warning="new_status == 'controller_offline'"
+                       decoration-danger="new_status == 'offline'"/>
             </list>
         </field>
     </record>

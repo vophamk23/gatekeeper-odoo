@@ -1,0 +1,268 @@
+# ==============================================================================
+# NHÓM 6: CÁC KỊCH BẢN KIỂM THỬ NÂNG CAO (EDGE CASES & VIOLATIONS BATCH)
+# ==============================================================================
+
+# @name login
+# ------------------------------------------------------------------------------
+# CHỨC NĂNG: Đăng nhập hệ thống qua chuẩn OAuth2 để lấy Access Token (Bearer Token).
+# KẾT QUẢ THÀNH CÔNG: Trả về 200 OK kèm mã token xác thực có thời hạn 24 giờ.
+#                     REST Client sẽ tự động lưu token này vào biến toàn cục {{token}}.
+# CÁC TRƯỜNG CẬP NHẬT: Tạo bản ghi token mới trong bảng `core.api.token`.
+# ------------------------------------------------------------------------------
+POST http://localhost:8070/api/v1/auth/token
+Content-Type: application/json
+
+{
+    "client_id": "app_bf343cac68c93ecce3f2f56e753999c1",
+    "client_secret": "client_secret_123456",
+    "grant_type": "client_credentials"
+}
+
+### Lưu Access Token từ phản hồi của server
+@token = {{login.response.body.api_token.token}}
+
+
+### 6.1.A Giả lập Đầu đọc sảnh vào Hà Nội mất kết nối (Heartbeat - Device Offline)
+# ------------------------------------------------------------------------------
+# CHỨC NĂNG: Bộ điều khiển báo cáo thiết bị con DEV-HN-LOB-IN-01 bị mất mạng/mất nguồn.
+# KẾT QUẢ THÀNH CÔNG: 
+# - Đầu đọc sảnh vào chuyển sang màu đỏ (Offline) trên Odoo.
+# - Tự động tạo bản ghi Cảnh báo sự cố thiết bị mới ở menu Warnings.
+# CÁC TRƯỜNG CẬP NHẬT TRÊN ODOO:
+# - Model `t4.gate_keeper.device` (Mã DEV-HN-LOB-IN-01):
+#   * `status` -> 'offline'
+# - Model `t4.gate_keeper.area_warning` (Cảnh báo sự cố):
+#   * Tạo mới 1 bản ghi warning với:
+#     * `device_id` -> Liên kết tới đầu đọc sảnh vào.
+#     * `warning_type_id` -> Cảnh báo lỗi thiết bị (`device_issue`).
+#     * `state` -> 'active' (Hoạt động).
+#     * `description` -> "Device DEV-HN-LOB-IN-01 is offline."
+# ------------------------------------------------------------------------------
+POST http://localhost:8070/api/v1/ControllerHeartbeat
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+    "controller_id": "CTRL-HN-LOBBY-01",
+    "devices_status": [
+        {
+            "device_sn": "DEV-HN-LOB-IN-01",
+            "status": "offline"
+        }
+    ]
+}
+
+### 6.1.B Giả lập Đầu đọc phòng máy chủ Hà Nội mất kết nối (Heartbeat - Device Offline)
+# ------------------------------------------------------------------------------
+# CHỨC NĂNG: Bộ điều khiển báo cáo đầu đọc khuôn mặt máy chủ bị mất mạng.
+# KẾT QUẢ THÀNH CÔNG: Đầu đọc chuyển sang offline và sinh cảnh báo lỗi thiết bị.
+# CÁC TRƯỜNG CẬP NHẬT TRÊN ODOO:
+# - Model `t4.gate_keeper.device` (Mã DEV-HN-SRV-FACE-01):
+#   * `status` -> 'offline'
+# - Model `t4.gate_keeper.area_warning`:
+#   * Tạo mới 1 bản ghi cảnh báo lỗi thiết bị (`device_issue`) trạng thái active.
+# ------------------------------------------------------------------------------
+POST http://localhost:8070/api/v1/ControllerHeartbeat
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+    "controller_id": "CTRL-HN-SRV-01",
+    "devices_status": [
+        {
+            "device_sn": "DEV-HN-SRV-FACE-01",
+            "status": "offline"
+        }
+    ]
+}
+
+### 6.1.C Giả lập Đầu đọc quét vân tay cửa kho HCM mất kết nối (Heartbeat - Device Offline)
+# ------------------------------------------------------------------------------
+# CHỨC NĂNG: Bộ điều khiển kho HCM báo đầu đọc vân tay bị mất mạng.
+# KẾT QUẢ THÀNH CÔNG: Đầu đọc kho chuyển sang offline và sinh cảnh báo lỗi thiết bị.
+# CÁC TRƯỜNG CẬP NHẬT TRÊN ODOO:
+# - Model `t4.gate_keeper.device` (Mã DEV-HCM-WHS-FGR-01):
+#   * `status` -> 'offline'
+# - Model `t4.gate_keeper.area_warning`:
+#   * Tạo mới 1 bản ghi cảnh báo lỗi thiết bị (`device_issue`) trạng thái active.
+# ------------------------------------------------------------------------------
+POST http://localhost:8070/api/v1/ControllerHeartbeat
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+    "controller_id": "CTRL-HCM-WHS-01",
+    "devices_status": [
+        {
+            "device_sn": "DEV-HCM-WHS-FGR-01",
+            "status": "offline"
+        }
+    ]
+}
+
+### 6.1.D Giả lập Đầu đọc phòng R&D Đà Nẵng mất kết nối (Heartbeat - Device Offline)
+# ------------------------------------------------------------------------------
+# CHỨC NĂNG: Bộ điều khiển báo cáo đầu đọc R&D Đà Nẵng bị mất mạng.
+# KẾT QUẢ THÀNH CÔNG:
+# - Đầu đọc R&D Đà Nẵng chuyển sang trạng thái "Offline" màu đỏ.
+# - Tự động sinh ra cảnh báo sự cố `device_issue` của chi nhánh Đà Nẵng.
+# CÁC TRƯỜNG CẬP NHẬT TRÊN ODOO:
+# - Model `t4.gate_keeper.device` (Mã DEV-DN-RD-IN-01):
+#   * `status` -> 'offline'
+# - Model `t4.gate_keeper.area_warning`:
+#   * Tạo mới 1 bản ghi cảnh báo lỗi thiết bị hoạt động (`device_issue`) trạng thái active.
+# ------------------------------------------------------------------------------
+POST http://localhost:8070/api/v1/ControllerHeartbeat
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+    "controller_id": "CTRL-DN-MAIN-01",
+    "devices_status": [
+        {
+            "device_sn": "DEV-DN-RD-IN-01",
+            "status": "offline"
+        }
+    ]
+}
+
+### 6.2.A Giả lập Nhóm quẹt thẻ ngoài giờ làm việc hành chính Hà Nội (Giờ giới nghiêm)
+# ------------------------------------------------------------------------------
+# CHỨC NĂNG: Đẩy lô log quẹt thẻ lúc NỬA ĐÊM (23:45:00) vi phạm giờ làm việc hành chính của chi nhánh.
+# ĐỐI TƯỢNG: 
+# - Nguyễn Văn Kỹ Thuật (EMP-HN-IT-001) quẹt VÀO lúc 23:45:00.
+# - Lê Văn Bảo Vệ (EMP-HN-SEC-001) quẹt RA lúc 23:48:00.
+# KẾT QUẢ THÀNH CÔNG:
+# - Odoo lưu thành công 2 sự kiện quẹt thẻ.
+# - Tự động đối chiếu múi giờ chi nhánh, phát hiện ngoài giờ làm việc (08:00 - 17:00).
+# - Tự động tạo 2 bản ghi Cảnh báo vi phạm giờ giới nghiêm cho cả 2 nhân viên.
+# CÁC TRƯỜNG CẬP NHẬT TRÊN ODOO:
+# - Model `t4.gate_keeper.access_log`: Tạo mới 2 bản ghi.
+# - Model `t4.gate_keeper.area_warning`:
+#   * Tạo mới 2 bản ghi cảnh báo với `warning_type_id` = Truy cập không hợp lệ (`invalid_access`), trạng thái `state` = 'active', mô tả chi tiết vi phạm giờ giới nghiêm ban đêm.
+# ------------------------------------------------------------------------------
+POST http://localhost:8070/api/v1/AccessLogUpload
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+    "controller_id": "CTRL-HN-LOBBY-01",
+    "logs": [
+        {
+            "device_serial": "DEV-HN-LOB-IN-01",
+            "emp_id": "EMP-HN-IT-001",
+            "card_code": "RFID-HN-IT-01",
+            "access_time": "2026-07-09 23:45:00",
+            "direction": "in",
+            "verification_type": "card"
+        },
+        {
+            "device_serial": "DEV-HN-LOB-OUT-01",
+            "emp_id": "EMP-HN-SEC-001",
+            "card_code": "RFID-HN-SEC-01",
+            "access_time": "2026-07-09 23:48:00",
+            "direction": "out",
+            "verification_type": "card"
+        }
+    ]
+}
+
+### 6.2.B Giả lập Nhân viên thời vụ HCM quẹt giờ cấm (Giờ giới nghiêm thời vụ)
+# ------------------------------------------------------------------------------
+# CHỨC NĂNG: Đẩy log nhân viên thời vụ quẹt thẻ tại HCM lúc 22:00:00.
+# ĐỐI TƯỢNG: Phạm Văn Thời Vụ (EMP-HCM-TMP-001) quẹt thẻ lúc 22:00:00 tại HCM Warehouse.
+# KẾT QUẢ THÀNH CÔNG: 
+# - Log quẹt thẻ lưu thành công.
+# - Hệ thống kích hoạt chính sách bảo mật POL-TEMP-CURFEW (Cấm nhân viên thời vụ sau 18:00) và tự động tạo Cảnh báo vi phạm giờ giới nghiêm của CTV.
+# CÁC TRƯỜNG CẬP NHẬT TRÊN ODOO:
+# - Model `t4.gate_keeper.access_log`: Tạo mới 1 bản ghi.
+# - Model `t4.gate_keeper.area_warning`:
+#   * Tạo mới 1 bản ghi cảnh báo loại `invalid_access` trạng thái active với mô tả vi phạm giờ giới nghiêm của CTV thời vụ.
+# ------------------------------------------------------------------------------
+POST http://localhost:8070/api/v1/AccessLogUpload
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+    "controller_id": "CTRL-HCM-WHS-01",
+    "logs": [
+        {
+            "device_serial": "DEV-HCM-WHS-FGR-01",
+            "emp_id": "EMP-HCM-TMP-001",
+            "card_code": "RFID-HCM-TMP-01",
+            "access_time": "2026-07-09 22:00:00",
+            "direction": "in",
+            "verification_type": "card"
+        }
+    ]
+}
+
+### 6.3.A Giả lập Nhóm quẹt thẻ lạ chưa đăng ký ở Hà Nội (Batch Unknown Cards)
+# ------------------------------------------------------------------------------
+# CHỨC NĂNG: Người lạ quẹt 2 mã thẻ chưa được đăng ký trong Odoo.
+# ĐỐI TƯỢNG: Thẻ RFID-UNKNOWN-8888 và RFID-UNKNOWN-9999 tại sảnh Hà Nội.
+# KẾT QUẢ THÀNH CÔNG: 
+# - Odoo lưu thành công 2 sự kiện quẹt thẻ (trường Nhân viên bỏ trống vì không nhận diện được).
+# - Kích hoạt chính sách bảo mật POL-UNKNOWN-CARD-MONITOR và dựng 2 Cảnh báo thẻ lạ xâm nhập khẩn cấp.
+# CÁC TRƯỜNG CẬP NHẬT TRÊN ODOO:
+# - Model `t4.gate_keeper.access_log`: Tạo mới 2 bản ghi (trường `employee_id` = False).
+# - Model `t4.gate_keeper.area_warning`:
+#   * Tạo mới 2 bản ghi cảnh báo loại `invalid_access` trạng thái `active` báo động có đối tượng dùng thẻ lạ xâm nhập.
+# ------------------------------------------------------------------------------
+POST http://localhost:8070/api/v1/AccessLogUpload
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+    "controller_id": "CTRL-HN-LOBBY-01",
+    "logs": [
+        {
+            "device_serial": "DEV-HN-LOB-IN-01",
+            "card_code": "RFID-UNKNOWN-8888",
+            "access_time": "2026-07-09 10:00:00",
+            "direction": "in",
+            "verification_type": "card"
+        },
+        {
+            "device_serial": "DEV-HN-LOB-IN-01",
+            "card_code": "RFID-UNKNOWN-9999",
+            "access_time": "2026-07-09 10:05:00",
+            "direction": "in",
+            "verification_type": "card"
+        }
+    ]
+}
+
+### 6.3.B Giả lập Nhóm quẹt thẻ lạ chưa đăng ký ở phòng Giám đốc Đà Nẵng (Batch Unknown Cards)
+# ------------------------------------------------------------------------------
+# CHỨC NĂNG: Người lạ quẹt 2 thẻ lạ tại cửa phòng Giám đốc Đà Nẵng.
+# ĐỐI TƯỢNG: Thẻ RFID-UNKNOWN-3333 và RFID-UNKNOWN-4444 tại Đà Nẵng.
+# KẾT QUẢ THÀNH CÔNG: Log lưu thành công, sinh 2 cảnh báo xâm nhập phòng VIP khẩn cấp.
+# CÁC TRƯỜNG CẬP NHẬT TRÊN ODOO:
+# - Model `t4.gate_keeper.access_log`: Tạo mới 2 bản ghi.
+# - Model `t4.gate_keeper.area_warning`:
+#   * Tạo mới 2 bản ghi cảnh báo xâm nhập của thẻ lạ trạng thái active tại Đà Nẵng.
+# ------------------------------------------------------------------------------
+POST http://localhost:8070/api/v1/AccessLogUpload
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+    "controller_id": "CTRL-DN-MAIN-01",
+    "logs": [
+        {
+            "device_serial": "DEV-DN-EXEC-IN-01",
+            "card_code": "RFID-UNKNOWN-3333",
+            "access_time": "2026-07-09 11:00:00",
+            "direction": "in",
+            "verification_type": "card"
+        },
+        {
+            "device_serial": "DEV-DN-EXEC-IN-01",
+            "card_code": "RFID-UNKNOWN-4444",
+            "access_time": "2026-07-09 11:05:00",
+            "direction": "in",
+            "verification_type": "card"
+        }
+    ]
+}

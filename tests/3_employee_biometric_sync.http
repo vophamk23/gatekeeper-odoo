@@ -1,0 +1,221 @@
+# ==============================================================================
+# NHÓM 3: ĐỒNG BỘ NHÂN VIÊN & DỮ LIỆU SINH TRẮC HỌC (EMPLOYEE SYNC)
+# ==============================================================================
+
+# @name login
+# ------------------------------------------------------------------------------
+# CHỨC NĂNG: Đăng nhập hệ thống qua chuẩn OAuth2 để lấy Access Token (Bearer Token).
+# KẾT QUẢ THÀNH CÔNG: Trả về 200 OK kèm mã token xác thực có thời hạn 24 giờ.
+#                     REST Client sẽ tự động lưu token này vào biến toàn cục {{token}}.
+# CÁC TRƯỜNG CẬP NHẬT: Tạo bản ghi token mới trong bảng `core.api.token`.
+# ------------------------------------------------------------------------------
+POST http://localhost:8070/api/v1/auth/token
+Content-Type: application/json
+
+{
+    "client_id": "app_bf343cac68c93ecce3f2f56e753999c1",
+    "client_secret": "client_secret_123456",
+    "grant_type": "client_credentials"
+}
+
+### Lưu Access Token từ phản hồi của server
+@token = {{login.response.body.api_token.token}}
+
+
+### 3.1.A Truy vấn danh sách nhân viên thay đổi của Sảnh Hà Nội (ControllerEmployeeSync)
+# ------------------------------------------------------------------------------
+# CHỨC NĂNG: Thiết bị Hà Nội hỏi Odoo xem từ mốc đồng bộ trước có nhân viên nào mới/sửa đổi/bị xóa hay không.
+# KẾT QUẢ THÀNH CÔNG: Trả về danh sách mã nhân viên (`emp_id`) cần đồng bộ cập nhật.
+# CÁC TRƯỜNG CẬP NHẬT TRÊN ODOO: Không ghi dữ liệu mới lên database (Read-only query).
+# ------------------------------------------------------------------------------
+POST http://localhost:8070/api/v1/ControllerEmployeeSync
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+    "serial_number": "CTRL-HN-LOBBY-01",
+    "last_sync_at": "2026-07-01 08:00:00"
+}
+
+### 3.1.B Truy vấn danh sách nhân viên thay đổi của Phòng Máy Chủ Hà Nội (ControllerEmployeeSync)
+# ------------------------------------------------------------------------------
+# CHỨC NĂNG: Thiết bị phòng máy chủ Hà Nội truy vấn danh sách thay đổi nhân sự.
+# KẾT QUẢ THÀNH CÔNG: Trả về danh sách nhân viên có quyền truy cập máy chủ (IT, Bảo vệ, Giám đốc).
+# CÁC TRƯỜNG CẬP NHẬT TRÊN ODOO: Không ghi dữ liệu mới.
+# ------------------------------------------------------------------------------
+POST http://localhost:8070/api/v1/ControllerEmployeeSync
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+    "serial_number": "CTRL-HN-SRV-01",
+    "last_sync_at": "2026-07-01 08:00:00"
+}
+
+### 3.1.C Truy vấn danh sách nhân viên thay đổi của Kho HCM (ControllerEmployeeSync)
+# ------------------------------------------------------------------------------
+# CHỨC NĂNG: Thiết bị kho HCM hỏi Odoo xem từ mốc đồng bộ trước có nhân viên nào thay đổi không.
+# KẾT QUẢ THÀNH CÔNG: Trả về danh sách mã nhân viên (`emp_id`) thay đổi của kho HCM.
+# CÁC TRƯỜNG CẬP NHẬT TRÊN ODOO: Không ghi dữ liệu mới lên database (Read-only query).
+# ------------------------------------------------------------------------------
+POST http://localhost:8070/api/v1/ControllerEmployeeSync
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+    "serial_number": "CTRL-HCM-WHS-01",
+    "last_sync_at": "2026-07-01 08:00:00"
+}
+
+### 3.1.D Truy vấn danh sách nhân viên thay đổi của Chi nhánh Đà Nẵng (ControllerEmployeeSync)
+# ------------------------------------------------------------------------------
+# CHỨC NĂNG: Thiết bị Đà Nẵng truy vấn danh sách thay đổi nhân sự.
+# KẾT QUẢ THÀNH CÔNG: Trả về danh sách nhân viên thuộc chi nhánh Đà Nẵng.
+# CÁC TRƯỜNG CẬP NHẬT TRÊN ODOO: Không ghi dữ liệu mới.
+# ------------------------------------------------------------------------------
+POST http://localhost:8070/api/v1/ControllerEmployeeSync
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+    "serial_number": "CTRL-DN-MAIN-01",
+    "last_sync_at": "2026-07-01 08:00:00"
+}
+
+
+### 3.2.A Tải chi tiết dữ liệu sinh trắc học của Nguyễn Văn Kỹ Thuật (EmployeeBiometricGet)
+# ------------------------------------------------------------------------------
+# CHỨC NĂNG: Thiết bị Hà Nội tải chi tiết dữ liệu thẻ từ / mã pin / vân tay của EMP-HN-IT-001.
+# KẾT QUẢ THÀNH CÔNG: Trả về mã thẻ `RFID-HN-IT-01` và chuỗi sinh trắc học vân tay Base64 để lưu vào bộ nhớ máy.
+# CÁC TRƯỜNG CẬP NHẬT TRÊN ODOO: Không ghi dữ liệu mới lên database (Read-only query).
+# ------------------------------------------------------------------------------
+POST http://localhost:8070/api/v1/EmployeeBiometricGet
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+    "controller_id": "CTRL-HN-LOBBY-01",
+    "emp_id": "EMP-HN-IT-001"
+}
+
+### 3.2.B Tải chi tiết dữ liệu sinh trắc học của Nguyễn Văn Giám Đốc (EmployeeBiometricGet)
+# ------------------------------------------------------------------------------
+# CHỨC NĂNG: Thiết bị Hà Nội tải chi tiết dữ liệu sinh trắc khuôn mặt của EMP-HN-DIR-001.
+# KẾT QUẢ THÀNH CÔNG: Trả về thông tin thẻ `RFID-HN-DIR-01` và chuỗi khuôn mặt Base64 của Giám Đốc.
+# CÁC TRƯỜNG CẬP NHẬT TRÊN ODOO: Không ghi dữ liệu mới lên database (Read-only query).
+# ------------------------------------------------------------------------------
+POST http://localhost:8070/api/v1/EmployeeBiometricGet
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+    "controller_id": "CTRL-HN-LOBBY-01",
+    "emp_id": "EMP-HN-DIR-001"
+}
+
+### 3.2.C Tải chi tiết dữ liệu sinh trắc học của Phạm Văn Thời Vụ (EmployeeBiometricGet)
+# ------------------------------------------------------------------------------
+# CHỨC NĂNG: Thiết bị kho HCM tải chi tiết dữ liệu thẻ từ của nhân viên thời vụ EMP-HCM-TMP-001.
+# KẾT QUẢ THÀNH CÔNG: Trả về mã thẻ `RFID-HCM-TMP-01` của nhân viên thời vụ HCM.
+# CÁC TRƯỜNG CẬP NHẬT TRÊN ODOO: Không ghi dữ liệu mới lên database (Read-only query).
+# ------------------------------------------------------------------------------
+POST http://localhost:8070/api/v1/EmployeeBiometricGet
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+    "controller_id": "CTRL-HCM-WHS-01",
+    "emp_id": "EMP-HCM-TMP-001"
+}
+
+### 3.2.D Tải chi tiết dữ liệu sinh trắc học của Lê Văn Bảo Vệ (EmployeeBiometricGet)
+# ------------------------------------------------------------------------------
+# CHỨC NĂNG: Thiết bị Hà Nội tải chi tiết dữ liệu của Bảo vệ EMP-HN-SEC-001.
+# KẾT QUẢ THÀNH CÔNG: Trả về mã thẻ `RFID-HN-SEC-01` và chuỗi vân tay Base64.
+# CÁC TRƯỜNG CẬP NHẬT TRÊN ODOO: Không ghi dữ liệu mới.
+# ------------------------------------------------------------------------------
+POST http://localhost:8070/api/v1/EmployeeBiometricGet
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+    "controller_id": "CTRL-HN-LOBBY-01",
+    "emp_id": "EMP-HN-SEC-001"
+}
+
+
+### 3.3.A Xác nhận hoàn tất đồng bộ thành công của Sảnh Hà Nội (ControllerSyncAck)
+# ------------------------------------------------------------------------------
+# CHỨC NĂNG: Thiết bị Hà Nội báo cho Odoo biết đã hoàn thành tải và nạp xong toàn bộ dữ liệu.
+# KẾT QUẢ THÀNH CÔNG: 
+# - Cập nhật mốc thời gian đồng bộ cuối cùng của bộ điều khiển.
+# - Đổi trạng thái đồng bộ nhân viên thành "Synced" (màu xanh lá) trên Odoo.
+# CÁC TRƯỜNG CẬP NHẬT TRÊN ODOO:
+# - Model `t4.gate_keeper.controller` (Mã CTRL-HN-LOBBY-01):
+#   * `last_sync_at` -> '2026-07-09 23:00:00' (Mốc thời gian gửi lên)
+#   * `employee_sync_status` -> 'synced' (Chuyển sang màu xanh lá)
+# ------------------------------------------------------------------------------
+POST http://localhost:8070/api/v1/ControllerSyncAck
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+    "controller_id": "CTRL-HN-LOBBY-01",
+    "sync_timestamp": "2026-07-09 23:00:00"
+}
+
+### 3.3.B Xác nhận hoàn tất đồng bộ thành công của Máy Chủ Hà Nội (ControllerSyncAck)
+# ------------------------------------------------------------------------------
+# CHỨC NĂNG: Thiết bị phòng máy chủ Hà Nội báo cáo đã đồng bộ xong.
+# KẾT QUẢ THÀNH CÔNG: Cập nhật Last Sync và chuyển trạng thái thành Synced.
+# CÁC TRƯỜNG CẬP NHẬT TRÊN ODOO:
+# - Model `t4.gate_keeper.controller` (Mã CTRL-HN-SRV-01):
+#   * `last_sync_at` -> '2026-07-09 23:02:00'
+#   * `employee_sync_status` -> 'synced'
+# ------------------------------------------------------------------------------
+POST http://localhost:8070/api/v1/ControllerSyncAck
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+    "controller_id": "CTRL-HN-SRV-01",
+    "sync_timestamp": "2026-07-09 23:02:00"
+}
+
+### 3.3.C Xác nhận hoàn tất đồng bộ thành công của Kho HCM (ControllerSyncAck)
+# ------------------------------------------------------------------------------
+# CHỨC NĂNG: Thiết bị kho HCM báo cho Odoo biết đã nạp xong dữ liệu nhân sự.
+# KẾT QUẢ THÀNH CÔNG: 
+# - Cập nhật mốc thời gian đồng bộ cuối của kho HCM.
+# - Chuyển trạng thái đồng bộ kho HCM thành "Synced" (màu xanh lá).
+# CÁC TRƯỜNG CẬP NHẬT TRÊN ODOO:
+# - Model `t4.gate_keeper.controller` (Mã CTRL-HCM-WHS-01):
+#   * `last_sync_at` -> '2026-07-09 23:05:00'
+#   * `employee_sync_status` -> 'synced'
+# ------------------------------------------------------------------------------
+POST http://localhost:8070/api/v1/ControllerSyncAck
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+    "controller_id": "CTRL-HCM-WHS-01",
+    "sync_timestamp": "2026-07-09 23:05:00"
+}
+
+### 3.3.D Xác nhận hoàn tất đồng bộ thành công của Đà Nẵng (ControllerSyncAck)
+# ------------------------------------------------------------------------------
+# CHỨC NĂNG: Thiết bị Đà Nẵng báo cáo đã nạp xong dữ liệu.
+# KẾT QUẢ THÀNH CÔNG: Cập nhật mốc thời gian đồng bộ Đà Nẵng và chuyển sang Synced.
+# CÁC TRƯỜNG CẬP NHẬT TRÊN ODOO:
+# - Model `t4.gate_keeper.controller` (Mã CTRL-DN-MAIN-01):
+#   * `last_sync_at` -> '2026-07-09 23:10:00'
+#   * `employee_sync_status` -> 'synced'
+# ------------------------------------------------------------------------------
+POST http://localhost:8070/api/v1/ControllerSyncAck
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+    "controller_id": "CTRL-DN-MAIN-01",
+    "sync_timestamp": "2026-07-09 23:10:00"
+}

@@ -1,0 +1,135 @@
+# ==============================================================================
+# NHÓM 2: GIÁM SÁT TRẠNG THÁI (MONITORING & HEARTBEAT)
+# ==============================================================================
+
+# @name login
+# ------------------------------------------------------------------------------
+# CHỨC NĂNG: Đăng nhập hệ thống qua chuẩn OAuth2 để lấy Access Token (Bearer Token).
+# KẾT QUẢ THÀNH CÔNG: Trả về 200 OK kèm mã token xác thực có thời hạn 24 giờ.
+#                     REST Client sẽ tự động lưu token này vào biến toàn cục {{token}}.
+# CÁC TRƯỜNG CẬP NHẬT: Tạo bản ghi token mới trong bảng `core.api.token`.
+# ------------------------------------------------------------------------------
+POST http://localhost:8070/api/v1/auth/token
+Content-Type: application/json
+
+{
+    "client_id": "app_bf343cac68c93ecce3f2f56e753999c1",
+    "client_secret": "client_secret_123456",
+    "grant_type": "client_credentials"
+}
+
+### Lưu Access Token từ phản hồi của server
+@token = {{login.response.body.api_token.token}}
+
+
+### 2.1.A Gửi nhịp tim định kỳ của Controller Sảnh Hà Nội (Heartbeat)
+# ------------------------------------------------------------------------------
+# CHỨC NĂNG: Bộ điều khiển Hà Nội báo cáo nhịp tim "sống" định kỳ kèm trạng thái của các đầu đọc.
+# KẾT QUẢ THÀNH CÔNG: 
+# - Cập nhật thời điểm nhận nhịp tim cuối của Controller.
+# - Giữ trạng thái của 2 đầu đọc sảnh là "Online".
+# CÁC TRƯỜNG CẬP NHẬT TRÊN ODOO:
+# - Model `t4.gate_keeper.controller` (Mã CTRL-HN-LOBBY-01):
+#   * `last_heartbeat_at` -> Thời gian hiện tại.
+# - Model `t4.gate_keeper.device` (Mã DEV-HN-LOB-IN-01 & DEV-HN-LOB-OUT-01):
+#   * `status` -> 'online' (Nếu trước đó bị offline thì đổi sang online).
+# ------------------------------------------------------------------------------
+POST http://localhost:8070/api/v1/ControllerHeartbeat
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+    "controller_id": "CTRL-HN-LOBBY-01",
+    "devices_status": [
+        {
+            "device_sn": "DEV-HN-LOB-IN-01",
+            "status": "online"
+        },
+        {
+            "device_sn": "DEV-HN-LOB-OUT-01",
+            "status": "online"
+        }
+    ]
+}
+
+### 2.1.B Gửi nhịp tim định kỳ của Controller Phòng Máy Chủ Hà Nội (Heartbeat)
+# ------------------------------------------------------------------------------
+# CHỨC NĂNG: Bộ điều khiển phòng máy chủ Hà Nội báo cáo nhịp tim sống.
+# KẾT QUẢ THÀNH CÔNG: 
+# - Cập nhật thời điểm nhận nhịp tim cuối của Controller phòng máy chủ.
+# - Giữ trạng thái đầu đọc nhận diện khuôn mặt cửa máy chủ là "Online".
+# CÁC TRƯỜNG CẬP NHẬT TRÊN ODOO:
+# - Model `t4.gate_keeper.controller` (Mã CTRL-HN-SRV-01):
+#   * `last_heartbeat_at` -> Thời gian hiện tại.
+# - Model `t4.gate_keeper.device` (Mã DEV-HN-SRV-FACE-01):
+#   * `status` -> 'online'.
+# ------------------------------------------------------------------------------
+POST http://localhost:8070/api/v1/ControllerHeartbeat
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+    "controller_id": "CTRL-HN-SRV-01",
+    "devices_status": [
+        {
+            "device_sn": "DEV-HN-SRV-FACE-01",
+            "status": "online"
+        }
+    ]
+}
+
+### 2.1.C Gửi nhịp tim định kỳ của Controller Kho hàng HCM (Heartbeat)
+# ------------------------------------------------------------------------------
+# CHỨC NĂNG: Bộ điều khiển kho HCM báo cáo nhịp tim định kỳ.
+# KẾT QUẢ THÀNH CÔNG: 
+# - Cập nhật thời điểm nhận nhịp tim cuối của Controller kho HCM.
+# - Giữ trạng thái đầu đọc vân tay cửa kho là "Online".
+# CÁC TRƯỜNG CẬP NHẬT TRÊN ODOO:
+# - Model `t4.gate_keeper.controller` (Mã CTRL-HCM-WHS-01):
+#   * `last_heartbeat_at` -> Thời gian hiện tại.
+# - Model `t4.gate_keeper.device` (Mã DEV-HCM-WHS-FGR-01):
+#   * `status` -> 'online'.
+# ------------------------------------------------------------------------------
+POST http://localhost:8070/api/v1/ControllerHeartbeat
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+    "controller_id": "CTRL-HCM-WHS-01",
+    "devices_status": [
+        {
+            "device_sn": "DEV-HCM-WHS-FGR-01",
+            "status": "online"
+        }
+    ]
+}
+
+### 2.1.D Gửi nhịp tim định kỳ của Controller Chi nhánh Đà Nẵng (Heartbeat)
+# ------------------------------------------------------------------------------
+# CHỨC NĂNG: Bộ điều khiển Đà Nẵng báo cáo nhịp tim sống định kỳ kèm trạng thái của các đầu đọc.
+# KẾT QUẢ THÀNH CÔNG: 
+# - Cập nhật thời điểm nhận nhịp tim cuối của Controller Đà Nẵng.
+# - Giữ trạng thái các đầu đọc con Đà Nẵng là "Online".
+# CÁC TRƯỜNG CẬP NHẬT TRÊN ODOO:
+# - Model `t4.gate_keeper.controller` (Mã CTRL-DN-MAIN-01):
+#   * `last_heartbeat_at` -> Thời gian hiện tại.
+# - Model `t4.gate_keeper.device` (Mã DEV-DN-RD-IN-01 & DEV-DN-EXEC-IN-01):
+#   * `status` -> 'online'.
+# ------------------------------------------------------------------------------
+POST http://localhost:8070/api/v1/ControllerHeartbeat
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+    "controller_id": "CTRL-DN-MAIN-01",
+    "devices_status": [
+        {
+            "device_sn": "DEV-DN-RD-IN-01",
+            "status": "online"
+        },
+        {
+            "device_sn": "DEV-DN-EXEC-IN-01",
+            "status": "online"
+        }
+    ]
+}

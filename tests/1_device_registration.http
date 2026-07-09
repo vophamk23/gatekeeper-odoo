@@ -1,0 +1,340 @@
+# ==============================================================================
+# NHÓM 1: KHỞI ĐỘNG & ĐĂNG KÝ THIẾT BỊ (DEVICE REGISTRATION)
+# ==============================================================================
+
+# @name login
+# ------------------------------------------------------------------------------
+# CHỨC NĂNG: Đăng nhập hệ thống qua chuẩn OAuth2 để lấy Access Token (Bearer Token).
+# KẾT QUẢ THÀNH CÔNG: Trả về 200 OK kèm mã token xác thực có thời hạn 24 giờ.
+#                     REST Client sẽ tự động lưu token này vào biến toàn cục {{token}}.
+# CÁC TRƯỜNG CẬP NHẬT: Tạo bản ghi token mới trong bảng `core.api.token`.
+# ------------------------------------------------------------------------------
+POST http://localhost:8070/api/v1/auth/token
+Content-Type: application/json
+
+{
+    "client_id": "app_bf343cac68c93ecce3f2f56e753999c1",
+    "client_secret": "client_secret_123456",
+    "grant_type": "client_credentials"
+}
+
+### Lưu Access Token từ phản hồi của server
+@token = {{login.response.body.api_token.token}}
+
+
+### 1.1.A Đăng ký Bộ điều khiển Sảnh chính Hà Nội (ControllerRegister)
+# ------------------------------------------------------------------------------
+# CHỨC NĂNG: Bộ điều khiển sảnh gửi cấu hình mạng khi khởi động lên Odoo.
+# KẾT QUẢ THÀNH CÔNG: 
+# - Bộ điều khiển trên Odoo chuyển sang trạng thái "Online" (màu xanh lá).
+# - Tự động cascade (đồng bộ) chuyển toàn bộ các đầu đọc con sảnh sang trạng thái "Online".
+# CÁC TRƯỜNG CẬP NHẬT TRÊN ODOO:
+# - Model `t4.gate_keeper.controller` (Mã CTRL-HN-LOBBY-01):
+#   * `status` -> 'online'
+#   * `ip_address` -> '192.168.10.210'
+#   * `mac_address` -> '00:17:0A:11:22:33'
+#   * `firmware_version` -> 'v2.1.0'
+#   * `last_heartbeat_at` -> Thời gian hiện tại.
+# - Model `t4.gate_keeper.device` (Đầu đọc con):
+#   * `status` -> 'online' (Cho cả đầu đọc sảnh vào và sảnh ra).
+# ------------------------------------------------------------------------------
+POST http://localhost:8070/api/v1/ControllerRegister
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+    "controller_id": "CTRL-HN-LOBBY-01",
+    "hardware_model": "T4-GATE-PRO",
+    "firmware_version": "v2.1.0",
+    "ip_address": "192.168.10.210",
+    "mac_address": "00:17:0A:11:22:33",
+    "connection_type": "tcp_ip"
+}
+
+### 1.1.B Đăng ký Bộ điều khiển Phòng Máy Chủ Hà Nội (ControllerRegister)
+# ------------------------------------------------------------------------------
+# CHỨC NĂNG: Bộ điều khiển phòng máy chủ Hà Nội gửi cấu hình mạng khi khởi động.
+# KẾT QUẢ THÀNH CÔNG: 
+# - Bộ điều khiển phòng máy chủ trên Odoo chuyển sang trạng thái "Online".
+# - Đầu đọc nhận diện khuôn mặt phòng máy chủ chuyển sang trạng thái "Online".
+# CÁC TRƯỜNG CẬP NHẬT TRÊN ODOO:
+# - Model `t4.gate_keeper.controller` (Mã CTRL-HN-SRV-01):
+#   * `status` -> 'online'
+#   * `ip_address` -> '192.168.10.211'
+#   * `mac_address` -> '00:17:0A:11:22:44'
+#   * `firmware_version` -> 'v2.4.1'
+#   * `last_heartbeat_at` -> Thời gian hiện tại.
+# - Model `t4.gate_keeper.device` (Đầu đọc khuôn mặt máy chủ):
+#   * `status` -> 'online'
+# ------------------------------------------------------------------------------
+POST http://localhost:8070/api/v1/ControllerRegister
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+    "controller_id": "CTRL-HN-SRV-01",
+    "hardware_model": "InBio Pro 260",
+    "firmware_version": "v2.4.1",
+    "ip_address": "192.168.10.211",
+    "mac_address": "00:17:0A:11:22:44",
+    "connection_type": "tcp_ip"
+}
+
+### 1.1.C Đăng ký Bộ điều khiển Kho HCM (ControllerRegister)
+# ------------------------------------------------------------------------------
+# CHỨC NĂNG: Bộ điều khiển kho hàng HCM gửi cấu hình mạng khi khởi động lên Odoo.
+# KẾT QUẢ THÀNH CÔNG: 
+# - Bộ điều khiển trên Odoo chuyển sang trạng thái "Online".
+# - Đầu đọc vân tay cửa kho chuyển sang trạng thái "Online".
+# CÁC TRƯỜNG CẬP NHẬT TRÊN ODOO:
+# - Model `t4.gate_keeper.controller` (Mã CTRL-HCM-WHS-01):
+#   * `status` -> 'online'
+#   * `ip_address` -> '192.168.20.220'
+#   * `mac_address` -> '00:17:0A:22:33:44'
+#   * `firmware_version` -> 'v2.3.2'
+#   * `last_heartbeat_at` -> Thời gian hiện tại.
+# - Model `t4.gate_keeper.device` (Đầu đọc vân tay kho):
+#   * `status` -> 'online'
+# ------------------------------------------------------------------------------
+POST http://localhost:8070/api/v1/ControllerRegister
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+    "controller_id": "CTRL-HCM-WHS-01",
+    "hardware_model": "InBio Pro 160",
+    "firmware_version": "v2.3.2",
+    "ip_address": "192.168.20.220",
+    "mac_address": "00:17:0A:22:33:44",
+    "connection_type": "tcp_ip"
+}
+
+### 1.1.D Đăng ký Bộ điều khiển Chi nhánh Đà Nẵng (ControllerRegister)
+# ------------------------------------------------------------------------------
+# CHỨC NĂNG: Bộ điều khiển Đà Nẵng gửi cấu hình mạng khi khởi động lên Odoo.
+# KẾT QUẢ THÀNH CÔNG: 
+# - Bộ điều khiển trên Odoo chuyển sang trạng thái "Online".
+# - Đầu đọc phòng R&D và Phòng Giám Đốc Đà Nẵng chuyển sang trạng thái "Online".
+# CÁC TRƯỜNG CẬP NHẬT TRÊN ODOO:
+# - Model `t4.gate_keeper.controller` (Mã CTRL-DN-MAIN-01):
+#   * `status` -> 'online'
+#   * `ip_address` -> '192.168.30.150'
+#   * `mac_address` -> '00:17:0A:33:44:55'
+#   * `firmware_version` -> 'v2.4.1'
+#   * `last_heartbeat_at` -> Thời gian hiện tại.
+# - Model `t4.gate_keeper.device` (Đầu đọc con Đà Nẵng):
+#   * `status` -> 'online'
+# ------------------------------------------------------------------------------
+POST http://localhost:8070/api/v1/ControllerRegister
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+    "controller_id": "CTRL-DN-MAIN-01",
+    "hardware_model": "InBio Pro 260",
+    "firmware_version": "v2.4.1",
+    "ip_address": "192.168.30.150",
+    "mac_address": "00:17:0A:33:44:55",
+    "connection_type": "tcp_ip"
+}
+
+### 1.2.A Đăng ký đầu đọc Sảnh vào Hà Nội (DeviceRegister)
+# ------------------------------------------------------------------------------
+# CHỨC NĂNG: Đăng ký thông tin chi tiết của đầu đọc thẻ từ sảnh vào Hà Nội.
+# KẾT QUẢ THÀNH CÔNG: Đầu đọc con đổi từ trạng thái không xác định sang "Online".
+# CÁC TRƯỜNG CẬP NHẬT TRÊN ODOO:
+# - Model `t4.gate_keeper.device` (Mã DEV-HN-LOB-IN-01):
+#   * `status` -> 'online'
+#   * `firmware_version` -> 'v1.2.0'
+#   * `port_or_channel` -> 'Relay 1 / Input 1'
+#   * `system_version` -> 'Linux 4.19'
+# ------------------------------------------------------------------------------
+POST http://localhost:8070/api/v1/DeviceRegister
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+    "device_sn": "DEV-HN-LOB-IN-01",
+    "area": "Sảnh đón khách chính (Hanoi Lobby)",
+    "device-model": "ZKTeco SpeedFace V5L",
+    "firmware_version": "v1.2.0",
+    "port/channel": "Relay 1 / Input 1",
+    "system_version": "Linux 4.19"
+}
+
+### 1.2.B Đăng ký đầu đọc Sảnh ra Hà Nội (DeviceRegister)
+# ------------------------------------------------------------------------------
+# CHỨC NĂNG: Đăng ký thông tin chi tiết của đầu đọc thẻ từ sảnh ra Hà Nội.
+# KẾT QUẢ THÀNH CÔNG: Đầu đọc con đổi từ trạng thái không xác định sang "Online".
+# CÁC TRƯỜNG CẬP NHẬT TRÊN ODOO:
+# - Model `t4.gate_keeper.device` (Mã DEV-HN-LOB-OUT-01):
+#   * `status` -> 'online'
+#   * `firmware_version` -> 'v1.0.5'
+#   * `port_or_channel` -> 'Relay 2 / Input 2'
+#   * `system_version` -> 'FreeRTOS v10'
+# ------------------------------------------------------------------------------
+POST http://localhost:8070/api/v1/DeviceRegister
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+    "device_sn": "DEV-HN-LOB-OUT-01",
+    "area": "Sảnh đón khách chính (Hanoi Lobby)",
+    "device-model": "Suprema BioEntry W2",
+    "firmware_version": "v1.0.5",
+    "port/channel": "Relay 2 / Input 2",
+    "system_version": "FreeRTOS v10"
+}
+
+### 1.2.C Đăng ký nhận diện khuôn mặt phòng máy chủ Hà Nội (DeviceRegister)
+# ------------------------------------------------------------------------------
+# CHỨC NĂNG: Đăng ký thông tin chi tiết đầu đọc khuôn mặt phòng máy chủ.
+# KẾT QUẢ THÀNH CÔNG: Đầu đọc con đổi từ trạng thái không xác định sang "Online".
+# CÁC TRƯỜNG CẬP NHẬT TRÊN ODOO:
+# - Model `t4.gate_keeper.device` (Mã DEV-HN-SRV-FACE-01):
+#   * `status` -> 'online'
+#   * `firmware_version` -> 'v2.1.2'
+#   * `port_or_channel` -> 'Relay 1 / Input 1'
+#   * `system_version` -> 'Android 8.1'
+# ------------------------------------------------------------------------------
+POST http://localhost:8070/api/v1/DeviceRegister
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+    "device_sn": "DEV-HN-SRV-FACE-01",
+    "area": "Phòng máy chủ trung tâm (Server Room)",
+    "device-model": "Hikvision DS-K1T671",
+    "firmware_version": "v2.1.2",
+    "port/channel": "Relay 1 / Input 1",
+    "system_version": "Android 8.1"
+}
+
+### 1.2.D Đăng ký đầu đọc Quét vân tay Cửa kho HCM (DeviceRegister)
+# ------------------------------------------------------------------------------
+# CHỨC NĂNG: Đăng ký thông tin chi tiết của đầu đọc vân tay cửa kho HCM.
+# KẾT QUẢ THÀNH CÔNG: Thiết bị con đổi trạng thái sang "Online".
+# CÁC TRƯỜNG CẬP NHẬT TRÊN ODOO:
+# - Model `t4.gate_keeper.device` (Mã DEV-HCM-WHS-FGR-01):
+#   * `status` -> 'online'
+#   * `firmware_version` -> 'v1.2.0'
+#   * `port_or_channel` -> 'Relay 1 / Input 1'
+#   * `system_version` -> 'Linux 4.19'
+# ------------------------------------------------------------------------------
+POST http://localhost:8070/api/v1/DeviceRegister
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+    "device_sn": "DEV-HCM-WHS-FGR-01",
+    "area": "Kho hàng thành phẩm (HCM Warehouse)",
+    "device-model": "ZKTeco SpeedFace V5L",
+    "firmware_version": "v1.2.0",
+    "port/channel": "Relay 1 / Input 1",
+    "system_version": "Linux 4.19"
+}
+
+### 1.2.E Đăng ký đầu đọc thẻ RFID phòng R&D Đà Nẵng (DeviceRegister)
+# ------------------------------------------------------------------------------
+# CHỨC NĂNG: Đăng ký thông tin chi tiết đầu đọc phòng R&D Đà Nẵng.
+# KẾT QUẢ THÀNH CÔNG: Thiết bị con đổi trạng thái sang "Online".
+# CÁC TRƯỜNG CẬP NHẬT TRÊN ODOO:
+# - Model `t4.gate_keeper.device` (Mã DEV-DN-RD-IN-01):
+#   * `status` -> 'online'
+#   * `firmware_version` -> 'v1.0.5'
+#   * `port_or_channel` -> 'Relay 1'
+#   * `system_version` -> 'FreeRTOS v10'
+# ------------------------------------------------------------------------------
+POST http://localhost:8070/api/v1/DeviceRegister
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+    "device_sn": "DEV-DN-RD-IN-01",
+    "area": "Phòng Nghiên cứu & Phát triển R&D (Da Nang R&D)",
+    "device-model": "Suprema BioEntry W2",
+    "firmware_version": "v1.0.5",
+    "port/channel": "Relay 1",
+    "system_version": "FreeRTOS v10"
+}
+
+### 1.2.F Đăng ký đầu đọc khuôn mặt phòng Giám đốc Đà Nẵng (DeviceRegister)
+# ------------------------------------------------------------------------------
+# CHỨC NĂNG: Đăng ký thông tin chi tiết của đầu đọc phòng Giám đốc Đà Nẵng.
+# KẾT QUẢ THÀNH CÔNG: Thiết bị con đổi trạng thái sang "Online".
+# CÁC TRƯỜNG CẬP NHẬT TRÊN ODOO:
+# - Model `t4.gate_keeper.device` (Mã DEV-DN-EXEC-IN-01):
+#   * `status` -> 'online'
+#   * `firmware_version` -> 'v2.1.2'
+#   * `port_or_channel` -> 'Relay 2'
+#   * `system_version` -> 'Android 8.1'
+# ------------------------------------------------------------------------------
+POST http://localhost:8070/api/v1/DeviceRegister
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+    "device_sn": "DEV-DN-EXEC-IN-01",
+    "area": "Phòng Ban Giám Đốc (Da Nang Boardroom)",
+    "device-model": "Hikvision DS-K1T671",
+    "firmware_version": "v2.1.2",
+    "port/channel": "Relay 2",
+    "system_version": "Android 8.1"
+}
+
+### 1.3.A Tải Cấu hình hoạt động của Controller Sảnh chính Hà Nội (ControllerGetConfig)
+# ------------------------------------------------------------------------------
+# CHỨC NĂNG: Bộ điều khiển sảnh tải cấu hình hoạt động từ server về bộ nhớ đệm local.
+# KẾT QUẢ THÀNH CÔNG: Trả về múi giờ 'Asia/Ho_Chi_Minh' và danh sách các đầu đọc con sảnh.
+# CÁC TRƯỜNG CẬP NHẬT TRÊN ODOO: Không ghi nhận (Đây là API truy vấn lấy dữ liệu dạng Read-only).
+# ------------------------------------------------------------------------------
+POST http://localhost:8070/api/v1/ControllerGetConfig
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+    "serial_number": "CTRL-HN-LOBBY-01"
+}
+
+### 1.3.B Tải Cấu hình hoạt động của Controller Chi nhánh Đà Nẵng (ControllerGetConfig)
+# ------------------------------------------------------------------------------
+# CHỨC NĂNG: Bộ điều khiển Đà Nẵng tải cấu hình từ server Odoo về.
+# KẾT QUẢ THÀNH CÔNG: Trả về múi giờ 'Asia/Ho_Chi_Minh' và danh sách đầu đọc/thuật toán tương ứng.
+# CÁC TRƯỜNG CẬP NHẬT TRÊN ODOO: Không ghi nhận (Read-only).
+# ------------------------------------------------------------------------------
+POST http://localhost:8070/api/v1/ControllerGetConfig
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+    "serial_number": "CTRL-DN-MAIN-01"
+}
+
+### 1.3.C Tải Cấu hình hoạt động của Controller Phòng Máy Chủ Hà Nội (ControllerGetConfig)
+# ------------------------------------------------------------------------------
+# CHỨC NĂNG: Bộ điều khiển phòng máy chủ Hà Nội tải cấu hình hoạt động từ server về.
+# KẾT QUẢ THÀNH CÔNG: Trả về múi giờ 'Asia/Ho_Chi_Minh' và đầu đọc khuôn mặt phòng máy chủ.
+# CÁC TRƯỜNG CẬP NHẬT TRÊN ODOO: Không ghi nhận (Read-only).
+# ------------------------------------------------------------------------------
+POST http://localhost:8070/api/v1/ControllerGetConfig
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+    "serial_number": "CTRL-HN-SRV-01"
+}
+
+### 1.3.D Tải Cấu hình hoạt động của Controller Kho hàng HCM (ControllerGetConfig)
+# ------------------------------------------------------------------------------
+# CHỨC NĂNG: Bộ điều khiển kho hàng HCM tải cấu hình hoạt động từ server về.
+# KẾT QUẢ THÀNH CÔNG: Trả về múi giờ 'Asia/Ho_Chi_Minh' và đầu đọc quét vân tay.
+# CÁC TRƯỜNG CẬP NHẬT TRÊN ODOO: Không ghi nhận (Read-only).
+# ------------------------------------------------------------------------------
+POST http://localhost:8070/api/v1/ControllerGetConfig
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+    "serial_number": "CTRL-HCM-WHS-01"
+}
+

@@ -1,0 +1,184 @@
+# ==============================================================================
+# NHÓM 4: NHẬT KÝ SỰ KIỆN RA VÀO (ACCESS LOGS)
+# ==============================================================================
+
+# @name login
+# ------------------------------------------------------------------------------
+# CHỨC NĂNG: Đăng nhập hệ thống qua chuẩn OAuth2 để lấy Access Token (Bearer Token).
+# KẾT QUẢ THÀNH CÔNG: Trả về 200 OK kèm mã token xác thực có thời hạn 24 giờ.
+#                     REST Client sẽ tự động lưu token này vào biến toàn cục {{token}}.
+# CÁC TRƯỜNG CẬP NHẬT: Tạo bản ghi token mới trong bảng `core.api.token`.
+# ------------------------------------------------------------------------------
+POST http://localhost:8070/api/v1/auth/token
+Content-Type: application/json
+
+{
+    "client_id": "app_bf343cac68c93ecce3f2f56e753999c1",
+    "client_secret": "client_secret_123456",
+    "grant_type": "client_credentials"
+}
+
+### Lưu Access Token từ phản hồi của server
+@token = {{login.response.body.api_token.token}}
+
+
+### 4.1.A Tải lô quẹt thẻ giờ hành chính của nhóm nhân sự Hà Nội (AccessLogUpload)
+# ------------------------------------------------------------------------------
+# CHỨC NĂNG: Thiết bị Hà Nội đẩy hàng loạt nhật ký quẹt thẻ offline của nhân viên lên Odoo.
+# ĐỐI TƯỢNG: 
+# - Nguyễn Văn Kỹ Thuật (EMP-HN-IT-001) quẹt VÀO lúc 08:30 và RA lúc 17:30.
+# - Trần Thị Hành Chính (EMP-HN-HR-001) quẹt VÀO lúc 08:15 và RA lúc 17:15.
+# KẾT QUẢ THÀNH CÔNG: 
+# - Tạo 4 bản ghi lịch sử ra vào thành công trong phân hệ Access Logs của Odoo.
+# - Hệ thống tự động tìm đúng nhân viên thông qua mã thẻ RFID để gán vào log.
+# - Cập nhật trạng thái vị trí hiện tại của Kỹ Thuật và Hành Chính thành "Đang ở ngoài" (vì lượt quẹt cuối là Out).
+# - Không tạo cảnh báo vi phạm an ninh (vì quẹt thẻ đúng giờ hành chính và thẻ đã đăng ký).
+# CÁC TRƯỜNG CẬP NHẬT TRÊN ODOO:
+# - Model `t4.gate_keeper.access_log`: Tạo mới 4 bản ghi tương ứng.
+# - Model `t4.gate_keeper.employee` (Nhân viên IT & HR):
+#   * `last_action` -> 'out'
+#   * `last_action_time` -> Cập nhật thời gian ra tương ứng ('2026-07-09 17:30:00' và '17:15:00').
+# ------------------------------------------------------------------------------
+POST http://localhost:8070/api/v1/AccessLogUpload
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+    "controller_id": "CTRL-HN-LOBBY-01",
+    "logs": [
+        {
+            "device_serial": "DEV-HN-LOB-IN-01",
+            "emp_id": "EMP-HN-IT-001",
+            "card_code": "RFID-HN-IT-01",
+            "access_time": "2026-07-09 08:30:00",
+            "direction": "in",
+            "verification_type": "card"
+        },
+        {
+            "device_serial": "DEV-HN-LOB-IN-01",
+            "emp_id": "EMP-HN-HR-001",
+            "card_code": "RFID-HN-HR-01",
+            "access_time": "2026-07-09 08:15:00",
+            "direction": "in",
+            "verification_type": "card"
+        },
+        {
+            "device_serial": "DEV-HN-LOB-OUT-01",
+            "emp_id": "EMP-HN-HR-001",
+            "card_code": "RFID-HN-HR-01",
+            "access_time": "2026-07-09 17:15:00",
+            "direction": "out",
+            "verification_type": "card"
+        },
+        {
+            "device_serial": "DEV-HN-LOB-OUT-01",
+            "emp_id": "EMP-HN-IT-001",
+            "card_code": "RFID-HN-IT-01",
+            "access_time": "2026-07-09 17:30:00",
+            "direction": "out",
+            "verification_type": "card"
+        }
+    ]
+}
+
+### 4.1.B Tải lô quẹt khuôn mặt Cửa Máy Chủ Hà Nội (AccessLogUpload)
+# ------------------------------------------------------------------------------
+# CHỨC NĂNG: Bộ điều khiển phòng máy chủ tải log nhận diện khuôn mặt ra vào.
+# ĐỐI TƯỢNG: Nguyễn Văn Giám Đốc (EMP-HN-DIR-001) quẹt VÀO lúc 10:00 và RA lúc 10:30.
+# KẾT QUẢ THÀNH CÔNG: Tạo 2 bản ghi Access Log. Cập nhật vị trí Giám đốc thành "Đang ở ngoài".
+# CÁC TRƯỜNG CẬP NHẬT TRÊN ODOO:
+# - Model `t4.gate_keeper.access_log`: Tạo mới 2 bản ghi.
+# - Model `t4.gate_keeper.employee` (EMP-HN-DIR-001):
+#   * `last_action` -> 'out'
+#   * `last_action_time` -> '2026-07-09 10:30:00'
+# ------------------------------------------------------------------------------
+POST http://localhost:8070/api/v1/AccessLogUpload
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+    "controller_id": "CTRL-HN-SRV-01",
+    "logs": [
+        {
+            "device_serial": "DEV-HN-SRV-FACE-01",
+            "emp_id": "EMP-HN-DIR-001",
+            "access_time": "2026-07-09 10:00:00",
+            "direction": "in",
+            "verification_type": "face"
+        },
+        {
+            "device_serial": "DEV-HN-SRV-FACE-01",
+            "emp_id": "EMP-HN-DIR-001",
+            "access_time": "2026-07-09 10:30:00",
+            "direction": "out",
+            "verification_type": "face"
+        }
+    ]
+}
+
+### 4.1.C Tải lô quẹt vân tay Cửa kho hàng HCM (AccessLogUpload)
+# ------------------------------------------------------------------------------
+# CHỨC NĂNG: Bộ điều khiển kho hàng HCM tải log vân tay của nhân viên thời vụ.
+# ĐỐI TƯỢNG: Phạm Văn Thời Vụ (EMP-HCM-TMP-001) quẹt vân tay VÀO lúc 09:00:00 và RA lúc 12:00:00.
+# KẾT QUẢ THÀNH CÔNG: Tạo 2 bản ghi Access Log. Cập nhật vị trí CTV thành "Đang ở ngoài".
+# CÁC TRƯỜNG CẬP NHẬT TRÊN ODOO:
+# - Model `t4.gate_keeper.access_log`: Tạo mới 2 bản ghi.
+# - Model `t4.gate_keeper.employee` (EMP-HCM-TMP-001):
+#   * `last_action` -> 'out'
+#   * `last_action_time` -> '2026-07-09 12:00:00'
+# ------------------------------------------------------------------------------
+POST http://localhost:8070/api/v1/AccessLogUpload
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+    "controller_id": "CTRL-HCM-WHS-01",
+    "logs": [
+        {
+            "device_serial": "DEV-HCM-WHS-FGR-01",
+            "emp_id": "EMP-HCM-TMP-001",
+            "card_code": "RFID-HCM-TMP-01",
+            "access_time": "2026-07-09 09:00:00",
+            "direction": "in",
+            "verification_type": "fingerprint"
+        },
+        {
+            "device_serial": "DEV-HCM-WHS-FGR-01",
+            "emp_id": "EMP-HCM-TMP-001",
+            "card_code": "RFID-HCM-TMP-01",
+            "access_time": "2026-07-09 12:00:00",
+            "direction": "out",
+            "verification_type": "fingerprint"
+        }
+    ]
+}
+
+### 4.1.D Tải lô quẹt thẻ của nhóm nhân sự chi nhánh Đà Nẵng (AccessLogUpload)
+# ------------------------------------------------------------------------------
+# CHỨC NĂNG: Bộ điều khiển Đà Nẵng tải log quẹt nhận diện khuôn mặt của Giám Đốc lên Odoo.
+# ĐỐI TƯỢNG: Nguyễn Văn Giám Đốc (EMP-HN-DIR-001) quẹt VÀO lúc 09:00:00.
+# KẾT QUẢ THÀNH CÔNG: 
+# - Tạo 1 bản ghi Access Log quẹt nhận diện khuôn mặt thành công trên Odoo.
+# - Cập nhật vị trí Giám đốc thành "Đang ở trong chi nhánh".
+# CÁC TRƯỜNG CẬP NHẬT TRÊN ODOO:
+# - Model `t4.gate_keeper.access_log`: Tạo mới 1 bản ghi.
+# - Model `t4.gate_keeper.employee` (Mã EMP-HN-DIR-001):
+#   * `last_action` -> 'in'
+#   * `last_action_time` -> '2026-07-09 09:00:00'
+# ------------------------------------------------------------------------------
+POST http://localhost:8070/api/v1/AccessLogUpload
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+    "controller_id": "CTRL-DN-MAIN-01",
+    "logs": [
+        {
+            "device_serial": "DEV-DN-EXEC-IN-01",
+            "emp_id": "EMP-HN-DIR-001",
+            "access_time": "2026-07-09 09:00:00",
+            "direction": "in",
+            "verification_type": "face"
+        }
+    ]
+}

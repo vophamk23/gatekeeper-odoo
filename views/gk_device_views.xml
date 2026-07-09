@@ -15,13 +15,13 @@
                       decoration-warning="status == 'controller_offline'"
                       decoration-danger="status == 'offline'">
                     <field name="name" string="Device Name"/>
-                    <field name="serial_number" string="Serial Number"/>
-                    <field name="vendor" string="Manufacturer"/>
-                    <field name="device_model_id" string="Model"/>
-                    <field name="controller_id" string="Controller"/>
-                    <field name="branch_id" string="Branch"/>
-                    <field name="area_id" string="Area"/>
-                    <field name="last_seen_at" string="Last Connection"/>
+                    <field name="serial_number" string="Serial Number" optional="show"/>
+                    <field name="vendor" string="Manufacturer" optional="hide"/>
+                    <field name="device_model_id" string="Model" optional="show"/>
+                    <field name="controller_id" string="Controller" optional="show"/>
+                    <field name="branch_id" string="Branch" optional="show"/>
+                    <field name="area_id" string="Area" optional="show"/>
+                    <field name="last_seen_at" string="Last Connection" optional="hide"/>
                     <field name="status"
                            string="Status"
                            widget="badge"
@@ -32,7 +32,8 @@
                            string="Employee Sync"
                            widget="badge"
                            decoration-success="employee_sync_status == 'synced'"
-                           decoration-danger="employee_sync_status == 'out_of_sync'"/>
+                           decoration-danger="employee_sync_status == 'out_of_sync'"
+                           optional="show"/>
                 </list>
             </field>
         </record>

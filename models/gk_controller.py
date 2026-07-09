@@ -2,6 +2,7 @@
 # Mục đích: Quản lý thiết bị điều khiển vật lý (Controller), cài đặt kết nối, heartbeat và các API đồng bộ.
 
 import logging
+import base64
 
 from odoo import api, _, fields, models
 from odoo.addons.t4_coreapi.utils import endpoint, get_body, require_fields
@@ -157,88 +158,391 @@ class T4GateKeeperController(models.Model):
             limit=1,
         )
 
-    # Cấu hình API - ĐIỂM KHỞI ĐẦU LUỒNG HEARTBEAT (Gửi từ thiết bị phần cứng để duy trì kết nối)
-    # Được gọi bởi: Thiết bị Controller gửi HTTP POST đến đường dẫn API: /api/ControllerHeartbeat
+    # ----------------------------------------------------
+    # API 1: ControllerRegister (Đăng ký Controller)
+    # ----------------------------------------------------
+    @endpoint(name="ControllerRegister")
+    def controller_register(self):
+        """API nhận thông tin đăng ký phần cứng từ Controller vật lý khi khởi động."""
+        body = get_body()
+        require_fields(body, ["controller_id"])
+        controller_id = body.get("controller_id")
+
+        controller = self._find_controller(controller_id)
+        if not controller:
+            raise ValidationError(
+                _("Không tìm thấy Controller với serial: %s") % controller_id
+            )
+
+        controller.write({
+            "hardware_model": body.get("hardware_model"),
+            "firmware_version": body.get("firmware_version"),
+            "ip_address": body.get("ip_address"),
+            "mac_address": body.get("mac_address"),
+            "connection_type": body.get("connection_type") or "tcp_ip",
+            "status": "online",
+            "last_heartbeat_at": fields.Datetime.now(),
+        })
+
+        return {
+            "message": "Success",
+            "status": "200 OK",
+            "controller_id": controller.id,
+            "name": controller.name,
+        }
+
+    # ----------------------------------------------------
+    # API 2: DeviceRegister (Đăng ký Device con)
+    # ----------------------------------------------------
+    @endpoint(name="DeviceRegister")
+    def device_register(self):
+        """API nhận thông tin đăng ký thiết bị đầu cuối vật lý (Device con)."""
+        body = get_body()
+        require_fields(body, ["device_sn"])
+        device_sn = body.get("device_sn")
+
+        device = self.env["t4.gate_keeper.device"].search([("serial_number", "=", device_sn)], limit=1)
+        if not device:
+            raise ValidationError(
+                _("Không tìm thấy Device con với serial: %s") % device_sn
+            )
+
+        device.write({
+            "port_or_channel": body.get("port/channel") or body.get("port_or_channel"),
+            "firmware_version": body.get("firmware_version"),
+            "system_version": body.get("system_version"),
+            "status": "online",
+        })
+
+        return {
+            "message": "Success",
+            "status": "200 OK",
+            "device_id": device.id,
+            "controller_name": device.controller_id.name,
+            "device_name": device.name,
+        }
+
+    # ----------------------------------------------------
+    # API 3: ControllerGetConfig (Tải cấu hình Controller)
+    # ----------------------------------------------------
+    @endpoint(name="ControllerGetConfig")
+    def controller_get_config(self):
+        """API tải thông số cấu hình và danh sách đầu đọc vật lý của Controller."""
+        body = get_body()
+        require_fields(body, ["serial_number"])
+        serial = body.get("serial_number")
+
+        controller = self._find_controller(serial)
+        if not controller:
+            raise ValidationError(
+                _("Không tìm thấy Controller với serial: %s") % serial
+            )
+
+        devices_data = []
+        for dev in controller.device_ids:
+            algos = []
+            for algo in dev.algorithm_ids:
+                algos.append({
+                    "name": algo.name,
+                    "type": algo.algorithm_type,
+                    "version": algo.version or "1.0",
+                })
+            devices_data.append({
+                "device_id": dev.id,
+                "name": dev.name,
+                "serial_number": dev.serial_number,
+                "port_or_channel": dev.port_or_channel,
+                "supported_algorithms": algos,
+            })
+
+        return {
+            "message": "Success",
+            "status": "200 OK",
+            "timezone": controller.timezone or "Asia/Ho_Chi_Minh",
+            "devices": devices_data,
+        }
+
+    # ----------------------------------------------------
+    # API 4: ControllerHeartbeat (Heartbeat của Controller)
+    # ----------------------------------------------------
     @endpoint(name="ControllerHeartbeat")
     def controller_heartbeat(self):
-        """Nhận heartbeat từ controller vàt cập nhật trạng thái online.
-
-        Payload: { "serial_number": "<serial>" }
-        """
+        """API nhận nhịp tim định kỳ và cập nhật trạng thái kết nối các thiết bị."""
         body = get_body()
-        require_fields(body, ["serial_number"])
-        serial_number = body.get("serial_number")
+        require_fields(body, ["controller_id"])
+        controller_id = body.get("controller_id")
+        devices_status = body.get("devices_status", [])
 
-        controller = self._find_controller(serial_number)
+        controller = self._find_controller(controller_id)
         if not controller:
             raise ValidationError(
-                _("Không tìm thấy controller với serial: %s") % serial_number
+                _("Không tìm thấy Controller với serial: %s") % controller_id
             )
 
-        # ---> Gọi hàm: write() tại L233 trong file này (gk_controller.py) để lưu trạng thái & cascade sang thiết bị
-        controller.write(
-            {
-                "last_heartbeat_at": fields.Datetime.now(),
-                "status": "online",
-            }
-        )
+        controller.write({
+            "status": "online",
+            "last_heartbeat_at": fields.Datetime.now(),
+        })
 
-    # Cấu hình API - ĐIỂM KHỞI ĐẦU LUỒNG ĐỒNG BỘ NHÂN VIÊN (Thiết bị gọi để tải danh sách vân tay/khuôn mặt mới)
-    # Được gọi bởi: Thiết bị Controller gửi HTTP POST đến đường dẫn API: /api/ControllerEmployeeSync
+        for dev_info in devices_status:
+            dev_sn = dev_info.get("device_sn")
+            status = dev_info.get("status")
+            if dev_sn and status:
+                device = self.env["t4.gate_keeper.device"].search([
+                    ("serial_number", "=", dev_sn),
+                    ("controller_id", "=", controller.id)
+                ], limit=1)
+                if device:
+                    device.write({"status": status})
+
+        return {
+            "message": "Success",
+            "status": "200 OK",
+        }
+
+    # ----------------------------------------------------
+    # API 5: ControllerEmployeeSync (Lọc danh sách cập nhật nhân sự)
+    # ----------------------------------------------------
     @endpoint(name="ControllerEmployeeSync")
     def controller_employee_sync(self):
-        """Trả về danh sách nhân viên cần đồng bộ (delta sync theo write_date).
-
-        Payload: { "serial_number": "<serial>" }
-        Response data: danh sách { emp_id, name, biometrics[] }
-        """
+        """API lấy danh sách thay đổi nhân sự (delta sync) để thêm/sửa/xóa trên thiết bị."""
         body = get_body()
         require_fields(body, ["serial_number"])
-        serial_number = body.get("serial_number")
+        serial = body.get("serial_number")
+        last_sync_str = body.get("last_sync_at")
 
-        controller = self._find_controller(serial_number)
+        controller = self._find_controller(serial)
         if not controller:
             raise ValidationError(
-                _("Không tìm thấy controller với serial: %s") % serial_number
+                _("Không tìm thấy Controller với serial: %s") % serial
             )
 
-        # ---> Gọi hàm: _get_employee_sync_domain() tại L251 trong file này (gk_controller.py)
-        domain = self._get_employee_sync_domain(controller)
-        # ---> Gọi hàm: _get_employees_to_sync() tại L263 trong file này (gk_controller.py)
-        employees = self._get_employees_to_sync(domain)
+        last_sync = fields.Datetime.from_string(last_sync_str) if last_sync_str else controller.last_sync_at
 
-        current_time = fields.Datetime.now()
+        # Nếu chưa đồng bộ lần nào, lấy tất cả nhân viên của chi nhánh hoặc dùng chung
+        if not last_sync:
+            employees = self.env["t4.gate_keeper.employee"].with_context(active_test=False).search([])
+        else:
+            employees = self.env["t4.gate_keeper.employee"].with_context(active_test=False).search([
+                ("write_date", ">", last_sync)
+            ])
 
-        if not employees:
-            # ---> Gọi hàm: write() tại L233 trong file này (gk_controller.py)
-            controller.write({"last_sync_at": current_time, "status": "online"})
-            return {"message": _("Already up-to-date"), "data": []}
-
-        data = []
+        sync_data = []
         for emp in employees:
-            # Lấy thông tin sinh trắc học của nhân viên
-            biometrics = []
-            for bio in emp.biometric_ids:
-                biometrics.append(
-                    {
-                        "algorithm": bio.algorithm_id.name if bio.algorithm_id else "",
-                        "algorithm_code": (
-                            bio.algorithm_id.code if bio.algorithm_id else ""
-                        ),
-                        "template_data": bio.template.decode("utf-8") if isinstance(bio.template, bytes) else (bio.template or ""),
-                    }
-                )
-            data.append(
-                {
-                    "emp_id": emp.emp_id,
-                    "name": emp.name,
-                    "biometrics": biometrics,
-                }
+            # Xác định action dựa trên trạng thái hoạt động và chi nhánh áp dụng
+            is_active_and_belongs = emp.active and (not emp.branch_id or emp.branch_id.id == controller.branch_id.id)
+            sync_data.append({
+                "emp_id": emp.emp_id,
+                "action": "update" if is_active_and_belongs else "delete"
+            })
+
+        return {
+            "message": "Success",
+            "status": "200 OK",
+            "sync_timestamp": fields.Datetime.to_string(fields.Datetime.now()),
+            "changes": sync_data,
+        }
+
+    # ----------------------------------------------------
+    # API 6: EmployeeBiometricGet (Tải dữ liệu mẫu sinh trắc học Base64)
+    # ----------------------------------------------------
+    @endpoint(name="EmployeeBiometricGet")
+    def get_biometric(self):
+        """API tải mã thẻ RFID và mẫu sinh trắc học Base64 của nhân viên cụ thể."""
+        body = get_body()
+        require_fields(body, ["controller_id", "emp_id"])
+        controller_id = body.get("controller_id")
+        emp_id = body.get("emp_id")
+
+        controller = self._find_controller(controller_id)
+        employee = self.env["t4.gate_keeper.employee"].search([("emp_id", "=", emp_id)], limit=1)
+
+        if not controller or not employee:
+            raise ValidationError(
+                _("Không tìm thấy Controller hoặc Nhân viên hợp lệ")
             )
 
-        # ---> Gọi hàm: write() ngay bên dưới trong file này (gk_controller.py)
-        controller.write({"last_sync_at": current_time, "status": "online"})
-        return {"message": _("%d nhân viên cần đồng bộ") % len(data), "data": data}
+        supported_algos = controller.device_ids.mapped("device_model_id.algorithm_ids.id")
+        biometrics = self.env["t4.gate_keeper.employee.biometric"].search([
+            ("employee_id", "=", employee.id),
+            ("algorithm_id", "in", supported_algos)
+        ])
+
+        templates = []
+        for bio in biometrics:
+            templates.append({
+                "biometric_type": bio.biometric_type,
+                "finger_index": bio.finger_index or 0,
+                "algorithm_name": bio.algorithm_id.name if bio.algorithm_id else "",
+                "algorithm_version": bio.algorithm_id.version or "1.0",
+                "template": base64.b64encode(bio.template).decode("utf-8") if bio.template else "",
+            })
+
+        return {
+            "message": "Success",
+            "status": "200 OK",
+            "emp_id": employee.emp_id,
+            "name": employee.name,
+            "biometrics": templates,
+        }
+
+    # ----------------------------------------------------
+    # API 7: ControllerSyncAck (Xác nhận hoàn thành đồng bộ)
+    # ----------------------------------------------------
+    @endpoint(name="ControllerSyncAck")
+    def sync_ack(self):
+        """API nhận xác nhận nạp dữ liệu thành công từ thiết bị."""
+        body = get_body()
+        require_fields(body, ["controller_id"])
+        controller_id = body.get("controller_id")
+        sync_time_str = body.get("sync_timestamp")
+
+        controller = self._find_controller(controller_id)
+        if not controller:
+            raise ValidationError(
+                _("Không tìm thấy Controller với serial: %s") % controller_id
+            )
+
+        sync_time = fields.Datetime.from_string(sync_time_str) if sync_time_str else fields.Datetime.now()
+        controller.write({
+            "last_sync_at": sync_time,
+        })
+
+        return {
+            "message": "Success",
+            "status": "200 OK",
+        }
+
+    # ----------------------------------------------------
+    # API 8: AccessLogUpload (Tiếp nhận lô quẹt thẻ offline)
+    # ----------------------------------------------------
+    @endpoint(name="AccessLogUpload")
+    def upload_logs(self):
+        """API nhận tải lên theo lô các sự kiện quẹt thẻ thực tế của nhân viên."""
+        body = get_body()
+        require_fields(body, ["controller_id", "logs"])
+        controller_id = body.get("controller_id")
+        logs = body.get("logs", [])
+
+        controller = self._find_controller(controller_id)
+        if not controller:
+            raise ValidationError(
+                _("Không tìm thấy Controller với serial: %s") % controller_id
+            )
+
+        controller.write({
+            "status": "online",
+            "last_heartbeat_at": fields.Datetime.now(),
+        })
+
+        # Sắp xếp các log theo thời gian tăng dần trước khi lưu lô
+        sorted_logs = sorted(logs, key=lambda x: x.get("access_time") or "")
+        created_count = 0
+
+        for log_data in sorted_logs:
+            device = self.env["t4.gate_keeper.device"].search([
+                ("serial_number", "=", log_data.get("device_serial")),
+                ("controller_id", "=", controller.id)
+            ], limit=1)
+
+            employee = self.env["t4.gate_keeper.employee"]
+            emp_id = log_data.get("emp_id")
+            card_code = log_data.get("card_code")
+
+            if emp_id:
+                employee = self.env["t4.gate_keeper.employee"].search([("emp_id", "=", emp_id)], limit=1)
+            elif card_code and log_data.get("verification_type") == "card":
+                auth_info = self.env["t4.gate_keeper.auth_info"].search([
+                    ("card_code", "=", card_code),
+                    ("active", "=", True)
+                ], limit=1)
+                if auth_info:
+                    employee = auth_info.employee_id
+
+            if device:
+                log_vals = {
+                    "device_id": device.id,
+                    "employee_id": employee.id if employee else False,
+                    "card_code": card_code or "",
+                    "direction": log_data.get("direction") or "in",
+                    "verification_type": log_data.get("verification_type") or "card",
+                    "sync_status": "success",
+                }
+                if log_data.get("access_time"):
+                    log_vals["access_time"] = fields.Datetime.from_string(log_data.get("access_time"))
+
+                self.env["t4.gate_keeper.access_log"].create(log_vals)
+                created_count += 1
+
+        return {
+            "message": "Success",
+            "status": "200 OK",
+            "processed_count": created_count,
+        }
+
+    # ----------------------------------------------------
+    # API 9: ControllerCommandPoll (Quét lệnh điều khiển từ xa)
+    # ----------------------------------------------------
+    @endpoint(name="ControllerCommandPoll")
+    def command_poll(self):
+        """API phục vụ cơ chế Pull-based: Controller quét tìm lệnh điều khiển từ xa."""
+        body = get_body()
+        require_fields(body, ["controller_id"])
+        controller_id = body.get("controller_id")
+
+        controller = self._find_controller(controller_id)
+        if not controller:
+            raise ValidationError(
+                _("Không tìm thấy Controller với serial: %s") % controller_id
+            )
+
+        commands = self.env["t4.gate_keeper.command"].search([
+            ("controller_id", "=", controller.id),
+            ("state", "=", "pending"),
+        ])
+
+        res = []
+        for cmd in commands:
+            cmd.write({"state": "sending"})
+            res.append({
+                "command_id": cmd.id,
+                "action": cmd.action_type,
+                "device_serial": cmd.device_id.serial_number if cmd.device_id else "",
+                "parameters": cmd.parameters or "",
+            })
+
+        return {
+            "message": "Success",
+            "status": "200 OK",
+            "commands": res,
+        }
+
+    # ----------------------------------------------------
+    # API 10: ControllerCommandAck (Báo cáo kết quả thực thi lệnh)
+    # ----------------------------------------------------
+    @endpoint(name="ControllerCommandAck")
+    def command_ack(self):
+        """API nhận báo cáo kết quả thực thi lệnh mở cửa từ xa gửi từ rơ-le thiết bị."""
+        body = get_body()
+        require_fields(body, ["controller_id", "command_id"])
+        command_id = body.get("command_id")
+        msg = body.get("execution_message")
+
+        command = self.env["t4.gate_keeper.command"].browse(command_id)
+        if not command.exists():
+            raise ValidationError(
+                _("Không tìm thấy Lệnh điều khiển với ID: %s") % command_id
+            )
+
+        command.write({
+            "state": "success" if not msg or "error" not in msg.lower() else "failed",
+            "execution_message": msg or "Executed successfully.",
+        })
+
+        return {
+            "message": "Success",
+            "status": "200 OK",
+        }
 
     # Cấu hình ghi đè hàm write để xử lý logic ghi log trạng thái
     def write(self, vals):
@@ -277,121 +581,3 @@ class T4GateKeeperController(models.Model):
 
     def _get_employees_to_sync(self, domain):
         return self.env["t4.gate_keeper.employee"].search(domain)
-
-    # Cấu hình API - ĐIỂM KHỞI ĐẦU LUỒNG QUẸT THẺ (Gửi từ thiết bị phần cứng / Postman)
-    # Được gọi bởi: Thiết bị Controller gửi HTTP POST đến đường dẫn API: /api/ControllerAccessLogUpload
-    @endpoint(name="AccessLogUpload")
-    def access_log_upload(self):
-        """API nhận sự kiện quẹt thẻ từ thiết bị/controller và ghi nhận vào access log.
-
-        Payload JSON:
-        {
-            "serial_number": "CTRL-123456",       # Serial của Controller
-            "device_serial": "DEV-098765",       # Serial của Device trực thuộc
-            "card_value": "EMP0001",              # Mã nhân viên (emp_id) hoặc mã thẻ RFID
-            "direction": "in",                    # 'in' hoặc 'out' (mặc định: 'in')
-            "verification_type": "card",          # 'card', 'fingerprint', 'face', 'password' (mặc định: 'card')
-            "access_time": "2026-07-08 08:30:00"  # Thời gian quẹt (định dạng YYYY-MM-DD HH:MM:SS, tùy chọn)
-        }
-        """
-        body = get_body()
-        require_fields(body, ["serial_number", "device_serial", "card_value"])
-
-        serial_number = body.get("serial_number")
-        device_serial = body.get("device_serial")
-        card_value = body.get("card_value")
-        v_type = body.get("verification_type") or "card"
-
-        # 1. Tra cứu Controller
-        # ---> Gọi hàm: _find_controller() tại L147 trong file này (gk_controller.py)
-        controller = self._find_controller(serial_number)
-        if not controller:
-            raise ValidationError(
-                _("Không tìm thấy Controller với serial: %s") % serial_number
-            )
-
-        # 2. Tìm Thiết bị thuộc Controller này
-        # ---> Tra cứu thiết bị trong file models/gk_device.py để liên kết log với vị trí vật lý
-        device = self.env["t4.gate_keeper.device"].search(
-            [
-                ("serial_number", "=", device_serial),
-                ("controller_id", "=", controller.id),
-            ],
-            limit=1,
-        )
-        if not device:
-            raise ValidationError(
-                _("Không tìm thấy Thiết bị với serial %s thuộc Controller %s")
-                % (device_serial, serial_number)
-            )
-
-        # 3. Xác thực thẻ RFID hoặc Sinh trắc học để tìm Nhân viên
-        # - Nếu verification_type là 'card' -> Tìm trong t4.gate_keeper.auth_info
-        # - Nếu là 'fingerprint' hoặc 'face' -> Tìm trong t4.gate_keeper.employee.biometric
-        employee = self.env["t4.gate_keeper.employee"]
-
-        if v_type == "card":
-            # Tra cứu mã thẻ RFID trong bảng thông tin xác thực
-            # ---> Tra cứu thẻ trong file models/gk_auth_info.py để lấy hồ sơ nhân viên sở hữu thẻ
-            auth_info = self.env["t4.gate_keeper.auth_info"].search(
-                [("card_code", "=", card_value), ("active", "=", True)], limit=1
-            )
-            if auth_info:
-                employee = auth_info.employee_id
-        elif v_type in ("fingerprint", "face"):
-            # Tìm nhân viên theo emp_id
-            # ---> Tra cứu nhân viên trong file models/gk_employee.py theo mã ID
-            emp = self.env["t4.gate_keeper.employee"].search(
-                [("emp_id", "=", card_value), ("active", "=", True)], limit=1
-            )
-            if emp:
-                # Kiểm tra nhân viên này đã đăng ký sinh trắc học tương ứng chưa
-                # biometric_type liên quan đến algorithm_id.algorithm_type
-                # ---> Tra cứu thông tin sinh trắc học trong file models/gk_employee_biometric.py để xác thực mẫu đã đăng ký
-                biometric = self.env["t4.gate_keeper.employee.biometric"].search(
-                    [("employee_id", "=", emp.id), ("biometric_type", "=", v_type)],
-                    limit=1,
-                )
-                if biometric:
-                    employee = emp
-        elif v_type in ("password", "other"):
-            # Tìm nhân viên theo emp_id cho kiểu xác thực mật khẩu hoặc khác
-            emp = self.env["t4.gate_keeper.employee"].search(
-                [("emp_id", "=", card_value), ("active", "=", True)], limit=1
-            )
-            if emp:
-                employee = emp
-
-        # 4. Ghi nhận lượt quẹt thẻ (Nếu employee rỗng -> log sẽ kích hoạt cảnh báo Thẻ lạ)
-        log_vals = {
-            "controller_id": controller.id,
-            "device_id": device.id,
-            "employee_id": employee.id if employee else False,
-            "direction": body.get("direction") or "in",
-            "verification_type": v_type,
-        }
-        if body.get("access_time"):
-            log_vals["access_time"] = body.get("access_time")
-
-        # Tạo bản ghi log (sẽ kích hoạt các rule kiểm tra an ninh tự động)
-        # Gọi hàm create() trong file models/gk_access_log.py
-        log = self.env["t4.gate_keeper.access_log"].create(log_vals)
-
-        # Trả về kết quả JSON phản hồi
-        return {
-            "message": _("Ghi nhận lượt quẹt thẻ thành công"),
-            "data": {
-                "log_id": log.id,
-                "employee_name": (
-                    employee.name
-                    if employee
-                    else _("Unknown/Unregistered Card or Biometrics")
-                ),
-                "device_name": device.name,
-                "has_warning": bool(
-                    self.env["t4.gate_keeper.area_warning"].search(
-                        [("access_log_id", "=", log.id)]
-                    )
-                ),
-            },
-        }
