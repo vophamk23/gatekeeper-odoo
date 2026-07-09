@@ -172,66 +172,134 @@ Mỗi **[PHẦN]** tương ứng với một **Epic**, mỗi **[NHÓM]** tương
 *Mục đích: Tiếp nhận và xử lý các yêu cầu HTTP từ các bộ điều khiển vật lý.*
 
 ### [API] Khai báo các Endpoint kết nối
-* ├── **Feature**: Đăng ký và hiện thực API ControllerRegister
+* ├── **Feature**: API ControllerRegister - Tiếp nhận đăng ký phần cứng và kích hoạt trạng thái trực tuyến cho Bộ điều khiển
   * **Mô tả chi tiết**:
-    - *Mục đích*: Thiết bị gửi thông tin phần cứng khi khởi động hoặc cắm mạng lần đầu để Backend ghi nhận IP/MAC và kích hoạt trạng thái.
-    - *HTTP Method & Route*: `POST` `/api/v1/controller-register` (hoặc thông qua `t4_coreapi` registry).
-    - *Payload*: `controller_id`, `hardware_model`, `firmware_version`, `ip_address`, `mac_address`, `connection_type`.
-    - *Logic xử lý*: Tra cứu bản ghi `t4.gate_keeper.controller` theo serial. Nếu tồn tại, cập nhật IP/MAC và đổi `status` sang `online`, đặt `last_heartbeat_at = Datetime.now()`. Cascade chuyển các thiết bị con từ `controller_offline` sang `online`.
-* ├── **Feature**: Đăng ký và hiện thực API DeviceRegister
+    - *Mục tiêu*: Cho phép các bộ điều khiển vật lý tự động đăng ký với hệ thống Odoo khi khởi động hoặc kết nối mạng lần đầu.
+    - *HTTP Method & Route*: `POST` `/api/v1/controller-register` (được phân phối và bảo mật qua module `t4_coreapi`).
+    - *Tham số đầu vào (Payload JSON)*:
+      - `controller_id`: Mã số seri vật lý của bộ điều khiển (bắt buộc, ví dụ: "CTRL-100234").
+      - `hardware_model`: Tên dòng máy bộ điều khiển (ví dụ: "ZKTeco C3-200").
+      - `firmware_version`: Phiên bản phần mềm nhúng đang chạy (ví dụ: "v2.1.4").
+      - `ip_address`: Địa chỉ IP nội bộ của bộ điều khiển.
+      - `mac_address`: Địa chỉ MAC vật lý của bộ điều khiển.
+      - `connection_type`: Giao thức kết nối (`wifi`, `ethernet`, `cellular`).
+    - *Logic xử lý Odoo Backend*:
+      - Tra cứu bản ghi trong model `t4.gate_keeper.controller` dựa trên số seri `serial_number = controller_id`.
+      - Nếu chưa có bản ghi, trả về lỗi cảnh báo bảo mật hoặc tự động tạo mới (tùy cấu hình whitelist).
+      - Nếu có, cập nhật các trường cấu hình mạng: `ip_address`, `mac_address`, `firmware_version`, `connection_type`.
+      - Chuyển trạng thái kết nối `status` của bộ điều khiển thành `online` và cập nhật `last_heartbeat_at = Datetime.now()`.
+      - **Cascade trạng thái**: Tự động tìm tất cả các thiết bị con (`t4.gate_keeper.device`) đang thuộc bộ điều khiển này và có trạng thái `controller_offline` để chuyển sang `online`.
+* ├── **Feature**: API DeviceRegister - Tiếp nhận và tự động đăng ký các thiết bị con vật lý kết nối với Bộ điều khiển
   * **Mô tả chi tiết**:
-    - *Mục đích*: Đăng ký các thiết bị con kết nối trực tiếp với bộ điều khiển vật lý.
+    - *Mục tiêu*: Bộ điều khiển khai báo danh sách các thiết bị con kết nối trực tiếp vào các cổng của nó để Odoo quản lý.
     - *HTTP Method & Route*: `POST` `/api/v1/device-register`
-    - *Payload*: `device_sn`, `area`, `device-model`, `firmware_version`, `port/channel`.
-    - *Logic xử lý*: Tra cứu thiết bị con trong `t4.gate_keeper.device` theo mã serial (`device_sn`), cập nhật trạng thái `online`, liên kết với khu vực tương ứng.
-* ├── **Feature**: Đăng ký và hiện thực API ControllerGetConfig
+    - *Tham số đầu vào (Payload JSON)*:
+      - `controller_id`: Số seri của bộ điều khiển quản lý.
+      - `device_sn`: Số seri duy nhất của thiết bị con (ví dụ: đầu đọc thẻ RFID, máy quét vân tay).
+      - `port_or_channel`: Cổng kết nối vật lý trên bộ điều khiển (ví dụ: cổng Wiegand 1, Wiegand 2).
+      - `device_model`: Dòng máy thiết bị con.
+    - *Logic xử lý Odoo Backend*:
+      - Xác thực sự tồn tại của bộ điều khiển cha `controller_id`.
+      - Tra cứu thiết bị con trong model `t4.gate_keeper.device` theo trường duy nhất `serial_number = device_sn`.
+      - Nếu chưa tồn tại, tự động tạo mới thiết bị con, liên kết Many2one với bộ điều khiển cha (`controller_id`) và dòng máy tương thích.
+      - Nếu đã tồn tại, cập nhật cổng kết nối `port_or_channel` và chuyển trạng thái hoạt động thành `online`.
+* ├── **Feature**: API ControllerGetConfig - Tải thông tin múi giờ chi nhánh và các thuật toán sinh trắc học được hỗ trợ
   * **Mô tả chi tiết**:
-    - *Mục đích*: Cho phép Controller tải cấu hình múi giờ chi nhánh sở hữu và danh sách thuật toán sinh trắc học được hỗ trợ của các thiết bị con trực thuộc.
+    - *Mục tiêu*: Bộ điều khiển tải các cấu hình hệ thống từ Odoo để tự căn chỉnh thời gian cục bộ và biết các thuật toán sinh trắc học khả dụng.
     - *HTTP Method & Route*: `POST` `/api/v1/config`
-    - *Payload*: `serial_number`.
-    - *Logic xử lý*: Trích xuất múi giờ địa phương từ chi nhánh của Controller (`branch_id.timezone`) và danh sách thuật toán sinh trắc học được hỗ trợ của từng thiết bị con từ `device_model_id.algorithm_ids`.
-* ├── **Feature**: Đăng ký và hiện thực API ControllerHeartbeat
+    - *Tham số đầu vào (Payload JSON)*:
+      - `serial_number`: Số seri vật lý của bộ điều khiển.
+    - *Logic xử lý Odoo Backend*:
+      - Tìm kiếm bộ điều khiển khớp với `serial_number`.
+      - Trích xuất trường múi giờ địa phương từ chi nhánh quản lý: `branch_id.timezone` (ví dụ: "Asia/Ho_Chi_Minh").
+      - Quét tất cả các thiết bị con thuộc bộ điều khiển để lấy danh sách các thuật toán sinh trắc học được hỗ trợ thông qua liên kết `device_model_id.algorithm_ids`.
+      - Trả về phản hồi chứa thông tin múi giờ, định dạng ngày giờ, và danh sách thuật toán (ví dụ: Face v12.0, Finger v10.0).
+* ├── **Feature**: API ControllerHeartbeat - Tiếp nhận tín hiệu nhịp tim định kỳ và tự động phát hiện/xử lý cảnh báo ngoại tuyến
   * **Mô tả chi tiết**:
-    - *Mục đích*: Nhận nhịp tim định kỳ từ bộ điều khiển để kiểm tra tình trạng kết nối.
+    - *Mục tiêu*: Duy trì kết nối sống (Keep-alive) giữa thiết bị phần cứng và hệ thống, đồng thời phát hiện sớm sự cố mất kết nối mạng.
     - *HTTP Method & Route*: `POST` `/api/v1/heartbeat`
-    - *Payload*: `controller_id`, mảng `devices_status` (gồm `device_sn` và `status` của từng thiết bị con).
-    - *Logic xử lý*: Cập nhật `last_heartbeat_at = Datetime.now()` và đặt trạng thái Controller là `online`. Duyệt mảng `devices_status` để cập nhật trạng thái thiết bị con. Nếu thiết bị con offline và thuộc khu vực, tự động tạo Area Warning loại `device_issue`. Nếu trực tuyến lại, tự động đóng cảnh báo.
-* ├── **Feature**: Đăng ký và hiện thực API ControllerEmployeeSync
+    - *Tham số đầu vào (Payload JSON)*:
+      - `controller_id`: Số seri của bộ điều khiển gửi tín hiệu.
+      - `devices_status`: Mảng danh sách trạng thái của các thiết bị con trực thuộc (gồm `device_sn` và trạng thái `status` tương ứng).
+    - *Logic xử lý Odoo Backend*:
+      - Cập nhật thời điểm nhận tín hiệu cuối `last_heartbeat_at = Datetime.now()` và đặt trạng thái Controller thành `online`.
+      - Duyệt qua mảng `devices_status` để cập nhật trạng thái hoạt động cho từng thiết bị con tương ứng trong database.
+      - **Logic sinh Cảnh báo tự động**: 
+        - Nếu trạng thái thiết bị con chuyển sang ngoại tuyến (`offline` hoặc `controller_offline`) và thiết bị đó đã được gán vào một khu vực (`area_id`), hệ thống sẽ kiểm tra xem đã có cảnh báo đang hoạt động nào chưa. Nếu chưa, tự động tạo mới bản ghi `t4.gate_keeper.area_warning` với loại cảnh báo là `device_issue` (lỗi thiết bị).
+        - Nếu thiết bị con trực tuyến trở lại (`online`), hệ thống tự động gọi hàm `action_resolve()` để đóng (đổi trạng thái sang `resolved`) toàn bộ các cảnh báo ngoại tuyến liên quan của thiết bị này.
+* ├── **Feature**: API ControllerEmployeeSync - Đồng bộ và lọc danh sách nhân viên cần thêm mới, cập nhật hoặc xóa khỏi thiết bị
   * **Mô tả chi tiết**:
-    - *Mục đích*: Trả về danh sách nhân viên thay đổi hoặc cần xóa khỏi thiết bị tính từ lần đồng bộ trước.
+    - *Mục tiêu*: Cung cấp cho bộ điều khiển danh sách các nhân viên có thay đổi dữ liệu thẻ/sinh trắc học kể từ lần đồng bộ thành công gần nhất.
     - *HTTP Method & Route*: `POST` `/api/v1/employee-sync`
-    - *Payload*: `serial_number`, `last_sync_at`.
-    - *Logic xử lý*: So sánh `write_date` của bản ghi nhân viên (`t4.gate_keeper.employee`) với thời điểm `last_sync_at` để lọc danh sách các nhân viên cần ghi đè/thêm mới (`action = "update"`) hoặc cần xóa (`action = "delete"`).
-* ├── **Feature**: Đăng ký và hiện thực API EmployeeBiometricGet
+    - *Tham số đầu vào (Payload JSON)*:
+      - `serial_number`: Số seri vật lý của bộ điều khiển gọi đồng bộ.
+      - `last_sync_at`: Thời điểm đồng bộ thành công trước đó do thiết bị gửi lên.
+    - *Logic xử lý Odoo Backend*:
+      - Tìm kiếm Controller tương ứng. Nếu tham số `last_sync_at` rỗng hoặc không hợp lệ, hệ thống sẽ lấy giá trị mặc định lưu trên database (`last_sync_at` của Controller).
+      - So sánh thời điểm chỉnh sửa `write_date` của tất cả bản ghi nhân sự `t4.gate_keeper.employee` với mốc thời gian đồng bộ trước.
+      - Lọc ra:
+        - Danh sách nhân viên cần cập nhật hoặc thêm mới (`action = "update"`): Những người được chỉnh sửa hoặc tạo mới sau thời điểm `last_sync_at`.
+        - Danh sách nhân viên cần xóa bỏ khỏi bộ nhớ thiết bị (`action = "delete"`): Những người bị đổi chi nhánh, bị khóa thẻ hoặc đã nghỉ việc.
+      - Trả về mảng JSON chứa danh sách `emp_id` và hành động tương ứng.
+* ├── **Feature**: API EmployeeBiometricGet - Xuất thông tin thẻ từ và dữ liệu sinh trắc học mã hóa dạng Base64
   * **Mô tả chi tiết**:
-    - *Mục đích*: Tải dữ liệu vân tay/khuôn mặt/thẻ chi tiết của một nhân viên cụ thể.
+    - *Mục tiêu*: Truy xuất dữ liệu sinh trắc học chi tiết (vân tay/khuôn mặt) hoặc mã thẻ từ của nhân viên cụ thể để lưu xuống bộ nhớ cục bộ của Controller.
     - *HTTP Method & Route*: `POST` `/api/v1/biometric`
-    - *Payload*: `controller_id`, `emp_id`.
-    - *Logic xử lý*: Tìm bản ghi nhân viên dựa theo mã UUID duy nhất `emp_id`. Truy vấn dữ liệu liên kết từ bảng sinh trắc học `t4.gate_keeper.employee.biometric`. Lọc chỉ lấy các dữ liệu sinh trắc học có thuật toán tương thích. Mã hóa trường dữ liệu nhị phân `template` sang chuỗi `Base64`.
-* ├── **Feature**: Đăng ký và hiện thực API ControllerSyncAck
+    - *Tham số đầu vào (Payload JSON)*:
+      - `controller_id`: Số seri của bộ điều khiển yêu cầu tải dữ liệu.
+      - `emp_id`: Mã định danh phần cứng của nhân viên cần tải (ví dụ: UUID v4).
+    - *Logic xử lý Odoo Backend*:
+      - Tra cứu nhân viên theo mã `emp_id` trong bảng `t4.gate_keeper.employee`.
+      - Truy vấn danh sách thẻ từ liên kết (`t4.gate_keeper.auth_info`).
+      - Truy vấn dữ liệu sinh trắc học liên kết từ bảng `t4.gate_keeper.employee.biometric`.
+      - Lọc chỉ lấy các bản ghi sinh trắc học có thuật toán tương thích với các thiết bị con của Controller hiện tại.
+      - Thực hiện mã hóa Base64 cho trường dữ liệu nhị phân `template` chứa mã băm vân tay/khuôn mặt để đảm bảo truyền tải an toàn qua JSON.
+* ├── **Feature**: API ControllerSyncAck - Tiếp nhận xác nhận nạp dữ liệu thành công và cập nhật thời điểm đồng bộ của Controller
   * **Mô tả chi tiết**:
-    - *Mục đích*: Controller gửi xác nhận nạp dữ liệu hoàn tất, cập nhật lại thời điểm đồng bộ thành công gần nhất.
+    - *Mục tiêu*: Thiết bị báo cáo lại cho Odoo sau khi đã ghi thành công tất cả dữ liệu nhân sự mới vào bộ nhớ flash của phần cứng.
     - *HTTP Method & Route*: `POST` `/api/v1/sync`
-    - *Payload*: `controller_id`, `sync_timestamp`.
-    - *Logic xử lý*: Tìm Controller theo `serial_number` và cập nhật trường `last_sync_at = sync_timestamp`. Khi đó, trường tính toán trạng thái đồng bộ nhân viên (`employee_sync_status`) của Controller tự động chuyển về trạng thái đồng bộ hoàn tất (`synced`).
-* ├── **Feature**: Đăng ký và hiện thực API AccessLogUpload
+    - *Tham số đầu vào (Payload JSON)*:
+      - `controller_id`: Số seri vật lý của bộ điều khiển gửi xác nhận.
+      - `sync_timestamp`: Thời điểm đồng bộ hoàn tất trên thiết bị.
+    - *Logic xử lý Odoo Backend*:
+      - Tìm kiếm Controller tương ứng theo số seri.
+      - Cập nhật trường `last_sync_at = sync_timestamp` trên bảng `t4.gate_keeper.controller`.
+      - Cơ chế kiểm tra phụ thuộc (depends engine) sẽ tự động cập nhật trường tính toán trạng thái đồng bộ `employee_sync_status` chuyển thành `synced` (Đã đồng bộ).
+* ├── **Feature**: API AccessLogUpload - Tiếp nhận và phân tích mảng nhật ký quẹt thẻ thực tế của nhân viên gửi lên từ thiết bị
   * **Mô tả chi tiết**:
-    - *Mục đích*: Tiếp nhận mảng log quẹt thẻ để lưu trữ và kiểm tra vi phạm bảo mật.
+    - *Mục tiêu*: Tiếp nhận dữ liệu quẹt thẻ thực tế của nhân viên gửi từ các thiết bị con để lưu trữ nhật ký ra vào và đánh giá quy tắc an ninh.
     - *HTTP Method & Route*: `POST` `/api/v1/log`
-    - *Payload*: `controller_id`, mảng `logs` (gồm `device_serial`, `emp_id`, `access_time`, `direction`, `verification_type`).
-    - *Logic xử lý*: Tra cứu thiết bị con theo `device_serial` để ra `device_id`, tra cứu nhân viên theo `emp_id` để ra `employee_id`. Tạo mới bản ghi trong `t4.gate_keeper.access_log` với trạng thái `sync_status = "success"`. Trong hàm `create()` của `t4.gate_keeper.access_log`, hệ thống tự động kiểm tra chính sách vi phạm giờ giấc ra vào, timezone địa phương và sinh Area Warning nếu vi phạm.
-* ├── **Feature**: Đăng ký và hiện thực API ControllerCommandPoll
+    - *Tham số đầu vào (Payload JSON)*:
+      - `controller_id`: Số seri bộ điều khiển gửi dữ liệu.
+      - `logs`: Mảng danh sách các sự kiện quẹt thẻ, mỗi sự kiện gồm: `device_serial` (mã đầu đọc), `emp_id` (mã nhân viên), `card_code` (mã thẻ quẹt), `access_time` (thời gian sự kiện trên thiết bị), `direction` (`in`/`out`/`unknown`), `verification_type` (phương thức xác thực: thẻ, vân tay, mặt).
+    - *Logic xử lý Odoo Backend*:
+      - Với mỗi bản ghi trong mảng `logs`:
+        - Tra cứu thiết bị con trong `t4.gate_keeper.device` theo `device_serial` để xác định trường `device_id`.
+        - Tra cứu nhân viên trong `t4.gate_keeper.employee` theo `emp_id` để xác định trường `employee_id`.
+        - Tạo mới một bản ghi trong `t4.gate_keeper.access_log` lưu trữ đầy đủ các thông tin trên cùng với trạng thái `sync_status = "success"`.
+        - Hàm `create()` trên model Access Log sẽ tự động đánh giá chính sách an ninh và cập nhật trạng thái vị trí nhân sự.
+* ├── **Feature**: API ControllerCommandPoll - Tiếp nhận yêu cầu quét tìm các lệnh điều khiển từ xa đang chờ thực thi (Pending Commands)
   * **Mô tả chi tiết**:
-    - *Mục đích*: Bộ điều khiển gọi định kỳ (5-10s) quét tìm các lệnh mở cửa từ xa đang ở trạng thái `pending`.
+    - *Mục tiêu*: Hỗ trợ cơ chế Pull-based giúp các bộ điều khiển nằm sau tường lửa (NAT) vẫn có thể nhận được lệnh mở cửa từ xa gửi từ Odoo Server bằng cách gọi API định kỳ.
     - *HTTP Method & Route*: `POST` `/api/v1/command`
-    - *Payload*: `controller_id`.
-    - *Logic xử lý*: Tìm kiếm các lệnh dành riêng cho Controller này đang ở trạng thái `pending`. Trả về danh sách lệnh và tự động chuyển trạng thái của lệnh sang `sending` để tránh trùng lặp.
-* └── **Feature**: Đăng ký và hiện thực API ControllerCommandAck
+    - *Tham số đầu vào (Payload JSON)*:
+      - `controller_id`: Số seri của bộ điều khiển quét lệnh.
+    - *Logic xử lý Odoo Backend*:
+      - Tìm kiếm các bản ghi trong model lệnh điều khiển đang ở trạng thái `pending` và thuộc bộ điều khiển này.
+      - Trả về danh sách lệnh dưới dạng mảng JSON bao gồm: `command_id`, loại lệnh (`open_door`, `close_door`, `lock_down`), thông số thiết bị con đích và thời gian hết hạn (expiration).
+      - Chuyển trạng thái lệnh sang `sending` để đảm bảo thiết bị không tải trùng một lệnh nhiều lần.
+* └── **Feature**: API ControllerCommandAck - Tiếp nhận báo cáo kết quả thực thi lệnh điều khiển từ xa (Mở/Khóa cửa) từ thiết bị
   * **Mô tả chi tiết**:
-    - *Mục đích*: Bộ điều khiển gửi phản hồi báo cáo kết quả thực thi lệnh mở cửa từ xa.
+    - *Mục tiêu*: Bộ điều khiển gửi xác nhận kết quả sau khi đã kích hoạt rơ-le mở cửa vật lý thành công hoặc thất bại.
     - *HTTP Method & Route*: `POST` `/api/v1/confirmation`
-    - *Payload*: `controller_id`, `command_id`, `execution_message`.
-    - *Logic xử lý*: Tìm bản ghi lệnh theo `command_id`, cập nhật trạng thái lệnh sang `success` hoặc `failed` và lưu lại tin nhắn kết quả (`execution_message`) lên Odoo.
+    - *Tham số đầu vào (Payload JSON)*:
+      - `controller_id`: Số seri của bộ điều khiển.
+      - `command_id`: Mã định danh lệnh đã nhận từ Odoo.
+      - `status`: Trạng thái thực thi (`success` / `failed`).
+      - `execution_message`: Tin nhắn báo cáo chi tiết hoặc mã lỗi phần cứng (nếu có).
+    - *Logic xử lý Odoo Backend*:
+      - Tìm bản ghi lệnh khớp với `command_id`.
+      - Cập nhật trạng thái lệnh sang `success` hoặc `failed` và ghi nhận nội dung `execution_message` phục vụ kiểm tra lỗi.
 
 ### [LOGIC] Nhật ký thiết bị thô (Device Log) và Xử lý Batch
 * ├── **Feature**: Tạo model Nhật ký thiết bị thô `t4.gate_keeper.device_log` (`models/gk_device_log.py`)
