@@ -153,8 +153,7 @@ class GateKeeperAlertPolicy(models.Model):
         if condition == "unknown_card" and not emp:
             return (
                 True,
-                "Phát hiện THẺ LẠ tại thiết bị %s"
-                % (access_log.device_id.name or "?"),
+                "Phát hiện THẺ LẠ tại thiết bị %s" % (access_log.device_id.name or "?"),
             )
 
         # B: Ngoài giờ quy định — kiểm tra khung giờ cấm theo timezone của branch
@@ -200,18 +199,17 @@ class GateKeeperAlertPolicy(models.Model):
             tz = pytz.timezone("Asia/Ho_Chi_Minh")
 
         # Quy đổi access_time (UTC) sang giờ địa phương
-        local_dt = pytz.utc.localize(access_time_utc.replace(tzinfo=None)).astimezone(tz)
+        local_dt = pytz.utc.localize(access_time_utc.replace(tzinfo=None)).astimezone(
+            tz
+        )
         event_hour = local_dt.hour + local_dt.minute / 60.0
 
         # Kiểm tra cuối tuần (thứ 7 = weekday 5, chủ nhật = 6)
         if self.apply_weekend and local_dt.weekday() >= 5:
-            reason = (
-                "%s quẹt thẻ vào %s (cuối tuần) — vi phạm chính sách \"%s\""
-                % (
-                    access_log.employee_id.name,
-                    local_dt.strftime("%H:%M %d/%m/%Y"),
-                    self.name,
-                )
+            reason = '%s quẹt thẻ vào %s (cuối tuần) - vi phạm chính sách "%s"' % (
+                access_log.employee_id.name,
+                local_dt.strftime("%H:%M %d/%m/%Y"),
+                self.name,
             )
             return (True, reason)
 
@@ -227,7 +225,7 @@ class GateKeeperAlertPolicy(models.Model):
 
         if in_curfew:
             reason = (
-                "%s quẹt thẻ lúc %s — nằm trong khung giờ cấm của chính sách \"%s\""
+                '%s quẹt thẻ lúc %s - nằm trong khung giờ cấm của chính sách "%s"'
                 % (
                     access_log.employee_id.name,
                     local_dt.strftime("%H:%M"),
@@ -251,23 +249,27 @@ class GateKeeperAlertPolicy(models.Model):
 
         if direction == "out" and emp.presence_state in ("outside", "unknown"):
             reason = (
-                "%s quẹt RA nhưng trạng thái đang là \"%s\" — vi phạm anti-passback"
+                '%s quẹt RA nhưng trạng thái đang là "%s" - vi phạm anti-passback'
                 % (emp.name, emp.presence_state)
             )
             return (True, reason)
 
         if direction == "in" and emp.presence_state == "inside":
-            # Nếu đang ở trong CÙNG khu vực thì không tính anti-passback
-            if not emp.current_area_id or emp.current_area_id != access_log.area_id:
+            if emp.current_area_id == access_log.area_id:
                 reason = (
-                    "%s đang ở \"%s\" nhưng quẹt vào \"%s\" mà chưa quẹt ra — vi phạm anti-passback"
+                    '%s đang ở "%s" và tiếp tục quẹt VÀO - vi phạm anti-passback (nghi ngờ xoay vòng thẻ)'
+                    % (emp.name, emp.current_area_id.name or "?")
+                )
+            else:
+                reason = (
+                    '%s đang ở "%s" nhưng quẹt vào "%s" mà chưa quẹt ra - vi phạm anti-passback'
                     % (
                         emp.name,
                         emp.current_area_id.name or "?",
                         access_log.area_id.name if access_log.area_id else "?",
                     )
                 )
-                return (True, reason)
+            return (True, reason)
 
         return (False, "")
 
@@ -292,7 +294,7 @@ class GateKeeperAlertPolicy(models.Model):
         # Không có nhóm được phép → không ai được vào
         if not self.allowed_group_ids:
             reason = (
-                "%s vào khu vực cấm \"%s\" — chính sách \"%s\" không cho phép nhóm nào"
+                '%s vào khu vực cấm "%s" - chính sách "%s" không cho phép nhóm nào'
                 % (emp.name, access_log.area_id.name, self.name)
             )
             return (True, reason)
@@ -301,7 +303,7 @@ class GateKeeperAlertPolicy(models.Model):
         emp_groups = emp.group_ids
         if not (emp_groups & self.allowed_group_ids):
             reason = (
-                "%s vào khu vực cấm \"%s\" — nhóm của nhân viên không được phép theo chính sách \"%s\""
+                '%s vào khu vực cấm "%s" - nhóm của nhân viên không được phép theo chính sách "%s"'
                 % (emp.name, access_log.area_id.name, self.name)
             )
             return (True, reason)

@@ -152,7 +152,7 @@ Content-Type: application/json
             "device_serial": "DEV-HN-LOB-IN-01",
             "emp_id": "EMP-HN-IT-001",
             "card_code": "RFID-HN-IT-01",
-            "access_time": "2026-07-09 23:45:00",
+            "access_time": "2026-07-10 19:45:00",
             "direction": "in",
             "verification_type": "card"
         },
@@ -160,7 +160,7 @@ Content-Type: application/json
             "device_serial": "DEV-HN-LOB-OUT-01",
             "emp_id": "EMP-HN-SEC-001",
             "card_code": "RFID-HN-SEC-01",
-            "access_time": "2026-07-09 23:48:00",
+            "access_time": "2026-07-10 19:48:00",
             "direction": "out",
             "verification_type": "card"
         }
@@ -253,14 +253,14 @@ Content-Type: application/json
         {
             "device_serial": "DEV-DN-EXEC-IN-01",
             "card_code": "RFID-UNKNOWN-3333",
-            "access_time": "2026-07-09 11:00:00",
+            "access_time": "2026-07-10 11:00:00",
             "direction": "in",
             "verification_type": "card"
         },
         {
             "device_serial": "DEV-DN-EXEC-IN-01",
             "card_code": "RFID-UNKNOWN-4444",
-            "access_time": "2026-07-09 11:05:00",
+            "access_time": "2026-07-10 11:05:00",
             "direction": "in",
             "verification_type": "card"
         }

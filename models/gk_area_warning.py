@@ -42,6 +42,13 @@ class GateKeeperAreaWarning(models.Model):
         ondelete="restrict",
     )
 
+    warning_type_code = fields.Char(
+        related="warning_type_id.code",
+        string="Warning Type Code",
+        store=True,
+        readonly=True,
+    )
+
     policy_id = fields.Many2one(
         comodel_name="t4.gate_keeper.alert_policy",
         string="Alert Policy",

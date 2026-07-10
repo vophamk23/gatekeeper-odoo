@@ -35,8 +35,8 @@ class T4GateKeeperScheduler(models.Model):
 
         controllers = self.env["t4.gate_keeper.controller"]
 
-        # Controller offline: chưa có heartbeat hoặc heartbeat quá cũ
-        offline = controllers.search(
+        # [Controller Model] Tìm các Controller có heartbeat quá hạn hoặc chưa kết nối lần nào
+        offline_controllers = controllers.search(
             [
                 ("status", "!=", "offline"),
                 "|",
@@ -44,12 +44,13 @@ class T4GateKeeperScheduler(models.Model):
                 ("last_heartbeat_at", "<", timeout),
             ]
         )
-        if offline:
-            offline.write({"status": "offline"})
+        if offline_controllers:
+            # Ghi trạng thái "offline" cho các Controller (Bộ điều khiển vật lý)
+            offline_controllers.write({"status": "offline"})
 
         devices = self.env["t4.gate_keeper.device"]
 
-        # 1. Device có controller đang offline → đánh dấu controller_offline
+        # [Device Model] 1. Tìm các Thiết bị con có Controller cha đang offline
         controller_offline_devices = devices.search(
             [
                 ("controller_id.status", "!=", "online"),
@@ -57,9 +58,10 @@ class T4GateKeeperScheduler(models.Model):
             ]
         )
         if controller_offline_devices:
+            # Ghi trạng thái "controller_offline" cho các Thiết bị đầu cuối (đầu đọc thẻ/vân tay con)
             controller_offline_devices.write({"status": "controller_offline"})
 
-        # 2. Device trên controller online nhưng không thấy gần đây → đánh dấu offline
+        # [Device Model] 2. Tìm các Thiết bị con có Controller cha online nhưng bản thân thiết bị không tương tác gần đây
         device_offline = devices.search(
             [
                 ("controller_id.status", "=", "online"),
@@ -70,6 +72,7 @@ class T4GateKeeperScheduler(models.Model):
             ]
         )
         if device_offline:
+            # Ghi trạng thái "offline" cho các Thiết bị đầu cuối (đầu đọc thẻ/vân tay con)
             device_offline.write({"status": "offline"})
 
     @api.model

@@ -11,22 +11,24 @@
                       decoration-warning="sync_status == 'fail'"
                       decoration-muted="is_system_generated == True">
                     <field name="access_time" string="Time"/>
-                    <field name="employee_id" string="Employee"/>
-                    <field name="device_id" string="Device"/>
+                    <field name="employee_id" string="Employee" optional="show"/>
+                    <field name="device_id" string="Device" optional="show"/>
                     <field name="direction"
                            string="Direction"
                            widget="badge"
                            decoration-success="direction == 'in'"
-                           decoration-warning="direction == 'out'"/>
-                    <field name="verification_type" string="Verification"/>
-                    <field name="branch_id" string="Branch"/>
-                    <field name="area_id" string="Area"/>
+                           decoration-warning="direction == 'out'"
+                           optional="show"/>
+                    <field name="verification_type" string="Verification" optional="show"/>
+                    <field name="branch_id" string="Branch" optional="show"/>
+                    <field name="area_id" string="Area" optional="show"/>
                     <field name="sync_status"
                            string="Sync Status"
                            widget="badge"
                            decoration-success="sync_status == 'success'"
                            decoration-danger="sync_status == 'fail'"
-                           decoration-info="sync_status == 'updating'"/>
+                           decoration-info="sync_status == 'updating'"
+                           optional="show"/>
                     <field name="is_system_generated" optional="hide"/>
                 </list>
             </field>

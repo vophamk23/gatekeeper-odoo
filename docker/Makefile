@@ -1,12 +1,12 @@
-# Makefile for Odoo t4_gatekeeper development
+# Makefile for Odoo t4_gatekeeper development (Docker Context)
 
 # Variables
-COMPOSE_FILE = docker/docker-compose.yml
+COMPOSE_FILE = docker-compose.yml
 ODOO_SERVICE = odoo
 DB_SERVICE = postgres
 DB_NAME = gatekeeper_db
 
-.PHONY: help up down restart status logs upgrade shell db-shell test test-api
+.PHONY: help up down restart status logs upgrade update shell db-shell test test-api
 
 help:
 	@echo "Available commands:"
@@ -15,7 +15,8 @@ help:
 	@echo "  make restart   - Restart Odoo container"
 	@echo "  make status    - Show container status"
 	@echo "  make logs      - View Odoo logs (follow)"
-	@echo "  make upgrade   - Upgrade t4_gate_keeper module"
+	@echo "  make upgrade   - Upgrade t4_gate_keeper module (fast upgrade inside running container)"
+	@echo "  make update    - Stop, safe upgrade (no DB locks), and restart Odoo (recommended on code changes)"
 	@echo "  make shell     - Open Odoo shell inside container"
 	@echo "  make db-shell  - Open PostgreSQL terminal inside container"
 	@echo "  make test      - Run automated Odoo tests for t4_gate_keeper"
@@ -40,6 +41,11 @@ upgrade:
 	docker compose -f $(COMPOSE_FILE) exec $(ODOO_SERVICE) odoo -d $(DB_NAME) -u t4_gate_keeper --stop-after-init
 	docker compose -f $(COMPOSE_FILE) restart $(ODOO_SERVICE)
 
+update:
+	docker compose -f $(COMPOSE_FILE) stop $(ODOO_SERVICE)
+	docker compose -f $(COMPOSE_FILE) run --rm $(ODOO_SERVICE) odoo -d $(DB_NAME) -u t4_gate_keeper --stop-after-init
+	docker compose -f $(COMPOSE_FILE) start $(ODOO_SERVICE)
+
 shell:
 	docker compose -f $(COMPOSE_FILE) exec $(ODOO_SERVICE) odoo shell -d $(DB_NAME)
 
@@ -50,4 +56,4 @@ test:
 	docker compose -f $(COMPOSE_FILE) exec $(ODOO_SERVICE) odoo -d $(DB_NAME) -i t4_gate_keeper --test-enable --stop-after-init --http-port 8073
 
 test-api:
-	python utils/test_api_client.py
+	python ../utils/test_api_client.py

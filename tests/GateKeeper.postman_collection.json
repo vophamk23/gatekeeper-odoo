@@ -1767,58 +1767,10 @@
             "name": "4. Nhật ký ra vào (Access Logs)",
             "item": [
                 {
-                    "name": "# ==============================================================================",
-                    "request": {
-                        "method": "POST",
-                        "header": [
-                            {
-                                "key": "Content-Type",
-                                "value": "application/json",
-                                "type": "text"
-                            }
-                        ],
-                        "url": {
-                            "raw": "{{baseUrl}}/api/v1/auth/token",
-                            "host": [
-                                "{{baseUrl}}"
-                            ],
-                            "path": [
-                                "api",
-                                "v1",
-                                "auth",
-                                "token"
-                            ]
-                        },
-                        "description": "==============================================================================\nNHÓM 4: NHẬT KÝ SỰ KIỆN RA VÀO (ACCESS LOGS)\n==============================================================================\n@name login\n------------------------------------------------------------------------------\nCHỨC NĂNG: Đăng nhập hệ thống qua chuẩn OAuth2 để lấy Access Token (Bearer Token).\nKẾT QUẢ THÀNH CÔNG: Trả về 200 OK kèm mã token xác thực có thời hạn 24 giờ.\nREST Client sẽ tự động lưu token này vào biến toàn cục {{token}}.\nCÁC TRƯỜNG CẬP NHẬT: Tạo bản ghi token mới trong bảng `core.api.token`.\n------------------------------------------------------------------------------",
-                        "body": {
-                            "mode": "raw",
-                            "raw": "{\n    \"client_id\": \"app_bf343cac68c93ecce3f2f56e753999c1\",\n    \"client_secret\": \"client_secret_123456\",\n    \"grant_type\": \"client_credentials\"\n}"
-                        }
-                    },
-                    "response": [],
-                    "event": [
-                        {
-                            "listen": "test",
-                            "script": {
-                                "exec": [
-                                    "pm.test(\"Đăng nhập thành công - HTTP 200\", function () {",
-                                    "    pm.response.to.have.status(200);",
-                                    "});",
-                                    "",
-                                    "pm.test(\"Lưu Token\", function () {",
-                                    "    var jsonData = pm.response.json();",
-                                    "    if (jsonData && jsonData.api_token && jsonData.api_token.token) {",
-                                    "        pm.globals.set(\"token\", jsonData.api_token.token);",
-                                    "    }",
-                                    "});"
-                                ],
-                                "type": "text/javascript"
-                            }
-                        }
-                    ]
+                    "name": "# =============================================================================="
                 },
                 {
-                    "name": "4.1.A Tải lô quẹt thẻ giờ hành chính của nhóm nhân sự Hà Nội (AccessLogUpload)",
+                    "name": "Lưu Access Token từ phản hồi của server",
                     "request": {
                         "method": "POST",
                         "header": [
@@ -1839,7 +1791,7 @@
                                 "AccessLogUpload"
                             ]
                         },
-                        "description": "------------------------------------------------------------------------------\nCHỨC NĂNG: Thiết bị Hà Nội đẩy hàng loạt nhật ký quẹt thẻ offline của nhân viên lên Odoo.\nĐỐI TƯỢNG:\n- Nguyễn Văn Kỹ Thuật (EMP-HN-IT-001) quẹt VÀO lúc 08:30 và RA lúc 17:30.\n- Trần Thị Hành Chính (EMP-HN-HR-001) quẹt VÀO lúc 08:15 và RA lúc 17:15.\nKẾT QUẢ THÀNH CÔNG:\n- Tạo 4 bản ghi lịch sử ra vào thành công trong phân hệ Access Logs của Odoo.\n- Hệ thống tự động tìm đúng nhân viên thông qua mã thẻ RFID để gán vào log.\n- Cập nhật trạng thái vị trí hiện tại của Kỹ Thuật và Hành Chính thành \"Đang ở ngoài\" (vì lượt quẹt cuối là Out).\n- Không tạo cảnh báo vi phạm an ninh (vì quẹt thẻ đúng giờ hành chính và thẻ đã đăng ký).\nCÁC TRƯỜNG CẬP NHẬT TRÊN ODOO:\n- Model `t4.gate_keeper.access_log`: Tạo mới 4 bản ghi tương ứng.\n- Model `t4.gate_keeper.employee` (Nhân viên IT & HR):\n* `last_action` -> 'out'\n* `last_action_time` -> Cập nhật thời gian ra tương ứng ('2026-07-09 17:30:00' và '17:15:00').\n------------------------------------------------------------------------------",
+                        "description": "==============================================================================\nPHẦN 1: CÁC KỊCH BẢN QUẸT THẺ THÔNG THƯỜNG RIÊNG LẺ (NORMAL ACCESS)\n==============================================================================",
                         "auth": {
                             "type": "bearer",
                             "bearer": [
@@ -1852,7 +1804,7 @@
                         },
                         "body": {
                             "mode": "raw",
-                            "raw": "{\n    \"controller_id\": \"CTRL-HN-LOBBY-01\",\n    \"logs\": [\n        {\n            \"device_serial\": \"DEV-HN-LOB-IN-01\",\n            \"emp_id\": \"EMP-HN-IT-001\",\n            \"card_code\": \"RFID-HN-IT-01\",\n            \"access_time\": \"2026-07-09 08:30:00\",\n            \"direction\": \"in\",\n            \"verification_type\": \"card\"\n        },\n        {\n            \"device_serial\": \"DEV-HN-LOB-IN-01\",\n            \"emp_id\": \"EMP-HN-HR-001\",\n            \"card_code\": \"RFID-HN-HR-01\",\n            \"access_time\": \"2026-07-09 08:15:00\",\n            \"direction\": \"in\",\n            \"verification_type\": \"card\"\n        },\n        {\n            \"device_serial\": \"DEV-HN-LOB-OUT-01\",\n            \"emp_id\": \"EMP-HN-HR-001\",\n            \"card_code\": \"RFID-HN-HR-01\",\n            \"access_time\": \"2026-07-09 17:15:00\",\n            \"direction\": \"out\",\n            \"verification_type\": \"card\"\n        },\n        {\n            \"device_serial\": \"DEV-HN-LOB-OUT-01\",\n            \"emp_id\": \"EMP-HN-IT-001\",\n            \"card_code\": \"RFID-HN-IT-01\",\n            \"access_time\": \"2026-07-09 17:30:00\",\n            \"direction\": \"out\",\n            \"verification_type\": \"card\"\n        }\n    ]\n}"
+                            "raw": "@token = {{login.response.body.api_token.token}}"
                         }
                     },
                     "response": [],
@@ -1871,7 +1823,7 @@
                     ]
                 },
                 {
-                    "name": "4.1.B Tải lô quẹt khuôn mặt Cửa Máy Chủ Hà Nội (AccessLogUpload)",
+                    "name": "4.1.1.A Nguyễn Văn Kỹ Thuật (EMP-HN-IT-001) quẹt VÀO riêng lẻ (Hanoi Lobby)",
                     "request": {
                         "method": "POST",
                         "header": [
@@ -1892,7 +1844,7 @@
                                 "AccessLogUpload"
                             ]
                         },
-                        "description": "------------------------------------------------------------------------------\nCHỨC NĂNG: Bộ điều khiển phòng máy chủ tải log nhận diện khuôn mặt ra vào.\nĐỐI TƯỢNG: Nguyễn Văn Giám Đốc (EMP-HN-DIR-001) quẹt VÀO lúc 10:00 và RA lúc 10:30.\nKẾT QUẢ THÀNH CÔNG: Tạo 2 bản ghi Access Log. Cập nhật vị trí Giám đốc thành \"Đang ở ngoài\".\nCÁC TRƯỜNG CẬP NHẬT TRÊN ODOO:\n- Model `t4.gate_keeper.access_log`: Tạo mới 2 bản ghi.\n- Model `t4.gate_keeper.employee` (EMP-HN-DIR-001):\n* `last_action` -> 'out'\n* `last_action_time` -> '2026-07-09 10:30:00'\n------------------------------------------------------------------------------",
+                        "description": "------------------------------------------------------------------------------\nCHỨC NĂNG: Gửi log quẹt VÀO của duy nhất nhân viên Nguyễn Văn Kỹ Thuật.\nKẾT QUẢ: \n- Tạo 1 bản ghi Access Log.\n- Cập nhật last_action của EMP-HN-IT-001 thành \"in\" và last_action_time.\n------------------------------------------------------------------------------",
                         "auth": {
                             "type": "bearer",
                             "bearer": [
@@ -1905,7 +1857,7 @@
                         },
                         "body": {
                             "mode": "raw",
-                            "raw": "{\n    \"controller_id\": \"CTRL-HN-SRV-01\",\n    \"logs\": [\n        {\n            \"device_serial\": \"DEV-HN-SRV-FACE-01\",\n            \"emp_id\": \"EMP-HN-DIR-001\",\n            \"access_time\": \"2026-07-09 10:00:00\",\n            \"direction\": \"in\",\n            \"verification_type\": \"face\"\n        },\n        {\n            \"device_serial\": \"DEV-HN-SRV-FACE-01\",\n            \"emp_id\": \"EMP-HN-DIR-001\",\n            \"access_time\": \"2026-07-09 10:30:00\",\n            \"direction\": \"out\",\n            \"verification_type\": \"face\"\n        }\n    ]\n}"
+                            "raw": "{\n    \"controller_id\": \"CTRL-HN-LOBBY-01\",\n    \"logs\": [\n        {\n            \"device_serial\": \"DEV-HN-LOB-IN-01\",\n            \"emp_id\": \"EMP-HN-IT-001\",\n            \"card_code\": \"RFID-HN-IT-01\",\n            \"direction\": \"in\",\n            \"verification_type\": \"face\"\n        }\n    ]\n}"
                         }
                     },
                     "response": [],
@@ -1924,7 +1876,7 @@
                     ]
                 },
                 {
-                    "name": "4.1.C Tải lô quẹt vân tay Cửa kho hàng HCM (AccessLogUpload)",
+                    "name": "4.1.1.B Nguyễn Văn Kỹ Thuật (EMP-HN-IT-001) quẹt RA riêng lẻ (Hanoi Lobby)",
                     "request": {
                         "method": "POST",
                         "header": [
@@ -1945,7 +1897,7 @@
                                 "AccessLogUpload"
                             ]
                         },
-                        "description": "------------------------------------------------------------------------------\nCHỨC NĂNG: Bộ điều khiển kho hàng HCM tải log vân tay của nhân viên thời vụ.\nĐỐI TƯỢNG: Phạm Văn Thời Vụ (EMP-HCM-TMP-001) quẹt vân tay VÀO lúc 09:00:00 và RA lúc 12:00:00.\nKẾT QUẢ THÀNH CÔNG: Tạo 2 bản ghi Access Log. Cập nhật vị trí CTV thành \"Đang ở ngoài\".\nCÁC TRƯỜNG CẬP NHẬT TRÊN ODOO:\n- Model `t4.gate_keeper.access_log`: Tạo mới 2 bản ghi.\n- Model `t4.gate_keeper.employee` (EMP-HCM-TMP-001):\n* `last_action` -> 'out'\n* `last_action_time` -> '2026-07-09 12:00:00'\n------------------------------------------------------------------------------",
+                        "description": "------------------------------------------------------------------------------\nCHỨC NĂNG: Gửi log quẹt RA của duy nhất nhân viên Nguyễn Văn Kỹ Thuật.\nKẾT QUẢ: \n- Tạo 1 bản ghi Access Log.\n- Cập nhật last_action của EMP-HN-IT-001 thành \"out\" và last_action_time.\n------------------------------------------------------------------------------",
                         "auth": {
                             "type": "bearer",
                             "bearer": [
@@ -1958,7 +1910,7 @@
                         },
                         "body": {
                             "mode": "raw",
-                            "raw": "{\n    \"controller_id\": \"CTRL-HCM-WHS-01\",\n    \"logs\": [\n        {\n            \"device_serial\": \"DEV-HCM-WHS-FGR-01\",\n            \"emp_id\": \"EMP-HCM-TMP-001\",\n            \"card_code\": \"RFID-HCM-TMP-01\",\n            \"access_time\": \"2026-07-09 09:00:00\",\n            \"direction\": \"in\",\n            \"verification_type\": \"fingerprint\"\n        },\n        {\n            \"device_serial\": \"DEV-HCM-WHS-FGR-01\",\n            \"emp_id\": \"EMP-HCM-TMP-001\",\n            \"card_code\": \"RFID-HCM-TMP-01\",\n            \"access_time\": \"2026-07-09 12:00:00\",\n            \"direction\": \"out\",\n            \"verification_type\": \"fingerprint\"\n        }\n    ]\n}"
+                            "raw": "{\n    \"controller_id\": \"CTRL-HN-LOBBY-01\",\n    \"logs\": [\n        {\n            \"device_serial\": \"DEV-HN-LOB-OUT-01\",\n            \"emp_id\": \"EMP-HN-IT-001\",\n            \"card_code\": \"RFID-HN-IT-01\",\n            \"direction\": \"out\",\n            \"verification_type\": \"face\"\n        }\n    ]\n}"
                         }
                     },
                     "response": [],
@@ -1977,7 +1929,7 @@
                     ]
                 },
                 {
-                    "name": "4.1.D Tải lô quẹt thẻ của nhóm nhân sự chi nhánh Đà Nẵng (AccessLogUpload)",
+                    "name": "4.1.2.A Trần Thị Hành Chính (EMP-HN-HR-001) quẹt VÀO riêng lẻ (Hanoi Lobby)",
                     "request": {
                         "method": "POST",
                         "header": [
@@ -1998,7 +1950,7 @@
                                 "AccessLogUpload"
                             ]
                         },
-                        "description": "------------------------------------------------------------------------------\nCHỨC NĂNG: Bộ điều khiển Đà Nẵng tải log quẹt nhận diện khuôn mặt của Giám Đốc lên Odoo.\nĐỐI TƯỢNG: Nguyễn Văn Giám Đốc (EMP-HN-DIR-001) quẹt VÀO lúc 09:00:00.\nKẾT QUẢ THÀNH CÔNG:\n- Tạo 1 bản ghi Access Log quẹt nhận diện khuôn mặt thành công trên Odoo.\n- Cập nhật vị trí Giám đốc thành \"Đang ở trong chi nhánh\".\nCÁC TRƯỜNG CẬP NHẬT TRÊN ODOO:\n- Model `t4.gate_keeper.access_log`: Tạo mới 1 bản ghi.\n- Model `t4.gate_keeper.employee` (Mã EMP-HN-DIR-001):\n* `last_action` -> 'in'\n* `last_action_time` -> '2026-07-09 09:00:00'\n------------------------------------------------------------------------------",
+                        "description": "------------------------------------------------------------------------------\nCHỨC NĂNG: Gửi log quẹt VÀO của duy nhất nhân viên Trần Thị Hành Chính.\nKẾT QUẢ: \n- Tạo 1 bản ghi Access Log.\n- Cập nhật last_action của EMP-HN-HR-001 thành \"in\" và last_action_time.\n------------------------------------------------------------------------------",
                         "auth": {
                             "type": "bearer",
                             "bearer": [
@@ -2011,7 +1963,7 @@
                         },
                         "body": {
                             "mode": "raw",
-                            "raw": "{\n    \"controller_id\": \"CTRL-DN-MAIN-01\",\n    \"logs\": [\n        {\n            \"device_serial\": \"DEV-DN-EXEC-IN-01\",\n            \"emp_id\": \"EMP-HN-DIR-001\",\n            \"access_time\": \"2026-07-09 09:00:00\",\n            \"direction\": \"in\",\n            \"verification_type\": \"face\"\n        }\n    ]\n}"
+                            "raw": "{\n    \"controller_id\": \"CTRL-HN-LOBBY-01\",\n    \"logs\": [\n        {\n            \"device_serial\": \"DEV-HN-LOB-IN-01\",\n            \"emp_id\": \"EMP-HN-HR-001\",\n            \"card_code\": \"RFID-HN-HR-01\",\n            \"direction\": \"in\",\n            \"verification_type\": \"card\"\n        }\n    ]\n}"
                         }
                     },
                     "response": [],
@@ -2030,7 +1982,7 @@
                     ]
                 },
                 {
-                    "name": "4.1.E Tải lô quẹt thẻ chứa Thẻ lạ / Chưa đăng ký (AccessLogUpload)",
+                    "name": "4.1.2.B Trần Thị Hành Chính (EMP-HN-HR-001) quẹt RA riêng lẻ (Hanoi Lobby)",
                     "request": {
                         "method": "POST",
                         "header": [
@@ -2051,7 +2003,7 @@
                                 "AccessLogUpload"
                             ]
                         },
-                        "description": "------------------------------------------------------------------------------\nCHỨC NĂNG: Thiết bị Hà Nội tải lên log của thẻ lạ quét tại sảnh.\nĐỐI TƯỢNG: Thẻ RFID-UNKNOWN-999 quét VÀO lúc 11:00:00.\nKẾT QUẢ THÀNH CÔNG:\n- Tạo bản ghi Access Log nhưng không gắn với nhân viên nào (employee_id = False).\n- Hệ thống tự động tạo cảnh báo bảo mật thẻ lạ (unknown_card) trong Area Warning.\n------------------------------------------------------------------------------",
+                        "description": "------------------------------------------------------------------------------\nCHỨC NĂNG: Gửi log quẹt RA của duy nhất nhân viên Trần Thị Hành Chính.\nKẾT QUẢ: \n- Tạo 1 bản ghi Access Log.\n- Cập nhật last_action của EMP-HN-HR-001 thành \"out\" và last_action_time.\n------------------------------------------------------------------------------",
                         "auth": {
                             "type": "bearer",
                             "bearer": [
@@ -2064,7 +2016,7 @@
                         },
                         "body": {
                             "mode": "raw",
-                            "raw": "{\n    \"controller_id\": \"CTRL-HN-LOBBY-01\",\n    \"logs\": [\n        {\n            \"device_serial\": \"DEV-HN-LOB-IN-01\",\n            \"card_code\": \"RFID-UNKNOWN-999\",\n            \"access_time\": \"2026-07-09 11:00:00\",\n            \"direction\": \"in\",\n            \"verification_type\": \"card\"\n        }\n    ]\n}"
+                            "raw": "{\n    \"controller_id\": \"CTRL-HN-LOBBY-01\",\n    \"logs\": [\n        {\n            \"device_serial\": \"DEV-HN-LOB-OUT-01\",\n            \"emp_id\": \"EMP-HN-HR-001\",\n            \"card_code\": \"RFID-HN-HR-01\",\n            \"direction\": \"out\",\n            \"verification_type\": \"card\"\n        }\n    ]\n}"
                         }
                     },
                     "response": [],
@@ -2083,7 +2035,7 @@
                     ]
                 },
                 {
-                    "name": "4.1.F Tải log với Controller ID không tồn tại (Kiểm tra lỗi ValidationError)",
+                    "name": "4.1.3.A Nguyễn Văn Kỹ Thuật (EMP-HN-IT-001) đi công tác quẹt VÀO tại Kho hàng HCM",
                     "request": {
                         "method": "POST",
                         "header": [
@@ -2104,7 +2056,7 @@
                                 "AccessLogUpload"
                             ]
                         },
-                        "description": "------------------------------------------------------------------------------\nCHỨC NĂNG: Gửi yêu cầu với controller_id sai định dạng hoặc không có trong hệ thống.\nKẾT QUẢ: Hệ thống báo lỗi ValidationError (400 Bad Request) bảo mật.\n------------------------------------------------------------------------------",
+                        "description": "------------------------------------------------------------------------------\nCHỨC NĂNG: Giả lập nhân viên Nguyễn Văn Kỹ Thuật (Hà Nội) quẹt VÀO tại Kho HCM.\nKẾT QUẢ: \n- Tạo 1 bản ghi Access Log với branch_id là chi nhánh HCM.\n- Trạng thái hiện diện của Kỹ Thuật đổi thành \"inside\" tại Kho HCM.\n------------------------------------------------------------------------------",
                         "auth": {
                             "type": "bearer",
                             "bearer": [
@@ -2117,7 +2069,7 @@
                         },
                         "body": {
                             "mode": "raw",
-                            "raw": "{\n    \"controller_id\": \"CTRL-HN-INVALID-999\",\n    \"logs\": [\n        {\n            \"device_serial\": \"DEV-HN-LOB-IN-01\",\n            \"emp_id\": \"EMP-HN-IT-001\",\n            \"access_time\": \"2026-07-09 11:15:00\",\n            \"direction\": \"in\",\n            \"verification_type\": \"card\"\n        }\n    ]\n}"
+                            "raw": "{\n    \"controller_id\": \"CTRL-HCM-WHS-01\",\n    \"logs\": [\n        {\n            \"device_serial\": \"DEV-HCM-WHS-FGR-01\",\n            \"emp_id\": \"EMP-HN-IT-001\",\n            \"card_code\": \"RFID-HN-IT-01\",\n            \"direction\": \"in\",\n            \"verification_type\": \"fingerprint\"\n        }\n    ]\n}"
                         }
                     },
                     "response": [],
@@ -2126,8 +2078,8 @@
                             "listen": "test",
                             "script": {
                                 "exec": [
-                                    "pm.test(\"Kiểm tra HTTP Status 400\", function () {",
-                                    "    pm.response.to.have.status(400);",
+                                    "pm.test(\"Kiểm tra HTTP Status 200\", function () {",
+                                    "    pm.response.to.have.status(200);",
                                     "});"
                                 ],
                                 "type": "text/javascript"
@@ -2136,7 +2088,7 @@
                     ]
                 },
                 {
-                    "name": "4.1.G Tải log thiếu trường bắt buộc logs (Kiểm tra lỗi Missing Data)",
+                    "name": "4.1.3.B Nguyễn Văn Kỹ Thuật (EMP-HN-IT-001) quẹt RA tại Kho hàng HCM",
                     "request": {
                         "method": "POST",
                         "header": [
@@ -2157,7 +2109,7 @@
                                 "AccessLogUpload"
                             ]
                         },
-                        "description": "------------------------------------------------------------------------------\nCHỨC NĂNG: Gửi yêu cầu thiếu tham số logs.\nKẾT QUẢ: Hệ thống báo lỗi Missing required field(s): logs (400 Bad Request).\n------------------------------------------------------------------------------",
+                        "description": "------------------------------------------------------------------------------\nCHỨC NĂNG: Nhân viên Kỹ Thuật quẹt RA khỏi Kho HCM để kết thúc chu kỳ công tác.\nKẾT QUẢ: \n- Tạo 1 bản ghi Access Log.\n- Trạng thái hiện diện đổi thành \"outside\".\n------------------------------------------------------------------------------",
                         "auth": {
                             "type": "bearer",
                             "bearer": [
@@ -2170,7 +2122,7 @@
                         },
                         "body": {
                             "mode": "raw",
-                            "raw": "{\n    \"controller_id\": \"CTRL-HN-LOBBY-01\"\n}"
+                            "raw": "{\n    \"controller_id\": \"CTRL-HCM-WHS-01\",\n    \"logs\": [\n        {\n            \"device_serial\": \"DEV-HCM-WHS-FGR-01\",\n            \"emp_id\": \"EMP-HN-IT-001\",\n            \"card_code\": \"RFID-HN-IT-01\",\n            \"direction\": \"out\",\n            \"verification_type\": \"fingerprint\"\n        }\n    ]\n}"
                         }
                     },
                     "response": [],
@@ -2179,8 +2131,1015 @@
                             "listen": "test",
                             "script": {
                                 "exec": [
-                                    "pm.test(\"Kiểm tra HTTP Status 400\", function () {",
-                                    "    pm.response.to.have.status(400);",
+                                    "pm.test(\"Kiểm tra HTTP Status 200\", function () {",
+                                    "    pm.response.to.have.status(200);",
+                                    "});"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "4.1.4.A Phạm Văn Thời Vụ (EMP-HCM-TMP-001) quẹt VÀO giờ hành chính (Kho hàng HCM - Bình thường)",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json",
+                                "type": "text"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/api/v1/AccessLogUpload",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "AccessLogUpload"
+                            ]
+                        },
+                        "description": "------------------------------------------------------------------------------\nCHỨC NĂNG: CTV Thời vụ quẹt VÀO lúc 10:00 (Trong giờ hành chính 08:00 - 18:00).\nKẾT QUẢ: \n- Tạo 1 bản ghi Access Log.\n- Trạng thái hiện diện đổi thành \"inside\".\n- Không tạo cảnh báo vi phạm.\n------------------------------------------------------------------------------",
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"controller_id\": \"CTRL-HCM-WHS-01\",\n    \"logs\": [\n        {\n            \"device_serial\": \"DEV-HCM-WHS-FGR-01\",\n            \"emp_id\": \"EMP-HCM-TMP-001\",\n            \"card_code\": \"RFID-HCM-TMP-01\",\n            \"direction\": \"in\",\n            \"verification_type\": \"fingerprint\"\n        }\n    ]\n}"
+                        }
+                    },
+                    "response": [],
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test(\"Kiểm tra HTTP Status 200\", function () {",
+                                    "    pm.response.to.have.status(200);",
+                                    "});"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "4.1.4.B Phạm Văn Thời Vụ (EMP-HCM-TMP-001) quẹt RA giờ hành chính (Kho hàng HCM - Bình thường)",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json",
+                                "type": "text"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/api/v1/AccessLogUpload",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "AccessLogUpload"
+                            ]
+                        },
+                        "description": "------------------------------------------------------------------------------\nCHỨC NĂNG: CTV Thời vụ quẹt RA lúc 16:00 (Trong giờ hành chính 08:00 - 18:00).\nKẾT QUẢ: \n- Tạo 1 bản ghi Access Log.\n- Trạng thái hiện diện đổi thành \"outside\".\n------------------------------------------------------------------------------",
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"controller_id\": \"CTRL-HCM-WHS-01\",\n    \"logs\": [\n        {\n            \"device_serial\": \"DEV-HCM-WHS-FGR-01\",\n            \"emp_id\": \"EMP-HCM-TMP-001\",\n            \"card_code\": \"RFID-HCM-TMP-01\",\n            \"direction\": \"out\",\n            \"verification_type\": \"fingerprint\"\n        }\n    ]\n}"
+                        }
+                    },
+                    "response": [],
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test(\"Kiểm tra HTTP Status 200\", function () {",
+                                    "    pm.response.to.have.status(200);",
+                                    "});"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "4.1.5.A Nguyễn Văn Kỹ Thuật (EMP-HN-IT-001) quẹt VÀO Phòng Máy Chủ Hà Nội (Hợp lệ)",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json",
+                                "type": "text"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/api/v1/AccessLogUpload",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "AccessLogUpload"
+                            ]
+                        },
+                        "description": "------------------------------------------------------------------------------\nCHỨC NĂNG: Nhân viên IT quẹt khuôn mặt vào phòng máy chủ (Khu vực được phép truy cập).\nKẾT QUẢ: \n- Tạo 1 bản ghi Access Log.\n- Trạng thái hiện diện đổi thành \"inside\" tại Server Room.\n- Không tạo cảnh báo vi phạm.\n------------------------------------------------------------------------------",
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"controller_id\": \"CTRL-HN-SRV-01\",\n    \"logs\": [\n        {\n            \"device_serial\": \"DEV-HN-SRV-FACE-01\",\n            \"emp_id\": \"EMP-HN-IT-001\",\n            \"card_code\": \"RFID-HN-IT-01\",\n            \"direction\": \"in\",\n            \"verification_type\": \"face\"\n        }\n    ]\n}"
+                        }
+                    },
+                    "response": [],
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test(\"Kiểm tra HTTP Status 200\", function () {",
+                                    "    pm.response.to.have.status(200);",
+                                    "});"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "4.1.5.B Nguyễn Văn Kỹ Thuật (EMP-HN-IT-001) quẹt RA khỏi Phòng Máy Chủ Hà Nội",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json",
+                                "type": "text"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/api/v1/AccessLogUpload",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "AccessLogUpload"
+                            ]
+                        },
+                        "description": "------------------------------------------------------------------------------\nCHỨC NĂNG: Nhân viên IT quẹt khuôn mặt ra khỏi phòng máy chủ.\nKẾT QUẢ: \n- Tạo 1 bản ghi Access Log.\n- Trạng thái hiện diện đổi thành \"outside\".\n------------------------------------------------------------------------------\n==============================================================================\nPHẦN 2: CÁC KỊCH BẢN QUẸT THẺ VI PHẠM RIÊNG LẺ (CẢNH BÁO BẢO MẬT)\n==============================================================================",
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"controller_id\": \"CTRL-HN-SRV-01\",\n    \"logs\": [\n        {\n            \"device_serial\": \"DEV-HN-SRV-FACE-01\",\n            \"emp_id\": \"EMP-HN-IT-001\",\n            \"card_code\": \"RFID-HN-IT-01\",\n            \"direction\": \"out\",\n            \"verification_type\": \"face\"\n        }\n    ]\n}"
+                        }
+                    },
+                    "response": [],
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test(\"Kiểm tra HTTP Status 200\", function () {",
+                                    "    pm.response.to.have.status(200);",
+                                    "});"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "4.2.1.A Vi phạm Ngoài giờ - Unauthorized Time: Phạm Văn Thời Vụ quẹt VÀO (Ngày thường)",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json",
+                                "type": "text"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/api/v1/AccessLogUpload",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "AccessLogUpload"
+                            ]
+                        },
+                        "description": "------------------------------------------------------------------------------\nCHỨC NĂNG: CTV Thời vụ quẹt VÀO lúc 22:00 ngày thường (Ngoài giờ hành chính 08:00 - 18:00).\nKẾT QUẢ: \n- Tạo 1 bản ghi Access Log.\n- Tự động tạo cảnh báo vi phạm thời gian (unauthorized_time - Màu xanh lá) tại Area Warning.\n------------------------------------------------------------------------------",
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"controller_id\": \"CTRL-HCM-WHS-01\",\n    \"logs\": [\n        {\n            \"device_serial\": \"DEV-HCM-WHS-FGR-01\",\n            \"emp_id\": \"EMP-HCM-TMP-001\",\n            \"card_code\": \"RFID-HCM-TMP-01\",\n            \"access_time\": \"2026-07-10 22:00:00\",\n            \"direction\": \"in\",\n            \"verification_type\": \"fingerprint\"\n        }\n    ]\n}"
+                        }
+                    },
+                    "response": [],
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test(\"Kiểm tra HTTP Status 200\", function () {",
+                                    "    pm.response.to.have.status(200);",
+                                    "});"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "4.2.1.B Phạm Văn Thời Vụ quẹt RA ngoài giờ (Ngày thường)",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json",
+                                "type": "text"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/api/v1/AccessLogUpload",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "AccessLogUpload"
+                            ]
+                        },
+                        "description": "------------------------------------------------------------------------------\nCHỨC NĂNG: CTV Thời vụ quẹt RA lúc 22:30.\nKẾT QUẢ: Tạo log quẹt RA, trả trạng thái hiện diện về outside.\n------------------------------------------------------------------------------",
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"controller_id\": \"CTRL-HCM-WHS-01\",\n    \"logs\": [\n        {\n            \"device_serial\": \"DEV-HCM-WHS-FGR-01\",\n            \"emp_id\": \"EMP-HCM-TMP-001\",\n            \"card_code\": \"RFID-HCM-TMP-01\",\n            \"access_time\": \"2026-07-10 22:30:00\",\n            \"direction\": \"out\",\n            \"verification_type\": \"fingerprint\"\n        }\n    ]\n}"
+                        }
+                    },
+                    "response": [],
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test(\"Kiểm tra HTTP Status 200\", function () {",
+                                    "    pm.response.to.have.status(200);",
+                                    "});"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "4.2.1.C Vi phạm Ngoài giờ - Unauthorized Time: Phạm Văn Thời Vụ quẹt VÀO (Cuối tuần)",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json",
+                                "type": "text"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/api/v1/AccessLogUpload",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "AccessLogUpload"
+                            ]
+                        },
+                        "description": "------------------------------------------------------------------------------\nCHỨC NĂNG: CTV Thời vụ quẹt VÀO lúc 10:00 sáng Thứ Bảy (Vi phạm chính sách cấm cuối tuần).\nKẾT QUẢ: \n- Tạo 1 bản ghi Access Log.\n- Tự động tạo cảnh báo vi phạm thời gian (unauthorized_time - Màu xanh lá) tại Area Warning.\n------------------------------------------------------------------------------",
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"controller_id\": \"CTRL-HCM-WHS-01\",\n    \"logs\": [\n        {\n            \"device_serial\": \"DEV-HCM-WHS-FGR-01\",\n            \"emp_id\": \"EMP-HCM-TMP-001\",\n            \"card_code\": \"RFID-HCM-TMP-01\",\n            \"access_time\": \"2026-07-11 10:00:00\",\n            \"direction\": \"in\",\n            \"verification_type\": \"fingerprint\"\n        }\n    ]\n}"
+                        }
+                    },
+                    "response": [],
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test(\"Kiểm tra HTTP Status 200\", function () {",
+                                    "    pm.response.to.have.status(200);",
+                                    "});"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "4.2.1.D Phạm Văn Thời Vụ quẹt RA cuối tuần",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json",
+                                "type": "text"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/api/v1/AccessLogUpload",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "AccessLogUpload"
+                            ]
+                        },
+                        "description": "------------------------------------------------------------------------------\nCHỨC NĂNG: CTV Thời vụ quẹt RA lúc 11:00 Thứ Bảy.\nKẾT QUẢ: Tạo log quẹt RA, trả trạng thái hiện diện về outside.\n------------------------------------------------------------------------------",
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"controller_id\": \"CTRL-HCM-WHS-01\",\n    \"logs\": [\n        {\n            \"device_serial\": \"DEV-HCM-WHS-FGR-01\",\n            \"emp_id\": \"EMP-HCM-TMP-001\",\n            \"card_code\": \"RFID-HCM-TMP-01\",\n            \"access_time\": \"2026-07-11 11:00:00\",\n            \"direction\": \"out\",\n            \"verification_type\": \"fingerprint\"\n        }\n    ]\n}"
+                        }
+                    },
+                    "response": [],
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test(\"Kiểm tra HTTP Status 200\", function () {",
+                                    "    pm.response.to.have.status(200);",
+                                    "});"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "4.2.2.A Vi phạm Khu vực cấm - Unauthorized Area: Trần Thị Hành Chính quẹt VÀO Server Room Hà Nội",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json",
+                                "type": "text"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/api/v1/AccessLogUpload",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "AccessLogUpload"
+                            ]
+                        },
+                        "description": "------------------------------------------------------------------------------\nCHỨC NĂNG: Nhân viên HR quẹt khuôn mặt vào phòng máy chủ bảo mật dành riêng cho IT/Bảo vệ/Ban Giám đốc.\nKẾT QUẢ: \n- Tạo 1 bản ghi Access Log.\n- Tự động tạo cảnh báo sai khu vực (unauthorized_area - Màu cam) tại Area Warning.\n------------------------------------------------------------------------------",
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"controller_id\": \"CTRL-HN-SRV-01\",\n    \"logs\": [\n        {\n            \"device_serial\": \"DEV-HN-SRV-FACE-01\",\n            \"emp_id\": \"EMP-HN-HR-001\",\n            \"card_code\": \"RFID-HN-HR-01\",\n            \"direction\": \"in\",\n            \"verification_type\": \"face\"\n        }\n    ]\n}"
+                        }
+                    },
+                    "response": [],
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test(\"Kiểm tra HTTP Status 200\", function () {",
+                                    "    pm.response.to.have.status(200);",
+                                    "});"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "4.2.2.B Vi phạm Khu vực cấm - Unauthorized Area: Phạm Văn Thời Vụ quẹt VÀO Server Room Hà Nội",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json",
+                                "type": "text"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/api/v1/AccessLogUpload",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "AccessLogUpload"
+                            ]
+                        },
+                        "description": "------------------------------------------------------------------------------\nCHỨC NĂNG: Nhân viên thời vụ HCM quẹt khuôn mặt vào Server Room Hà Nội (không có quyền truy cập).\nKẾT QUẢ: \n- Tạo 1 bản ghi Access Log.\n- Tự động tạo cảnh báo sai khu vực (unauthorized_area - Màu cam) tại Area Warning.\n------------------------------------------------------------------------------",
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"controller_id\": \"CTRL-HN-SRV-01\",\n    \"logs\": [\n        {\n            \"device_serial\": \"DEV-HN-SRV-FACE-01\",\n            \"emp_id\": \"EMP-HCM-TMP-001\",\n            \"card_code\": \"RFID-HCM-TMP-01\",\n            \"direction\": \"in\",\n            \"verification_type\": \"face\"\n        }\n    ]\n}"
+                        }
+                    },
+                    "response": [],
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test(\"Kiểm tra HTTP Status 200\", function () {",
+                                    "    pm.response.to.have.status(200);",
+                                    "});"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "4.2.2.C Vi phạm Khu vực cấm - Unauthorized Area: Trần Thị Hành Chính quẹt VÀO Phòng R&D Đà Nẵng",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json",
+                                "type": "text"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/api/v1/AccessLogUpload",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "AccessLogUpload"
+                            ]
+                        },
+                        "description": "------------------------------------------------------------------------------\nCHỨC NĂNG: Nhân viên HR Hà Nội quẹt thẻ vào phòng R&D Đà Nẵng (chỉ cho phép IT Đà Nẵng).\nKẾT QUẢ: \n- Tạo 1 bản ghi Access Log.\n- Tự động tạo cảnh báo sai khu vực (unauthorized_area - Màu cam) tại Area Warning.\n------------------------------------------------------------------------------",
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"controller_id\": \"CTRL-DN-MAIN-01\",\n    \"logs\": [\n        {\n            \"device_serial\": \"DEV-DN-RD-IN-01\",\n            \"emp_id\": \"EMP-HN-HR-001\",\n            \"card_code\": \"RFID-HN-HR-01\",\n            \"direction\": \"in\",\n            \"verification_type\": \"card\"\n        }\n    ]\n}"
+                        }
+                    },
+                    "response": [],
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test(\"Kiểm tra HTTP Status 200\", function () {",
+                                    "    pm.response.to.have.status(200);",
+                                    "});"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "4.2.3.A Vi phạm Anti-passback (Xoay vòng thẻ): Kỹ Thuật quẹt VÀO lần 1 (Hợp lệ)",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json",
+                                "type": "text"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/api/v1/AccessLogUpload",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "AccessLogUpload"
+                            ]
+                        },
+                        "description": "------------------------------------------------------------------------------\nCHỨC NĂNG: Nguyễn Văn Kỹ Thuật quẹt VÀO tại sảnh.\nKẾT QUẢ: Trạng thái hiện diện là \"inside\".\n------------------------------------------------------------------------------",
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"controller_id\": \"CTRL-HN-LOBBY-01\",\n    \"logs\": [\n        {\n            \"device_serial\": \"DEV-HN-LOB-IN-01\",\n            \"emp_id\": \"EMP-HN-IT-001\",\n            \"card_code\": \"RFID-HN-IT-01\",\n            \"direction\": \"in\",\n            \"verification_type\": \"face\"\n        }\n    ]\n}"
+                        }
+                    },
+                    "response": [],
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test(\"Kiểm tra HTTP Status 200\", function () {",
+                                    "    pm.response.to.have.status(200);",
+                                    "});"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "4.2.3.B Vi phạm Anti-passback (Xoay vòng thẻ): Kỹ Thuật tiếp tục quẹt VÀO lần 2 (Không hợp lệ)",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json",
+                                "type": "text"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/api/v1/AccessLogUpload",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "AccessLogUpload"
+                            ]
+                        },
+                        "description": "------------------------------------------------------------------------------\nCHỨC NĂNG: Nguyễn Văn Kỹ Thuật tiếp tục quẹt VÀO lần thứ 2 mà chưa quẹt RA.\nKẾT QUẢ: \n- Tạo bản ghi Access Log.\n- Tự động tạo cảnh báo vi phạm trình tự (invalid_sequence - Màu đỏ) do xoay vòng thẻ.\n------------------------------------------------------------------------------",
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"controller_id\": \"CTRL-HN-LOBBY-01\",\n    \"logs\": [\n        {\n            \"device_serial\": \"DEV-HN-LOB-IN-01\",\n            \"emp_id\": \"EMP-HN-IT-001\",\n            \"card_code\": \"RFID-HN-IT-01\",\n            \"direction\": \"in\",\n            \"verification_type\": \"face\"\n        }\n    ]\n}"
+                        }
+                    },
+                    "response": [],
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test(\"Kiểm tra HTTP Status 200\", function () {",
+                                    "    pm.response.to.have.status(200);",
+                                    "});"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "4.2.3.C Nguyễn Văn Kỹ Thuật quẹt RA sau vi phạm VÀO liên tiếp (Hợp lệ)",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json",
+                                "type": "text"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/api/v1/AccessLogUpload",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "AccessLogUpload"
+                            ]
+                        },
+                        "description": "------------------------------------------------------------------------------\nCHỨC NĂNG: Quẹt RA để trả trạng thái hiện diện về \"outside\".\n------------------------------------------------------------------------------",
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"controller_id\": \"CTRL-HN-LOBBY-01\",\n    \"logs\": [\n        {\n            \"device_serial\": \"DEV-HN-LOB-OUT-01\",\n            \"emp_id\": \"EMP-HN-IT-001\",\n            \"card_code\": \"RFID-HN-IT-01\",\n            \"direction\": \"out\",\n            \"verification_type\": \"face\"\n        }\n    ]\n}"
+                        }
+                    },
+                    "response": [],
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test(\"Kiểm tra HTTP Status 200\", function () {",
+                                    "    pm.response.to.have.status(200);",
+                                    "});"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "4.2.3.D Vi phạm Anti-passback: Kỹ Thuật quẹt RA lần 2 liên tiếp (Không hợp lệ)",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json",
+                                "type": "text"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/api/v1/AccessLogUpload",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "AccessLogUpload"
+                            ]
+                        },
+                        "description": "------------------------------------------------------------------------------\nCHỨC NĂNG: Nguyễn Văn Kỹ Thuật đã ở ngoài (outside) nhưng tiếp tục quẹt RA lần nữa.\nKẾT QUẢ: \n- Tạo bản ghi Access Log.\n- Tự động tạo cảnh báo vi phạm trình tự (invalid_sequence - Màu đỏ).\n------------------------------------------------------------------------------",
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"controller_id\": \"CTRL-HN-LOBBY-01\",\n    \"logs\": [\n        {\n            \"device_serial\": \"DEV-HN-LOB-OUT-01\",\n            \"emp_id\": \"EMP-HN-IT-001\",\n            \"card_code\": \"RFID-HN-IT-01\",\n            \"direction\": \"out\",\n            \"verification_type\": \"face\"\n        }\n    ]\n}"
+                        }
+                    },
+                    "response": [],
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test(\"Kiểm tra HTTP Status 200\", function () {",
+                                    "    pm.response.to.have.status(200);",
+                                    "});"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "4.2.4.A Phát hiện thẻ lạ chưa đăng ký: Thẻ lạ 777 quẹt VÀO (Hà Nội Lobby)",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json",
+                                "type": "text"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/api/v1/AccessLogUpload",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "AccessLogUpload"
+                            ]
+                        },
+                        "description": "------------------------------------------------------------------------------\nCHỨC NĂNG: Gửi mã thẻ chưa đăng ký vào hệ thống tại sảnh Hà Nội.\nKẾT QUẢ: \n- Tạo Access Log (không có nhân viên).\n- Tự động tạo cảnh báo thẻ lạ (unknown_card - Màu tím) tại Area Warning.\n------------------------------------------------------------------------------",
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"controller_id\": \"CTRL-HN-LOBBY-01\",\n    \"logs\": [\n        {\n            \"device_serial\": \"DEV-HN-LOB-IN-01\",\n            \"card_code\": \"RFID-UNKNOWN-777\",\n            \"direction\": \"in\",\n            \"verification_type\": \"card\"\n        }\n    ]\n}"
+                        }
+                    },
+                    "response": [],
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test(\"Kiểm tra HTTP Status 200\", function () {",
+                                    "    pm.response.to.have.status(200);",
+                                    "});"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "4.2.4.B Phát hiện thẻ lạ chưa đăng ký: Thẻ lạ 777 quẹt RA (Hà Nội Lobby)",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json",
+                                "type": "text"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/api/v1/AccessLogUpload",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "AccessLogUpload"
+                            ]
+                        },
+                        "description": "------------------------------------------------------------------------------\nCHỨC NĂNG: Thẻ lạ 777 quẹt RA.\nKẾT QUẢ: Tạo Access Log và tạo cảnh báo thẻ lạ (unknown_card - Màu tím).\n------------------------------------------------------------------------------",
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"controller_id\": \"CTRL-HN-LOBBY-01\",\n    \"logs\": [\n        {\n            \"device_serial\": \"DEV-HN-LOB-OUT-01\",\n            \"card_code\": \"RFID-UNKNOWN-777\",\n            \"direction\": \"out\",\n            \"verification_type\": \"card\"\n        }\n    ]\n}"
+                        }
+                    },
+                    "response": [],
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test(\"Kiểm tra HTTP Status 200\", function () {",
+                                    "    pm.response.to.have.status(200);",
+                                    "});"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "4.2.4.C Phát hiện thẻ lạ chưa đăng ký: Thẻ lạ 888 quẹt VÀO (Kho hàng HCM)",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json",
+                                "type": "text"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/api/v1/AccessLogUpload",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "AccessLogUpload"
+                            ]
+                        },
+                        "description": "------------------------------------------------------------------------------\nCHỨC NĂNG: Gửi mã thẻ chưa đăng ký vào hệ thống tại Kho hàng TP. HCM.\nKẾT QUẢ: \n- Tạo Access Log (không có nhân viên).\n- Tự động tạo cảnh báo thẻ lạ (unknown_card - Màu tím) tại Area Warning.\n------------------------------------------------------------------------------",
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"controller_id\": \"CTRL-HCM-WHS-01\",\n    \"logs\": [\n        {\n            \"device_serial\": \"DEV-HCM-WHS-FGR-01\",\n            \"card_code\": \"RFID-UNKNOWN-888\",\n            \"direction\": \"in\",\n            \"verification_type\": \"card\"\n        }\n    ]\n}"
+                        }
+                    },
+                    "response": [],
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test(\"Kiểm tra HTTP Status 200\", function () {",
+                                    "    pm.response.to.have.status(200);",
+                                    "});"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "4.2.4.D Phát hiện thẻ lạ chưa đăng ký: Thẻ lạ 888 quẹt RA (Kho hàng HCM)",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json",
+                                "type": "text"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/api/v1/AccessLogUpload",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "AccessLogUpload"
+                            ]
+                        },
+                        "description": "------------------------------------------------------------------------------\nCHỨC NĂNG: Thẻ lạ 888 quẹt RA tại Kho hàng TP. HCM.\nKẾT QUẢ: Tạo Access Log và tạo cảnh báo thẻ lạ (unknown_card - Màu tím).\n------------------------------------------------------------------------------",
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"controller_id\": \"CTRL-HCM-WHS-01\",\n    \"logs\": [\n        {\n            \"device_serial\": \"DEV-HCM-WHS-FGR-01\",\n            \"card_code\": \"RFID-UNKNOWN-888\",\n            \"direction\": \"out\",\n            \"verification_type\": \"card\"\n        }\n    ]\n}"
+                        }
+                    },
+                    "response": [],
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test(\"Kiểm tra HTTP Status 200\", function () {",
+                                    "    pm.response.to.have.status(200);",
                                     "});"
                                 ],
                                 "type": "text/javascript"
