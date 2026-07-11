@@ -244,6 +244,7 @@ class GateKeeperDevice(models.Model):
                     "area_id": self.area_id.id,
                     "device_id": self.id,
                     "warning_type_id": warning_type.id,
+                    "priority": "medium",
                     "description": _("Device %s is offline. Status: %s")
                     % (self.name, status_label),
                 }

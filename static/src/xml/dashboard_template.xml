@@ -1,0 +1,352 @@
+<?xml version="1.0" encoding="utf-8"?>
+<templates xml:space="preserve">
+    <t t-name="t4_gate_keeper.DashboardTemplate" owl="1">
+        <div class="o_gatekeeper_dashboard" t-on-click="onDashboardClick">
+
+            <!-- ═══════════════════ HEADER ═══════════════════ -->
+            <div class="gk-header d-flex justify-content-between align-items-center px-4 py-3">
+                <div class="d-flex align-items-center gap-3">
+                    <span class="pulse-dot"></span>
+                    <div>
+                        <div class="gk-title">🛡️ GATE KEEPER DASHBOARD</div>
+                        <div class="gk-subtitle">Hệ thống kiểm soát ra vào · Cập nhật mỗi 15 giây</div>
+                    </div>
+                </div>
+                <div class="d-flex align-items-center gap-3">
+                    <div class="sound-controls d-flex align-items-center gap-2 bg-light border rounded px-3 py-1" style="height: fit-content; font-size: 0.8rem;">
+                        <button class="btn btn-sm p-0 border-0 text-secondary" t-on-click="toggleSound" title="Bật/Tắt âm thanh">
+                            <i t-attf-class="fa #{state.soundEnabled ? 'fa-volume-up text-success' : 'fa-volume-off text-danger'} me-1"></i>
+                            <span t-esc="state.soundEnabled ? 'Bật âm thanh' : 'Tắt âm thanh'"/>
+                        </button>
+                        <span class="text-muted">|</span>
+                        <button class="btn btn-sm btn-link p-0 text-decoration-none text-info fw-bold" t-on-click="testSound">
+                            <i class="fa fa-play me-1"></i>Thử loa
+                        </button>
+                    </div>
+                    <div class="text-end">
+                        <div class="gk-clock" t-esc="state.currentTime"/>
+                        <div class="gk-date" t-esc="state.currentDate"/>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Loading -->
+            <t t-if="state.loading">
+                <div class="d-flex flex-column justify-content-center align-items-center" style="height: 70vh;">
+                    <div class="gk-spinner mb-3"></div>
+                    <div class="text-white fw-bold fs-5">Đang tải dữ liệu giám sát...</div>
+                </div>
+            </t>
+
+            <t t-else="">
+                <div class="gk-body px-4 pb-4">
+
+                    <!-- ═══════════════════ STAT CARDS ROW ═══════════════════ -->
+                    <div class="row g-3 mb-4">
+                        <!-- Card: Trong khuôn viên -->
+                        <div class="col-6 col-md-3" t-on-click="showBreakdownModal" style="cursor: pointer;" title="Click để xem chi tiết khu vực">
+                            <div class="stat-card stat-blue">
+                                <div class="stat-icon-wrap">
+                                    <i class="fa fa-users stat-ico"></i>
+                                </div>
+                                <div class="stat-num" t-esc="state.stats.inside"/>
+                                <div class="stat-label">Trong khuôn viên 🔍</div>
+                                <div class="stat-sub">Ngoài: <t t-esc="state.stats.outside"/> · Chưa rõ: <t t-esc="state.stats.unknown"/></div>
+                            </div>
+                        </div>
+                        <!-- Card: Sự kiện hôm nay -->
+                        <div class="col-6 col-md-3">
+                            <div class="stat-card stat-green">
+                                <div class="stat-icon-wrap">
+                                    <i class="fa fa-exchange stat-ico"></i>
+                                </div>
+                                <div class="stat-num" t-esc="state.stats.events_today"/>
+                                <div class="stat-label">Lượt Ra/Vào Hôm Nay</div>
+                                <div class="stat-sub">Ghi nhận từ 00:00</div>
+                            </div>
+                        </div>
+                        <!-- Card: Cảnh báo -->
+                        <div class="col-6 col-md-3">
+                            <div class="stat-card" t-att-class="state.stats.alerts_active > 0 ? 'stat-red stat-pulse' : 'stat-gray'">
+                                <div class="stat-icon-wrap">
+                                    <i class="fa fa-exclamation-triangle stat-ico"></i>
+                                </div>
+                                <div class="stat-num" t-esc="state.stats.alerts_active"/>
+                                <div class="stat-label">Cảnh Báo Chưa Xử Lý</div>
+                                <div class="stat-sub">
+                                    <t t-if="state.stats.alerts_active > 0">🚨 CẦN XỬ LÝ NGAY</t>
+                                    <t t-else="">✅ Bình thường</t>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- Card: Thiết bị -->
+                        <div class="col-6 col-md-3">
+                            <div class="stat-card stat-amber">
+                                <div class="stat-icon-wrap">
+                                    <i class="fa fa-microchip stat-ico"></i>
+                                </div>
+                                <div class="stat-num">
+                                    <t t-esc="state.stats.device_active"/>/<t t-esc="state.stats.device_total"/>
+                                </div>
+                                <div class="stat-label">Thiết Bị Hoạt Động</div>
+                                <div class="stat-sub">Online / Tổng số</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- ═══════════════════ MAIN GRID ═══════════════════ -->
+                    <div class="row g-3">
+
+                        <!-- LEFT: ALERTS PANEL (8 cols) -->
+                        <div class="col-lg-8">
+                            <div class="gk-panel h-100">
+                                <div class="gk-panel-header d-flex justify-content-between align-items-center">
+                                    <span><i class="fa fa-bell me-2 text-danger"></i>Cảnh báo vi phạm &amp; Sự cố thiết bị</span>
+                                    <span class="gk-badge-danger" t-esc="state.alerts.length + ' chưa xử lý'"/>
+                                </div>
+                                <div class="gk-panel-body scrollable-panel" style="max-height: 520px;">
+                                    <!-- Empty state -->
+                                    <t t-if="state.alerts.length == 0">
+                                        <div class="gk-empty-state">
+                                            <i class="fa fa-check-circle gk-empty-icon text-success"></i>
+                                            <div class="fw-bold text-success">Không có cảnh báo đang hoạt động</div>
+                                            <div class="text-muted small mt-1">An ninh bình thường · Hệ thống ổn định</div>
+                                        </div>
+                                    </t>
+                                    <!-- Alert list -->
+                                    <t t-else="">
+                                        <t t-foreach="state.alerts" t-as="alert" t-key="alert.id">
+                                            <div class="alert-card mb-3" t-att-data-priority="alert.priority">
+                                                <div class="d-flex justify-content-between align-items-start mb-2">
+                                                    <div class="d-flex align-items-center gap-2">
+                                                        <span class="priority-pill" t-att-data-priority="alert.priority">
+                                                            <t t-if="alert.priority == 'critical'">🚨 KHẨN CẤP</t>
+                                                            <t t-elif="alert.priority == 'high'">⚠️ CAO</t>
+                                                            <t t-elif="alert.priority == 'medium'">🔵 TRUNG BÌNH</t>
+                                                            <t t-else="">🟢 THẤP</t>
+                                                        </span>
+                                                        <span class="state-pill" t-att-data-state="alert.state">
+                                                            <t t-if="alert.state == 'warning'">CẢNH BÁO</t>
+                                                            <t t-else="">ĐANG XỬ LÝ</t>
+                                                        </span>
+                                                    </div>
+                                                    <span class="text-muted small" t-esc="alert.alert_time ? alert.alert_time.substring(0,19).replace('T',' ') : ''"/>
+                                                </div>
+                                                <div class="alert-policy-name mb-1">
+                                                    <i class="fa fa-tag me-1 text-muted"></i>
+                                                    <t t-esc="alert.policy_name"/>
+                                                </div>
+                                                <div class="alert-note mb-3" t-esc="alert.note"/>
+                                                <div t-if="alert.person" class="alert-person mb-2">
+                                                    <i class="fa fa-user me-1"></i>
+                                                    <t t-esc="alert.person"/>
+                                                    <t t-if="alert.device"> · <i class="fa fa-tablet me-1"></i><t t-esc="alert.device"/></t>
+                                                </div>
+                                                <!-- Resolve form -->
+                                                <div class="resolve-form d-flex gap-2">
+                                                    <input type="text"
+                                                           class="form-control form-control-sm gk-input"
+                                                           placeholder="Ghi chú xử lý (vd: Cho phép đặc cách, Viết cam kết...)"
+                                                           t-on-input="(ev) => this.handleNoteChange(ev, alert.id)"/>
+                                                    <button class="btn btn-sm gk-btn-resolve"
+                                                            t-on-click="() => this.resolveAlert(alert.id)">
+                                                        <i class="fa fa-check me-1"></i>XÁC NHẬN
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </t>
+                                    </t>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- RIGHT: Devices + Events (4 cols) -->
+                        <div class="col-lg-4">
+                            <div class="d-flex flex-column gap-3">
+
+                                <!-- Device Status -->
+                                <div class="gk-panel">
+                                    <div class="gk-panel-header">
+                                        <span><i class="fa fa-hdd-o me-2"></i>Trạng thái thiết bị</span>
+                                        <span class="gk-badge-neutral" t-esc="state.stats.device_total + ' thiết bị'"/>
+                                    </div>
+                                    <div class="gk-panel-body scrollable-panel" style="max-height: 220px;">
+                                        <t t-if="state.devices.length == 0">
+                                            <div class="gk-empty-state" style="padding: 20px 0;">
+                                                <div class="text-muted small">Chưa có thiết bị nào.</div>
+                                            </div>
+                                        </t>
+                                        <t t-else="">
+                                            <t t-foreach="state.devices" t-as="dev" t-key="dev.id">
+                                                <div class="device-row">
+                                                    <div class="device-info">
+                                                        <div class="device-name" t-esc="dev.name"/>
+                                                        <div class="device-location" t-esc="dev.area + ' · Controller: ' + dev.controller"/>
+                                                    </div>
+                                                    <div class="d-flex align-items-center gap-2">
+                                                        <span class="status-dot" t-att-data-state="dev.state"></span>
+                                                        <span class="device-state-badge" t-att-data-state="dev.state">
+                                                            <t t-if="dev.state == 'online'">ONLINE</t>
+                                                            <t t-elif="dev.state == 'controller_offline'">CONTROLLER OFFLINE</t>
+                                                            <t t-else="">OFFLINE</t>
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                            </t>
+                                        </t>
+                                    </div>
+                                </div>
+
+                                <!-- Live Events with search -->
+                                <div class="gk-panel">
+                                    <div class="gk-panel-header">
+                                        <span><i class="fa fa-history me-2"></i>Sự kiện gần nhất</span>
+                                    </div>
+                                    <div class="gk-panel-body">
+                                        <!-- Search -->
+                                        <div class="mb-2">
+                                            <input type="text"
+                                                   class="form-control form-control-sm gk-input"
+                                                   placeholder="🔍 Tìm theo tên, cổng, địa điểm..."
+                                                   t-on-input="handleSearch"/>
+                                        </div>
+                                        <div class="scrollable-panel" style="max-height: 260px;">
+                                            <t t-if="filteredEvents.length == 0">
+                                                <div class="gk-empty-state" style="padding: 20px 0;">
+                                                    <div class="text-muted small">Không có sự kiện phù hợp.</div>
+                                                </div>
+                                            </t>
+                                            <t t-else="">
+                                                <t t-foreach="filteredEvents" t-as="ev" t-key="ev.id">
+                                                    <div class="event-row">
+                                                        <div class="event-direction" t-att-data-dir="ev.direction">
+                                                            <t t-if="ev.direction == 'in'">VÀO</t>
+                                                            <t t-elif="ev.direction == 'out'">RA</t>
+                                                            <t t-else="">K.XĐ</t>
+                                                        </div>
+                                                        <div class="event-info flex-grow-1">
+                                                            <div class="event-person" t-esc="ev.person"/>
+                                                            <div class="event-gate" t-esc="ev.gate + (ev.location ? ' · ' + ev.location : '')"/>
+                                                        </div>
+                                                        <div class="event-time" t-esc="ev.time ? ev.time.substring(11,19) : ''"/>
+                                                    </div>
+                                                </t>
+                                            </t>
+                                        </div>
+                                    </div>
+                                </div>
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </t>
+
+            <!-- ═══════════════════ DETAILED BREAKDOWN MODAL ═══════════════════ -->
+            <t t-if="state.showInsideModal">
+                <div class="modal fade show d-block" tabindex="-1" role="dialog" style="background: rgba(0, 0, 0, 0.5); backdrop-filter: blur(2px); z-index: 1055;">
+                    <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
+                        <div class="modal-content" style="background: #ffffff; border: 1px solid #dee2e6; border-radius: 12px; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15); overflow: hidden; color: #333333;">
+                            <div class="modal-header d-flex justify-content-between align-items-center px-4 py-3" style="background: #f8f9fa; border-bottom: 1px solid #dee2e6;">
+                                <h5 class="modal-title fw-bold d-flex align-items-center gap-2 mb-0" style="font-size: 1.15rem; color: #002f6c;">
+                                    <i class="fa fa-users"></i> Chi Tiết Người Trong Khuôn Viên
+                                </h5>
+                                <button type="button" class="btn p-0 border-0 bg-transparent text-secondary" t-on-click="closeBreakdownModal" style="font-size: 1.25rem; line-height: 1; cursor: pointer;">✕</button>
+                            </div>
+                            <div class="modal-body p-4 d-flex flex-column" style="height: 480px; overflow: hidden;">
+                                
+                                <!-- Tabs/Filter Cards by Location -->
+                                <div class="row g-3 mb-4 flex-shrink-0">
+                                    <!-- Card: Tất cả -->
+                                    <div class="col-3 d-flex align-items-stretch">
+                                        <div t-on-click="() => this.selectLocation('all')"
+                                             t-att-class="state.selectedLocationId === 'all' ? 'location-filter-card active w-100' : 'location-filter-card w-100'"
+                                             title="Tất cả khu vực">
+                                            <div class="location-filter-num" t-esc="state.stats.inside"/>
+                                            <div class="location-filter-label">📍 Tất cả khu vực</div>
+                                        </div>
+                                    </div>
+                                    
+                                    <t t-foreach="state.stats.location_counts || []" t-as="loc" t-key="loc.id">
+                                        <div class="col-3 d-flex align-items-stretch">
+                                            <div t-on-click="() => this.selectLocation(loc.id)"
+                                                 t-att-class="state.selectedLocationId === loc.id ? 'location-filter-card active w-100' : 'location-filter-card w-100'"
+                                                 t-att-title="loc.name">
+                                                <div class="location-filter-num" t-esc="loc.count"/>
+                                                <div class="location-filter-label" t-esc="loc.name"/>
+                                            </div>
+                                        </div>
+                                    </t>
+                                </div>
+
+                                <!-- Branch & Group Select Filters -->
+                                <div class="row g-2 mb-3 flex-shrink-0 px-1">
+                                    <div class="col-6">
+                                        <label class="form-label small fw-bold text-muted mb-1">🏢 Chi nhánh</label>
+                                        <select class="form-select form-select-sm" t-on-change="onBranchChange" style="border-radius: 6px;">
+                                            <option value="all">-- Tất cả chi nhánh --</option>
+                                            <t t-foreach="state.branches" t-as="b" t-key="b.id">
+                                                <option t-att-value="b.id" t-att-selected="state.selectedBranchId == b.id"><t t-esc="b.name"/></option>
+                                            </t>
+                                        </select>
+                                    </div>
+                                    <div class="col-6">
+                                        <label class="form-label small fw-bold text-muted mb-1">👥 Nhóm đối tượng</label>
+                                        <select class="form-select form-select-sm" t-on-change="onGroupChange" style="border-radius: 6px;">
+                                            <option value="all">-- Tất cả nhóm --</option>
+                                            <t t-foreach="availableGroups" t-as="g" t-key="g.id">
+                                                <option t-att-value="g.id" t-att-selected="state.selectedGroupId == g.id"><t t-esc="g.name"/></option>
+                                            </t>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <!-- People List Table -->
+                                <div class="table-responsive rounded-3 flex-grow-1" style="border: 1px solid #dee2e6; background: #ffffff; overflow-y: auto;">
+                                    <table class="table table-hover mb-0" style="background: transparent;">
+                                        <thead>
+                                            <tr style="background: #f8f9fa; border-bottom: 2px solid #dee2e6; position: sticky; top: 0; z-index: 1;">
+                                                <th class="ps-4 py-3" style="color: #212529; font-size: 0.8rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; border-top: none;">Họ và Tên</th>
+                                                <th class="py-3" style="color: #212529; font-size: 0.8rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; border-top: none;">Mã Định Danh</th>
+                                                <th class="py-3" style="color: #212529; font-size: 0.8rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; border-top: none;">Đơn Vị / Nhóm</th>
+                                                <th class="py-3" style="color: #212529; font-size: 0.8rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; border-top: none;">Vị Trí Hiện Tại</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <t t-if="!filteredPeopleInside || filteredPeopleInside.length === 0">
+                                                <tr>
+                                                    <td colspan="4" class="text-center py-5 text-muted small"><i class="fa fa-info-circle me-1"></i>Không tìm thấy đối tượng nào trong khu vực này.</td>
+                                                </tr>
+                                            </t>
+                                            <t t-else="">
+                                                <t t-foreach="filteredPeopleInside" t-as="person" t-key="person.id">
+                                                    <tr class="align-middle" style="border-bottom: 1px solid #e9ecef;">
+                                                        <td class="ps-4 py-3 fw-bold" style="color: #111827; font-weight: 600;"><t t-esc="person.name"/></td>
+                                                        <td class="py-3">
+                                                            <span class="badge px-2 py-1" style="font-size: 0.75rem; background-color: #f3f4f6 !important; color: #1f2937 !important; border: 1px solid #d1d5db; border-radius: 4px;">
+                                                                <t t-esc="person.identifier"/>
+                                                            </span>
+                                                        </td>
+                                                        <td class="py-3" style="color: #374151; font-size: 0.85rem; font-weight: 500;"><t t-esc="person.department"/></td>
+                                                        <td class="py-3">
+                                                            <span class="badge px-2 py-1 d-inline-flex align-items-center gap-1" style="font-size: 0.75rem; background-color: #d1fae5 !important; color: #065f46 !important; border: 1px solid #a7f3d0; border-radius: 4px;">
+                                                                <i class="fa fa-map-marker"></i> <t t-esc="person.location_name"/>
+                                                            </span>
+                                                        </td>
+                                                    </tr>
+                                                </t>
+                                            </t>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                            <div class="modal-footer px-4 py-3 d-flex justify-content-end" style="background: #f8f9fa; border-top: 1px solid #dee2e6;">
+                                <button type="button" class="btn btn-secondary px-4" t-on-click="closeBreakdownModal" style="border-radius: 6px; font-weight: 500;">Đóng</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </t>
+        </div>
+    </t>
+</templates>

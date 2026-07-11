@@ -26,12 +26,12 @@ Content-Type: application/json
 # PHẦN 1: CÁC KỊCH BẢN QUẸT THẺ THÔNG THƯỜNG RIÊNG LẺ (NORMAL ACCESS)
 # ==============================================================================
 
-### 4.1.1.A Nguyễn Văn Kỹ Thuật (EMP-HN-IT-001) quẹt VÀO riêng lẻ (Hanoi Lobby)
+### 4.1.1.A Phạm Thanh Sơn (EMP-HN-002) quẹt VÀO riêng lẻ (Hanoi Lobby)
 # ------------------------------------------------------------------------------
-# CHỨC NĂNG: Gửi log quẹt VÀO của duy nhất nhân viên Nguyễn Văn Kỹ Thuật.
+# CHỨC NĂNG: Gửi log quẹt VÀO của duy nhất nhân viên Phạm Thanh Sơn.
 # KẾT QUẢ: 
 # - Tạo 1 bản ghi Access Log.
-# - Cập nhật last_action của EMP-HN-IT-001 thành "in" và last_action_time.
+# - Cập nhật last_action của EMP-HN-002 thành "in" và last_action_time.
 # ------------------------------------------------------------------------------
 POST http://localhost:8070/api/v1/AccessLogUpload
 Authorization: Bearer {{token}}
@@ -42,20 +42,20 @@ Content-Type: application/json
     "logs": [
         {
             "device_serial": "DEV-HN-LOB-IN-01",
-            "emp_id": "EMP-HN-IT-001",
-            "card_code": "RFID-HN-IT-01",
+            "emp_id": "EMP-HN-002",
+            "card_code": "RFID-HN-002",
             "direction": "in",
             "verification_type": "face"
         }
     ]
 }
 
-### 4.1.1.B Nguyễn Văn Kỹ Thuật (EMP-HN-IT-001) quẹt RA riêng lẻ (Hanoi Lobby)
+### 4.1.1.B Phạm Thanh Sơn (EMP-HN-002) quẹt RA riêng lẻ (Hanoi Lobby)
 # ------------------------------------------------------------------------------
-# CHỨC NĂNG: Gửi log quẹt RA của duy nhất nhân viên Nguyễn Văn Kỹ Thuật.
+# CHỨC NĂNG: Gửi log quẹt RA của duy nhất nhân viên Phạm Thanh Sơn.
 # KẾT QUẢ: 
 # - Tạo 1 bản ghi Access Log.
-# - Cập nhật last_action của EMP-HN-IT-001 thành "out" và last_action_time.
+# - Cập nhật last_action của EMP-HN-002 thành "out" và last_action_time.
 # ------------------------------------------------------------------------------
 POST http://localhost:8070/api/v1/AccessLogUpload
 Authorization: Bearer {{token}}
@@ -66,20 +66,20 @@ Content-Type: application/json
     "logs": [
         {
             "device_serial": "DEV-HN-LOB-OUT-01",
-            "emp_id": "EMP-HN-IT-001",
-            "card_code": "RFID-HN-IT-01",
+            "emp_id": "EMP-HN-002",
+            "card_code": "RFID-HN-002",
             "direction": "out",
             "verification_type": "face"
         }
     ]
 }
 
-### 4.1.2.A Trần Thị Hành Chính (EMP-HN-HR-001) quẹt VÀO riêng lẻ (Hanoi Lobby)
+### 4.1.2.A Trần Thu Trang (EMP-HN-003) quẹt VÀO riêng lẻ (Hanoi Lobby)
 # ------------------------------------------------------------------------------
-# CHỨC NĂNG: Gửi log quẹt VÀO của duy nhất nhân viên Trần Thị Hành Chính.
+# CHỨC NĂNG: Gửi log quẹt VÀO của duy nhất nhân viên Trần Thu Trang.
 # KẾT QUẢ: 
 # - Tạo 1 bản ghi Access Log.
-# - Cập nhật last_action của EMP-HN-HR-001 thành "in" và last_action_time.
+# - Cập nhật last_action của EMP-HN-003 thành "in" và last_action_time.
 # ------------------------------------------------------------------------------
 POST http://localhost:8070/api/v1/AccessLogUpload
 Authorization: Bearer {{token}}
@@ -90,20 +90,20 @@ Content-Type: application/json
     "logs": [
         {
             "device_serial": "DEV-HN-LOB-IN-01",
-            "emp_id": "EMP-HN-HR-001",
-            "card_code": "RFID-HN-HR-01",
+            "emp_id": "EMP-HN-003",
+            "card_code": "RFID-HN-003",
             "direction": "in",
             "verification_type": "card"
         }
     ]
 }
 
-### 4.1.2.B Trần Thị Hành Chính (EMP-HN-HR-001) quẹt RA riêng lẻ (Hanoi Lobby)
+### 4.1.2.B Trần Thu Trang (EMP-HN-003) quẹt RA riêng lẻ (Hanoi Lobby)
 # ------------------------------------------------------------------------------
-# CHỨC NĂNG: Gửi log quẹt RA của duy nhất nhân viên Trần Thị Hành Chính.
+# CHỨC NĂNG: Gửi log quẹt RA của duy nhất nhân viên Trần Thu Trang.
 # KẾT QUẢ: 
 # - Tạo 1 bản ghi Access Log.
-# - Cập nhật last_action của EMP-HN-HR-001 thành "out" và last_action_time.
+# - Cập nhật last_action của EMP-HN-003 thành "out" và last_action_time.
 # ------------------------------------------------------------------------------
 POST http://localhost:8070/api/v1/AccessLogUpload
 Authorization: Bearer {{token}}
@@ -114,17 +114,17 @@ Content-Type: application/json
     "logs": [
         {
             "device_serial": "DEV-HN-LOB-OUT-01",
-            "emp_id": "EMP-HN-HR-001",
-            "card_code": "RFID-HN-HR-01",
+            "emp_id": "EMP-HN-003",
+            "card_code": "RFID-HN-003",
             "direction": "out",
             "verification_type": "card"
         }
     ]
 }
 
-### 4.1.3.A Nguyễn Văn Kỹ Thuật (EMP-HN-IT-001) đi công tác quẹt VÀO tại Kho hàng HCM
+### 4.1.3.A Phạm Thanh Sơn (EMP-HN-002) đi công tác quẹt VÀO tại Kho hàng HCM
 # ------------------------------------------------------------------------------
-# CHỨC NĂNG: Giả lập nhân viên Nguyễn Văn Kỹ Thuật (Hà Nội) quẹt VÀO tại Kho HCM.
+# CHỨC NĂNG: Giả lập nhân viên Phạm Thanh Sơn (Hà Nội) quẹt VÀO tại Kho HCM.
 # KẾT QUẢ: 
 # - Tạo 1 bản ghi Access Log với branch_id là chi nhánh HCM.
 # - Trạng thái hiện diện của Kỹ Thuật đổi thành "inside" tại Kho HCM.
@@ -138,15 +138,15 @@ Content-Type: application/json
     "logs": [
         {
             "device_serial": "DEV-HCM-WHS-FGR-01",
-            "emp_id": "EMP-HN-IT-001",
-            "card_code": "RFID-HN-IT-01",
+            "emp_id": "EMP-HN-002",
+            "card_code": "RFID-HN-002",
             "direction": "in",
             "verification_type": "fingerprint"
         }
     ]
 }
 
-### 4.1.3.B Nguyễn Văn Kỹ Thuật (EMP-HN-IT-001) quẹt RA tại Kho hàng HCM
+### 4.1.3.B Phạm Thanh Sơn (EMP-HN-002) quẹt RA tại Kho hàng HCM
 # ------------------------------------------------------------------------------
 # CHỨC NĂNG: Nhân viên Kỹ Thuật quẹt RA khỏi Kho HCM để kết thúc chu kỳ công tác.
 # KẾT QUẢ: 
@@ -162,15 +162,15 @@ Content-Type: application/json
     "logs": [
         {
             "device_serial": "DEV-HCM-WHS-FGR-01",
-            "emp_id": "EMP-HN-IT-001",
-            "card_code": "RFID-HN-IT-01",
+            "emp_id": "EMP-HN-002",
+            "card_code": "RFID-HN-002",
             "direction": "out",
             "verification_type": "fingerprint"
         }
     ]
 }
 
-### 4.1.4.A Phạm Văn Thời Vụ (EMP-HCM-TMP-001) quẹt VÀO giờ hành chính (Kho hàng HCM - Bình thường)
+### 4.1.4.A Nguyễn Thị Kim Anh (EMP-HCM-006) quẹt VÀO giờ hành chính (Kho hàng HCM - Bình thường)
 # ------------------------------------------------------------------------------
 # CHỨC NĂNG: CTV Thời vụ quẹt VÀO lúc 10:00 (Trong giờ hành chính 08:00 - 18:00).
 # KẾT QUẢ: 
@@ -187,15 +187,15 @@ Content-Type: application/json
     "logs": [
         {
             "device_serial": "DEV-HCM-WHS-FGR-01",
-            "emp_id": "EMP-HCM-TMP-001",
-            "card_code": "RFID-HCM-TMP-01",
+            "emp_id": "EMP-HCM-006",
+            "card_code": "RFID-HCM-006",
             "direction": "in",
             "verification_type": "fingerprint"
         }
     ]
 }
 
-### 4.1.4.B Phạm Văn Thời Vụ (EMP-HCM-TMP-001) quẹt RA giờ hành chính (Kho hàng HCM - Bình thường)
+### 4.1.4.B Nguyễn Thị Kim Anh (EMP-HCM-006) quẹt RA giờ hành chính (Kho hàng HCM - Bình thường)
 # ------------------------------------------------------------------------------
 # CHỨC NĂNG: CTV Thời vụ quẹt RA lúc 16:00 (Trong giờ hành chính 08:00 - 18:00).
 # KẾT QUẢ: 
@@ -211,15 +211,15 @@ Content-Type: application/json
     "logs": [
         {
             "device_serial": "DEV-HCM-WHS-FGR-01",
-            "emp_id": "EMP-HCM-TMP-001",
-            "card_code": "RFID-HCM-TMP-01",
+            "emp_id": "EMP-HCM-006",
+            "card_code": "RFID-HCM-006",
             "direction": "out",
             "verification_type": "fingerprint"
         }
     ]
 }
 
-### 4.1.5.A Nguyễn Văn Kỹ Thuật (EMP-HN-IT-001) quẹt VÀO Phòng Máy Chủ Hà Nội (Hợp lệ)
+### 4.1.5.A Phạm Thanh Sơn (EMP-HN-002) quẹt VÀO Phòng Máy Chủ Hà Nội (Hợp lệ)
 # ------------------------------------------------------------------------------
 # CHỨC NĂNG: Nhân viên IT quẹt khuôn mặt vào phòng máy chủ (Khu vực được phép truy cập).
 # KẾT QUẢ: 
@@ -236,15 +236,15 @@ Content-Type: application/json
     "logs": [
         {
             "device_serial": "DEV-HN-SRV-FACE-01",
-            "emp_id": "EMP-HN-IT-001",
-            "card_code": "RFID-HN-IT-01",
+            "emp_id": "EMP-HN-002",
+            "card_code": "RFID-HN-002",
             "direction": "in",
             "verification_type": "face"
         }
     ]
 }
 
-### 4.1.5.B Nguyễn Văn Kỹ Thuật (EMP-HN-IT-001) quẹt RA khỏi Phòng Máy Chủ Hà Nội
+### 4.1.5.B Phạm Thanh Sơn (EMP-HN-002) quẹt RA khỏi Phòng Máy Chủ Hà Nội
 # ------------------------------------------------------------------------------
 # CHỨC NĂNG: Nhân viên IT quẹt khuôn mặt ra khỏi phòng máy chủ.
 # KẾT QUẢ: 
@@ -260,8 +260,248 @@ Content-Type: application/json
     "logs": [
         {
             "device_serial": "DEV-HN-SRV-FACE-01",
-            "emp_id": "EMP-HN-IT-001",
-            "card_code": "RFID-HN-IT-01",
+            "emp_id": "EMP-HN-002",
+            "card_code": "RFID-HN-002",
+            "direction": "out",
+            "verification_type": "face"
+        }
+    ]
+}
+
+### 4.1.6.A Nguyễn Minh Triết (EMP-HN-001) quẹt VÀO riêng lẻ (Hanoi Lobby)
+# ------------------------------------------------------------------------------
+# CHỨC NĂNG: Gửi log quẹt VÀO của Ban Giám Đốc Nguyễn Minh Triết.
+# KẾT QUẢ: 
+# - Tạo 1 bản ghi Access Log.
+# - Cập nhật last_action của EMP-HN-001 thành "in" và last_action_time.
+# ------------------------------------------------------------------------------
+POST http://localhost:8070/api/v1/AccessLogUpload
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+    "controller_id": "CTRL-HN-LOBBY-01",
+    "logs": [
+        {
+            "device_serial": "DEV-HN-LOB-IN-01",
+            "emp_id": "EMP-HN-001",
+            "card_code": "RFID-HN-001",
+            "direction": "in",
+            "verification_type": "face"
+        }
+    ]
+}
+
+### 4.1.6.B Nguyễn Minh Triết (EMP-HN-001) quẹt RA riêng lẻ (Hanoi Lobby)
+# ------------------------------------------------------------------------------
+# CHỨC NĂNG: Gửi log quẹt RA của Ban Giám Đốc Nguyễn Minh Triết.
+# KẾT QUẢ: 
+# - Tạo 1 bản ghi Access Log.
+# - Cập nhật last_action của EMP-HN-001 thành "out" và last_action_time.
+# ------------------------------------------------------------------------------
+POST http://localhost:8070/api/v1/AccessLogUpload
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+    "controller_id": "CTRL-HN-LOBBY-01",
+    "logs": [
+        {
+            "device_serial": "DEV-HN-LOB-OUT-01",
+            "emp_id": "EMP-HN-001",
+            "card_code": "RFID-HN-001",
+            "direction": "out",
+            "verification_type": "face"
+        }
+    ]
+}
+
+### 4.1.7.A Lê Hoàng Nam (EMP-HN-004) quẹt VÀO riêng lẻ (Hanoi Lobby)
+# ------------------------------------------------------------------------------
+# CHỨC NĂNG: Gửi log quẹt VÀO của Đội Bảo vệ & An ninh Lê Hoàng Nam.
+# KẾT QUẢ: 
+# - Tạo 1 bản ghi Access Log.
+# - Cập nhật last_action của EMP-HN-004 thành "in" và last_action_time.
+# ------------------------------------------------------------------------------
+POST http://localhost:8070/api/v1/AccessLogUpload
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+    "controller_id": "CTRL-HN-LOBBY-01",
+    "logs": [
+        {
+            "device_serial": "DEV-HN-LOB-IN-01",
+            "emp_id": "EMP-HN-004",
+            "card_code": "RFID-HN-004",
+            "direction": "in",
+            "verification_type": "card"
+        }
+    ]
+}
+
+### 4.1.7.B Lê Hoàng Nam (EMP-HN-004) quẹt RA riêng lẻ (Hanoi Lobby)
+# ------------------------------------------------------------------------------
+# CHỨC NĂNG: Gửi log quẹt RA của Đội Bảo vệ & An ninh Lê Hoàng Nam.
+# KẾT QUẢ: 
+# - Tạo 1 bản ghi Access Log.
+# - Cập nhật last_action của EMP-HN-004 thành "out" và last_action_time.
+# ------------------------------------------------------------------------------
+POST http://localhost:8070/api/v1/AccessLogUpload
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+    "controller_id": "CTRL-HN-LOBBY-01",
+    "logs": [
+        {
+            "device_serial": "DEV-HN-LOB-OUT-01",
+            "emp_id": "EMP-HN-004",
+            "card_code": "RFID-HN-004",
+            "direction": "out",
+            "verification_type": "card"
+        }
+    ]
+}
+
+### 4.1.8.A Lê Anh Tuấn (EMP-DN-001) quẹt VÀO tại Chi nhánh Đà Nẵng
+# ------------------------------------------------------------------------------
+# CHỨC NĂNG: Giám đốc Chi nhánh Đà Nẵng Lê Anh Tuấn quẹt VÀO phòng họp BGĐ.
+# KẾT QUẢ: 
+# - Tạo 1 bản ghi Access Log.
+# - Trạng thái hiện diện đổi thành "inside" tại Phòng Ban Giám Đốc Đà Nẵng.
+# ------------------------------------------------------------------------------
+POST http://localhost:8070/api/v1/AccessLogUpload
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+    "controller_id": "CTRL-DN-MAIN-01",
+    "logs": [
+        {
+            "device_serial": "DEV-DN-EXEC-IN-01",
+            "emp_id": "EMP-DN-001",
+            "card_code": "RFID-DN-001",
+            "direction": "in",
+            "verification_type": "face"
+        }
+    ]
+}
+
+### 4.1.8.B Lê Anh Tuấn (EMP-DN-001) quẹt RA tại Chi nhánh Đà Nẵng
+# ------------------------------------------------------------------------------
+# CHỨC NĂNG: Giám đốc Chi nhánh Đà Nẵng Lê Anh Tuấn quẹt RA khỏi phòng họp BGĐ.
+# KẾT QUẢ: 
+# - Tạo 1 bản ghi Access Log.
+# - Trạng thái hiện diện đổi thành "outside".
+# ------------------------------------------------------------------------------
+POST http://localhost:8070/api/v1/AccessLogUpload
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+    "controller_id": "CTRL-DN-MAIN-01",
+    "logs": [
+        {
+            "device_serial": "DEV-DN-EXEC-IN-01",
+            "emp_id": "EMP-DN-001",
+            "card_code": "RFID-DN-001",
+            "direction": "out",
+            "verification_type": "face"
+        }
+    ]
+}
+
+### 4.1.9.A Nguyễn Văn An (EMP-HN-007) quẹt VÀO lúc 23:30 (Phòng Máy Chủ HN)
+# ------------------------------------------------------------------------------
+# CHỨC NĂNG: Nhân viên Kỹ thuật Bảo trì Hà Nội quẹt VÀO phòng Máy chủ ngoài giờ hành chính (23:30).
+# KẾT QUẢ: 
+# - Tạo 1 bản ghi Access Log hợp lệ.
+# - KHÔNG sinh cảnh báo (do nhóm Bảo trì có quyền vào Server Room và không bị giới nghiêm).
+# ------------------------------------------------------------------------------
+POST http://localhost:8070/api/v1/AccessLogUpload
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+    "controller_id": "CTRL-HN-SRV-01",
+    "logs": [
+        {
+            "device_serial": "DEV-HN-SRV-FACE-01",
+            "emp_id": "EMP-HN-007",
+            "card_code": "RFID-HN-007",
+            "direction": "in",
+            "verification_type": "face"
+        }
+    ]
+}
+
+### 4.1.9.B Nguyễn Văn An (EMP-HN-007) quẹt RA lúc 23:45 (Phòng Máy Chủ HN)
+# ------------------------------------------------------------------------------
+# CHỨC NĂNG: Nhân viên Kỹ thuật Bảo trì Hà Nội quẹt RA khỏi phòng Máy chủ sau khi hoàn thành sửa chữa.
+# KẾT QUẢ: 
+# - Tạo 1 bản ghi Access Log hợp lệ.
+# - KHÔNG sinh cảnh báo.
+# ------------------------------------------------------------------------------
+POST http://localhost:8070/api/v1/AccessLogUpload
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+    "controller_id": "CTRL-HN-SRV-01",
+    "logs": [
+        {
+            "device_serial": "DEV-HN-SRV-FACE-01",
+            "emp_id": "EMP-HN-007",
+            "card_code": "RFID-HN-007",
+            "direction": "out",
+            "verification_type": "face"
+        }
+    ]
+}
+
+### 4.1.10.A Lê Hoàng Nam (EMP-HN-004) quẹt VÀO lúc 10:00 (Phòng Máy Chủ HN)
+# ------------------------------------------------------------------------------
+# CHỨC NĂNG: Đội trưởng An ninh Hà Nội Lê Hoàng Nam quẹt VÀO kiểm tra Phòng Máy Chủ (Khu vực bảo mật).
+# KẾT QUẢ: 
+# - Tạo 1 bản ghi Access Log hợp lệ.
+# - KHÔNG sinh cảnh báo (do nhóm Bảo vệ có quyền truy cập Server Room theo chính sách POL-SRV-RESTRICT-HN).
+# ------------------------------------------------------------------------------
+POST http://localhost:8070/api/v1/AccessLogUpload
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+    "controller_id": "CTRL-HN-SRV-01",
+    "logs": [
+        {
+            "device_serial": "DEV-HN-SRV-FACE-01",
+            "emp_id": "EMP-HN-004",
+            "card_code": "RFID-HN-004",
+            "direction": "in",
+            "verification_type": "face"
+        }
+    ]
+}
+
+### 4.1.10.B Lê Hoàng Nam (EMP-HN-004) quẹt RA lúc 10:15 (Phòng Máy Chủ HN)
+# ------------------------------------------------------------------------------
+# CHỨC NĂNG: Đội trưởng An ninh Hà Nội Lê Hoàng Nam quẹt RA khỏi Phòng Máy Chủ.
+# KẾT QUẢ: 
+# - Tạo 1 bản ghi Access Log hợp lệ.
+# - KHÔNG sinh cảnh báo.
+# ------------------------------------------------------------------------------
+POST http://localhost:8070/api/v1/AccessLogUpload
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+    "controller_id": "CTRL-HN-SRV-01",
+    "logs": [
+        {
+            "device_serial": "DEV-HN-SRV-FACE-01",
+            "emp_id": "EMP-HN-004",
+            "card_code": "RFID-HN-004",
             "direction": "out",
             "verification_type": "face"
         }
@@ -273,12 +513,12 @@ Content-Type: application/json
 # PHẦN 2: CÁC KỊCH BẢN QUẸT THẺ VI PHẠM RIÊNG LẺ (CẢNH BÁO BẢO MẬT)
 # ==============================================================================
 
-### 4.2.1.A Vi phạm Ngoài giờ - Unauthorized Time: Phạm Văn Thời Vụ quẹt VÀO (Ngày thường)
+### 4.2.1.A Vi phạm Ngoài giờ (Temp Staff Curfew): Nguyễn Thị Kim Anh quẹt VÀO (Ngày thường)
 # ------------------------------------------------------------------------------
-# CHỨC NĂNG: CTV Thời vụ quẹt VÀO lúc 22:00 ngày thường (Ngoài giờ hành chính 08:00 - 18:00).
+# CHỨC NĂNG: CTV Thời vụ quẹt VÀO lúc 22:00 ngày thường (Ngoài giờ quy định 20:00 - 06:00).
 # KẾT QUẢ: 
 # - Tạo 1 bản ghi Access Log.
-# - Tự động tạo cảnh báo vi phạm thời gian (unauthorized_time - Màu xanh lá) tại Area Warning.
+# - Tự động tạo cảnh báo vi phạm thời gian (unauthorized_time) tại Area Warning (POL-TEMP-CURFEW).
 # ------------------------------------------------------------------------------
 POST http://localhost:8070/api/v1/AccessLogUpload
 Authorization: Bearer {{token}}
@@ -289,8 +529,8 @@ Content-Type: application/json
     "logs": [
         {
             "device_serial": "DEV-HCM-WHS-FGR-01",
-            "emp_id": "EMP-HCM-TMP-001",
-            "card_code": "RFID-HCM-TMP-01",
+            "emp_id": "EMP-HCM-006",
+            "card_code": "RFID-HCM-006",
             "access_time": "2026-07-10 22:00:00",
             "direction": "in",
             "verification_type": "fingerprint"
@@ -298,35 +538,37 @@ Content-Type: application/json
     ]
 }
 
-### 4.2.1.B Phạm Văn Thời Vụ quẹt RA ngoài giờ (Ngày thường)
+### 4.2.1.B Vi phạm Ngoài giờ (Office Staff Curfew): Trần Thu Trang quẹt VÀO (Ngày thường)
 # ------------------------------------------------------------------------------
-# CHỨC NĂNG: CTV Thời vụ quẹt RA lúc 22:30.
-# KẾT QUẢ: Tạo log quẹt RA, trả trạng thái hiện diện về outside.
+# CHỨC NĂNG: Nhân viên Hành chính HR quẹt VÀO lúc 22:00 ngày thường (Ngoài giờ quy định 20:00 - 06:00).
+# KẾT QUẢ: 
+# - Tạo 1 bản ghi Access Log.
+# - Tự động tạo cảnh báo vi phạm thời gian (unauthorized_time) tại Area Warning (POL-OFFICE-STAFF-CURFEW).
 # ------------------------------------------------------------------------------
 POST http://localhost:8070/api/v1/AccessLogUpload
 Authorization: Bearer {{token}}
 Content-Type: application/json
 
 {
-    "controller_id": "CTRL-HCM-WHS-01",
+    "controller_id": "CTRL-HN-LOBBY-01",
     "logs": [
         {
-            "device_serial": "DEV-HCM-WHS-FGR-01",
-            "emp_id": "EMP-HCM-TMP-001",
-            "card_code": "RFID-HCM-TMP-01",
-            "access_time": "2026-07-10 22:30:00",
-            "direction": "out",
-            "verification_type": "fingerprint"
+            "device_serial": "DEV-HN-LOB-IN-01",
+            "emp_id": "EMP-HN-003",
+            "card_code": "RFID-HN-003",
+            "access_time": "2026-07-10 22:00:00",
+            "direction": "in",
+            "verification_type": "card"
         }
     ]
 }
 
-### 4.2.1.C Vi phạm Ngoài giờ - Unauthorized Time: Phạm Văn Thời Vụ quẹt VÀO (Cuối tuần)
+### 4.2.1.C Vi phạm Ngoài giờ (Temp Staff Curfew - Cuối tuần): Nguyễn Thị Kim Anh quẹt VÀO (Cuối tuần)
 # ------------------------------------------------------------------------------
 # CHỨC NĂNG: CTV Thời vụ quẹt VÀO lúc 10:00 sáng Thứ Bảy (Vi phạm chính sách cấm cuối tuần).
 # KẾT QUẢ: 
 # - Tạo 1 bản ghi Access Log.
-# - Tự động tạo cảnh báo vi phạm thời gian (unauthorized_time - Màu xanh lá) tại Area Warning.
+# - Tự động tạo cảnh báo vi phạm thời gian (unauthorized_time) tại Area Warning.
 # ------------------------------------------------------------------------------
 POST http://localhost:8070/api/v1/AccessLogUpload
 Authorization: Bearer {{token}}
@@ -337,8 +579,8 @@ Content-Type: application/json
     "logs": [
         {
             "device_serial": "DEV-HCM-WHS-FGR-01",
-            "emp_id": "EMP-HCM-TMP-001",
-            "card_code": "RFID-HCM-TMP-01",
+            "emp_id": "EMP-HCM-006",
+            "card_code": "RFID-HCM-006",
             "access_time": "2026-07-11 10:00:00",
             "direction": "in",
             "verification_type": "fingerprint"
@@ -346,35 +588,37 @@ Content-Type: application/json
     ]
 }
 
-### 4.2.1.D Phạm Văn Thời Vụ quẹt RA cuối tuần
+### 4.2.1.D Vi phạm Ngoài giờ (IT Staff Curfew): Phạm Thanh Sơn quẹt VÀO (Ngày thường)
 # ------------------------------------------------------------------------------
-# CHỨC NĂNG: CTV Thời vụ quẹt RA lúc 11:00 Thứ Bảy.
-# KẾT QUẢ: Tạo log quẹt RA, trả trạng thái hiện diện về outside.
+# CHỨC NĂNG: Nhân viên Kỹ thuật IT quẹt VÀO lúc 23:00 ngày thường (Ngoài giờ quy định 22:00 - 06:00).
+# KẾT QUẢ: 
+# - Tạo 1 bản ghi Access Log.
+# - Tự động tạo cảnh báo vi phạm thời gian (unauthorized_time) tại Area Warning (POL-IT-STAFF-CURFEW).
 # ------------------------------------------------------------------------------
 POST http://localhost:8070/api/v1/AccessLogUpload
 Authorization: Bearer {{token}}
 Content-Type: application/json
 
 {
-    "controller_id": "CTRL-HCM-WHS-01",
+    "controller_id": "CTRL-HN-LOBBY-01",
     "logs": [
         {
-            "device_serial": "DEV-HCM-WHS-FGR-01",
-            "emp_id": "EMP-HCM-TMP-001",
-            "card_code": "RFID-HCM-TMP-01",
-            "access_time": "2026-07-11 11:00:00",
-            "direction": "out",
-            "verification_type": "fingerprint"
+            "device_serial": "DEV-HN-LOB-IN-01",
+            "emp_id": "EMP-HN-002",
+            "card_code": "RFID-HN-002",
+            "access_time": "2026-07-10 23:00:00",
+            "direction": "in",
+            "verification_type": "face"
         }
     ]
 }
 
-### 4.2.2.A Vi phạm Khu vực cấm - Unauthorized Area: Trần Thị Hành Chính quẹt VÀO Server Room Hà Nội
+### 4.2.2.A Vi phạm Khu vực cấm - Unauthorized Area: Trần Thu Trang quẹt VÀO Server Room Hà Nội
 # ------------------------------------------------------------------------------
-# CHỨC NĂNG: Nhân viên HR quẹt khuôn mặt vào phòng máy chủ bảo mật dành riêng cho IT/Bảo vệ/Ban Giám đốc.
+# CHỨC NĂNG: Nhân viên HR quẹt khuôn mặt vào phòng máy chủ bảo mật dành riêng cho IT/Bảo vệ/Ban Giám đốc (POL-SRV-RESTRICT-HN).
 # KẾT QUẢ: 
 # - Tạo 1 bản ghi Access Log.
-# - Tự động tạo cảnh báo sai khu vực (unauthorized_area - Màu cam) tại Area Warning.
+# - Tự động tạo cảnh báo sai khu vực (unauthorized_area) tại Area Warning.
 # ------------------------------------------------------------------------------
 POST http://localhost:8070/api/v1/AccessLogUpload
 Authorization: Bearer {{token}}
@@ -385,20 +629,20 @@ Content-Type: application/json
     "logs": [
         {
             "device_serial": "DEV-HN-SRV-FACE-01",
-            "emp_id": "EMP-HN-HR-001",
-            "card_code": "RFID-HN-HR-01",
+            "emp_id": "EMP-HN-003",
+            "card_code": "RFID-HN-003",
             "direction": "in",
             "verification_type": "face"
         }
     ]
 }
 
-### 4.2.2.B Vi phạm Khu vực cấm - Unauthorized Area: Phạm Văn Thời Vụ quẹt VÀO Server Room Hà Nội
+### 4.2.2.B Vi phạm Khu vực cấm - Unauthorized Area: Nguyễn Thị Kim Anh quẹt VÀO Server Room Hà Nội
 # ------------------------------------------------------------------------------
 # CHỨC NĂNG: Nhân viên thời vụ HCM quẹt khuôn mặt vào Server Room Hà Nội (không có quyền truy cập).
 # KẾT QUẢ: 
 # - Tạo 1 bản ghi Access Log.
-# - Tự động tạo cảnh báo sai khu vực (unauthorized_area - Màu cam) tại Area Warning.
+# - Tự động tạo cảnh báo sai khu vực (unauthorized_area) tại Area Warning.
 # ------------------------------------------------------------------------------
 POST http://localhost:8070/api/v1/AccessLogUpload
 Authorization: Bearer {{token}}
@@ -409,20 +653,20 @@ Content-Type: application/json
     "logs": [
         {
             "device_serial": "DEV-HN-SRV-FACE-01",
-            "emp_id": "EMP-HCM-TMP-001",
-            "card_code": "RFID-HCM-TMP-01",
+            "emp_id": "EMP-HCM-006",
+            "card_code": "RFID-HCM-006",
             "direction": "in",
             "verification_type": "face"
         }
     ]
 }
 
-### 4.2.2.C Vi phạm Khu vực cấm - Unauthorized Area: Trần Thị Hành Chính quẹt VÀO Phòng R&D Đà Nẵng
+### 4.2.2.C Vi phạm Khu vực cấm - Unauthorized Area: Trần Thu Trang quẹt VÀO Phòng R&D Đà Nẵng
 # ------------------------------------------------------------------------------
 # CHỨC NĂNG: Nhân viên HR Hà Nội quẹt thẻ vào phòng R&D Đà Nẵng (chỉ cho phép IT Đà Nẵng).
 # KẾT QUẢ: 
 # - Tạo 1 bản ghi Access Log.
-# - Tự động tạo cảnh báo sai khu vực (unauthorized_area - Màu cam) tại Area Warning.
+# - Tự động tạo cảnh báo sai khu vực (unauthorized_area) tại Area Warning.
 # ------------------------------------------------------------------------------
 POST http://localhost:8070/api/v1/AccessLogUpload
 Authorization: Bearer {{token}}
@@ -433,17 +677,41 @@ Content-Type: application/json
     "logs": [
         {
             "device_serial": "DEV-DN-RD-IN-01",
-            "emp_id": "EMP-HN-HR-001",
-            "card_code": "RFID-HN-HR-01",
+            "emp_id": "EMP-HN-003",
+            "card_code": "RFID-HN-003",
             "direction": "in",
             "verification_type": "card"
         }
     ]
 }
 
+### 4.2.2.D Vi phạm Khu vực cấm - Unauthorized Area: Lê Anh Tuấn quẹt VÀO Phòng R&D Đà Nẵng
+# ------------------------------------------------------------------------------
+# CHỨC NĂNG: Giám đốc Đà Nẵng Lê Anh Tuấn quẹt khuôn mặt vào phòng R&D Đà Nẵng (chỉ cho phép IT Đà Nẵng - POL-RD-RESTRICT-DN).
+# KẾT QUẢ: 
+# - Tạo 1 bản ghi Access Log.
+# - Tự động tạo cảnh báo sai khu vực (unauthorized_area) tại Area Warning.
+# ------------------------------------------------------------------------------
+POST http://localhost:8070/api/v1/AccessLogUpload
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+    "controller_id": "CTRL-DN-MAIN-01",
+    "logs": [
+        {
+            "device_serial": "DEV-DN-RD-IN-01",
+            "emp_id": "EMP-DN-001",
+            "card_code": "RFID-DN-001",
+            "direction": "in",
+            "verification_type": "face"
+        }
+    ]
+}
+
 ### 4.2.3.A Vi phạm Anti-passback (Xoay vòng thẻ): Kỹ Thuật quẹt VÀO lần 1 (Hợp lệ)
 # ------------------------------------------------------------------------------
-# CHỨC NĂNG: Nguyễn Văn Kỹ Thuật quẹt VÀO tại sảnh.
+# CHỨC NĂNG: Phạm Thanh Sơn quẹt VÀO tại sảnh.
 # KẾT QUẢ: Trạng thái hiện diện là "inside".
 # ------------------------------------------------------------------------------
 POST http://localhost:8070/api/v1/AccessLogUpload
@@ -455,8 +723,8 @@ Content-Type: application/json
     "logs": [
         {
             "device_serial": "DEV-HN-LOB-IN-01",
-            "emp_id": "EMP-HN-IT-001",
-            "card_code": "RFID-HN-IT-01",
+            "emp_id": "EMP-HN-002",
+            "card_code": "RFID-HN-002",
             "direction": "in",
             "verification_type": "face"
         }
@@ -465,7 +733,7 @@ Content-Type: application/json
 
 ### 4.2.3.B Vi phạm Anti-passback (Xoay vòng thẻ): Kỹ Thuật tiếp tục quẹt VÀO lần 2 (Không hợp lệ)
 # ------------------------------------------------------------------------------
-# CHỨC NĂNG: Nguyễn Văn Kỹ Thuật tiếp tục quẹt VÀO lần thứ 2 mà chưa quẹt RA.
+# CHỨC NĂNG: Phạm Thanh Sơn tiếp tục quẹt VÀO lần thứ 2 mà chưa quẹt RA.
 # KẾT QUẢ: 
 # - Tạo bản ghi Access Log.
 # - Tự động tạo cảnh báo vi phạm trình tự (invalid_sequence - Màu đỏ) do xoay vòng thẻ.
@@ -479,15 +747,15 @@ Content-Type: application/json
     "logs": [
         {
             "device_serial": "DEV-HN-LOB-IN-01",
-            "emp_id": "EMP-HN-IT-001",
-            "card_code": "RFID-HN-IT-01",
+            "emp_id": "EMP-HN-002",
+            "card_code": "RFID-HN-002",
             "direction": "in",
             "verification_type": "face"
         }
     ]
 }
 
-### 4.2.3.C Nguyễn Văn Kỹ Thuật quẹt RA sau vi phạm VÀO liên tiếp (Hợp lệ)
+### 4.2.3.C Phạm Thanh Sơn quẹt RA sau vi phạm VÀO liên tiếp (Hợp lệ)
 # ------------------------------------------------------------------------------
 # CHỨC NĂNG: Quẹt RA để trả trạng thái hiện diện về "outside".
 # ------------------------------------------------------------------------------
@@ -500,8 +768,8 @@ Content-Type: application/json
     "logs": [
         {
             "device_serial": "DEV-HN-LOB-OUT-01",
-            "emp_id": "EMP-HN-IT-001",
-            "card_code": "RFID-HN-IT-01",
+            "emp_id": "EMP-HN-002",
+            "card_code": "RFID-HN-002",
             "direction": "out",
             "verification_type": "face"
         }
@@ -510,7 +778,7 @@ Content-Type: application/json
 
 ### 4.2.3.D Vi phạm Anti-passback: Kỹ Thuật quẹt RA lần 2 liên tiếp (Không hợp lệ)
 # ------------------------------------------------------------------------------
-# CHỨC NĂNG: Nguyễn Văn Kỹ Thuật đã ở ngoài (outside) nhưng tiếp tục quẹt RA lần nữa.
+# CHỨC NĂNG: Phạm Thanh Sơn đã ở ngoài (outside) nhưng tiếp tục quẹt RA lần nữa.
 # KẾT QUẢ: 
 # - Tạo bản ghi Access Log.
 # - Tự động tạo cảnh báo vi phạm trình tự (invalid_sequence - Màu đỏ).
@@ -524,8 +792,8 @@ Content-Type: application/json
     "logs": [
         {
             "device_serial": "DEV-HN-LOB-OUT-01",
-            "emp_id": "EMP-HN-IT-001",
-            "card_code": "RFID-HN-IT-01",
+            "emp_id": "EMP-HN-002",
+            "card_code": "RFID-HN-002",
             "direction": "out",
             "verification_type": "face"
         }

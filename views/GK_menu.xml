@@ -10,7 +10,7 @@
   <menuitem id="t4_gate_keeper_dashboard_menu"
             name="Dashboard"
             parent="t4_gate_keeper_menu_root"
-            action="t4_gate_keeper_branch_action"
+            action="action_t4_gatekeeper_dashboard"
             sequence="10"/>
 
   <!-- 2. SYSTEM -->

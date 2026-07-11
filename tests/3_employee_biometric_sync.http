@@ -83,10 +83,10 @@ Content-Type: application/json
 }
 
 
-### 3.2.A Tải chi tiết dữ liệu sinh trắc học của Nguyễn Văn Kỹ Thuật (EmployeeBiometricGet)
+### 3.2.A Tải chi tiết dữ liệu sinh trắc học của Phạm Thanh Sơn (EmployeeBiometricGet)
 # ------------------------------------------------------------------------------
-# CHỨC NĂNG: Thiết bị Hà Nội tải chi tiết dữ liệu thẻ từ / mã pin / vân tay của EMP-HN-IT-001.
-# KẾT QUẢ THÀNH CÔNG: Trả về mã thẻ `RFID-HN-IT-01` và chuỗi sinh trắc học vân tay Base64 để lưu vào bộ nhớ máy.
+# CHỨC NĂNG: Thiết bị Hà Nội tải chi tiết dữ liệu thẻ từ / mã pin / vân tay của EMP-HN-002.
+# KẾT QUẢ THÀNH CÔNG: Trả về mã thẻ `RFID-HN-002` và chuỗi sinh trắc học vân tay Base64 để lưu vào bộ nhớ máy.
 # CÁC TRƯỜNG CẬP NHẬT TRÊN ODOO: Không ghi dữ liệu mới lên database (Read-only query).
 # ------------------------------------------------------------------------------
 POST http://localhost:8070/api/v1/EmployeeBiometricGet
@@ -95,13 +95,13 @@ Content-Type: application/json
 
 {
     "controller_id": "CTRL-HN-LOBBY-01",
-    "emp_id": "EMP-HN-IT-001"
+    "emp_id": "EMP-HN-002"
 }
 
-### 3.2.B Tải chi tiết dữ liệu sinh trắc học của Nguyễn Văn Giám Đốc (EmployeeBiometricGet)
+### 3.2.B Tải chi tiết dữ liệu sinh trắc học của Nguyễn Minh Triết (EmployeeBiometricGet)
 # ------------------------------------------------------------------------------
-# CHỨC NĂNG: Thiết bị Hà Nội tải chi tiết dữ liệu sinh trắc khuôn mặt của EMP-HN-DIR-001.
-# KẾT QUẢ THÀNH CÔNG: Trả về thông tin thẻ `RFID-HN-DIR-01` và chuỗi khuôn mặt Base64 của Giám Đốc.
+# CHỨC NĂNG: Thiết bị Hà Nội tải chi tiết dữ liệu sinh trắc khuôn mặt của EMP-HN-001.
+# KẾT QUẢ THÀNH CÔNG: Trả về thông tin thẻ `RFID-HN-001` và chuỗi khuôn mặt Base64 của Giám Đốc.
 # CÁC TRƯỜNG CẬP NHẬT TRÊN ODOO: Không ghi dữ liệu mới lên database (Read-only query).
 # ------------------------------------------------------------------------------
 POST http://localhost:8070/api/v1/EmployeeBiometricGet
@@ -110,13 +110,13 @@ Content-Type: application/json
 
 {
     "controller_id": "CTRL-HN-LOBBY-01",
-    "emp_id": "EMP-HN-DIR-001"
+    "emp_id": "EMP-HN-001"
 }
 
-### 3.2.C Tải chi tiết dữ liệu sinh trắc học của Phạm Văn Thời Vụ (EmployeeBiometricGet)
+### 3.2.C Tải chi tiết dữ liệu sinh trắc học của Nguyễn Thị Kim Anh (EmployeeBiometricGet)
 # ------------------------------------------------------------------------------
-# CHỨC NĂNG: Thiết bị kho HCM tải chi tiết dữ liệu thẻ từ của nhân viên thời vụ EMP-HCM-TMP-001.
-# KẾT QUẢ THÀNH CÔNG: Trả về mã thẻ `RFID-HCM-TMP-01` của nhân viên thời vụ HCM.
+# CHỨC NĂNG: Thiết bị kho HCM tải chi tiết dữ liệu thẻ từ của nhân viên thời vụ EMP-HCM-006.
+# KẾT QUẢ THÀNH CÔNG: Trả về mã thẻ `RFID-HCM-006` của nhân viên thời vụ HCM.
 # CÁC TRƯỜNG CẬP NHẬT TRÊN ODOO: Không ghi dữ liệu mới lên database (Read-only query).
 # ------------------------------------------------------------------------------
 POST http://localhost:8070/api/v1/EmployeeBiometricGet
@@ -125,13 +125,13 @@ Content-Type: application/json
 
 {
     "controller_id": "CTRL-HCM-WHS-01",
-    "emp_id": "EMP-HCM-TMP-001"
+    "emp_id": "EMP-HCM-006"
 }
 
-### 3.2.D Tải chi tiết dữ liệu sinh trắc học của Lê Văn Bảo Vệ (EmployeeBiometricGet)
+### 3.2.D Tải chi tiết dữ liệu sinh trắc học của Lê Hoàng Nam (EmployeeBiometricGet)
 # ------------------------------------------------------------------------------
-# CHỨC NĂNG: Thiết bị Hà Nội tải chi tiết dữ liệu của Bảo vệ EMP-HN-SEC-001.
-# KẾT QUẢ THÀNH CÔNG: Trả về mã thẻ `RFID-HN-SEC-01` và chuỗi vân tay Base64.
+# CHỨC NĂNG: Thiết bị Hà Nội tải chi tiết dữ liệu của Bảo vệ EMP-HN-004.
+# KẾT QUẢ THÀNH CÔNG: Trả về mã thẻ `RFID-HN-004` và chuỗi vân tay Base64.
 # CÁC TRƯỜNG CẬP NHẬT TRÊN ODOO: Không ghi dữ liệu mới.
 # ------------------------------------------------------------------------------
 POST http://localhost:8070/api/v1/EmployeeBiometricGet
@@ -140,7 +140,7 @@ Content-Type: application/json
 
 {
     "controller_id": "CTRL-HN-LOBBY-01",
-    "emp_id": "EMP-HN-SEC-001"
+    "emp_id": "EMP-HN-004"
 }
 
 

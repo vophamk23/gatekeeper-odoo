@@ -7,6 +7,7 @@
         <field name="arch" type="xml">
             <list string="Area Warnings" create="false" delete="false">
                 <field name="create_date" string="Detected At"/>
+                <field name="branch_id" optional="show"/>
                 <field name="area_id" optional="show"/>
                 <field name="warning_type_code" column_invisible="True"/>
                 <field name="warning_type_id"
@@ -95,6 +96,7 @@
         <field name="model">t4.gate_keeper.area_warning</field>
         <field name="arch" type="xml">
             <search string="Search Area Warnings">
+                <field name="branch_id" string="Branch"/>
                 <field name="employee_id" string="Employee"/>
                 <field name="device_id" string="Device"/>
                 <field name="area_id" string="Area"/>
@@ -106,6 +108,7 @@
                 <filter string="Critical Priority" name="priority_critical" domain="[('priority', '=', 'critical')]"/>
                 <filter string="High Priority" name="priority_high" domain="[('priority', '=', 'high')]"/>
                 <group expand="0" string="Group By">
+                    <filter string="Branch" name="group_branch" context="{'group_by': 'branch_id'}"/>
                     <filter string="Status" name="group_state" context="{'group_by': 'state'}"/>
                     <filter string="Priority" name="group_priority" context="{'group_by': 'priority'}"/>
                     <filter string="Area" name="group_area" context="{'group_by': 'area_id'}"/>
@@ -123,7 +126,7 @@
         <field name="view_mode">list,form</field>
         <field name="view_id" ref="t4_gate_keeper_area_warning_extra_view_list"/>
         <field name="search_view_id" ref="t4_gate_keeper_area_warning_view_search"/>
-        <field name="context">{'search_default_unresolved': 1}</field>
+        <field name="context">{'search_default_unresolved': 1, 'search_default_group_branch': 1}</field>
         <field name="help" type="html">
             <p class="o_view_nocontent_smiling_face">
                 Great! No active warnings.

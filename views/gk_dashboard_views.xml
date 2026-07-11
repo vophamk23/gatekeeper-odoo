@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <!-- Client Action to trigger the OWL Dashboard Component -->
+        <record id="action_t4_gatekeeper_dashboard" model="ir.actions.client">
+            <field name="name">Dashboard</field>
+            <field name="tag">t4_gatekeeper_dashboard_tag</field>
+            <field name="target">main</field>
+        </record>
+    </data>
+</odoo>

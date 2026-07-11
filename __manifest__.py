@@ -4,7 +4,7 @@
     "category": "Uncategorized",
     "version": "0.1",
     # any module necessary for this one to work correctly
-    "depends": ["base", "hr", "hr_attendance", "t4_coreapi", "mail"],
+    "depends": ["base", "web", "hr", "hr_attendance", "t4_coreapi", "mail"],
     "post_init_hook": "post_init_hook",
     # always loaded
     "data": [
@@ -29,9 +29,17 @@
         "views/gk_area_warning_views.xml",
         "views/gk_area_warning_type_views.xml",
         "views/gk_device_log_views.xml",
+        "views/gk_dashboard_views.xml",
         "views/GK_menu.xml",
         "data/gk_demo_data.xml",
     ],
+    "assets": {
+        "web.assets_backend": [
+            "t4_gate_keeper/static/src/css/dashboard.css",
+            "t4_gate_keeper/static/src/js/dashboard.js",
+            "t4_gate_keeper/static/src/xml/dashboard_template.xml",
+        ],
+    },
     "demo": [
     ],
 }

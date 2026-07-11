@@ -17,6 +17,14 @@ class GateKeeperAreaWarning(models.Model):
         ondelete="cascade",
     )
 
+    branch_id = fields.Many2one(
+        related="area_id.branch_id",
+        string="Branch",
+        store=True,
+        readonly=True,
+        index=True,
+    )
+
     device_id = fields.Many2one(
         comodel_name="t4.gate_keeper.device",
         string="Device",

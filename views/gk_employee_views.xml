@@ -13,6 +13,7 @@
                     <field name="emp_id" string="Employee ID"/>
                     <field name="name" string="Full Name"/>
                     <field name="hr_employee_id" string="HR Employee" optional="show"/>
+                    <field name="group_ids" widget="many2many_tags" options="{'color_field': 'color'}" string="Nhóm đối tượng" optional="show"/>
                     <field name="branch_id" string="Branch"/>
                     <field name="presence_state"
                            string="Presence"

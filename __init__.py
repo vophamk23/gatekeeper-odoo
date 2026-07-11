@@ -1,5 +1,6 @@
 from . import models
 from . import utils
+from . import controllers
 
 
 def post_init_hook(env):

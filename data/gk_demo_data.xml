@@ -192,6 +192,7 @@
             <field name="code">TECH_RD_DN</field>
             <field name="branch_id" ref="branch_danang_office"/>
             <field name="description">Nhóm nhân viên nghiên cứu phát triển công nghệ tại chi nhánh Đà Nẵng.</field>
+            <field name="color">4</field>
         </record>
 
         <record id="group_dn_board" model="t4.gate_keeper.employee_group">
@@ -199,6 +200,7 @@
             <field name="code">BOARD_DN</field>
             <field name="branch_id" ref="branch_danang_office"/>
             <field name="description">Nhóm lãnh đạo quản lý cấp cao tại chi nhánh Đà Nẵng.</field>
+            <field name="color">1</field>
         </record>
 
         <!-- 4. CONTROLLER -->
@@ -242,14 +244,14 @@
         </record>
 
         <!-- ==================== EMPLOYEE GROUPS & POLICIES ==================== -->
-        <!-- 1. EMPLOYEE GROUPS (4 EQUIVALENT GROUPS PER BRANCH + 1 HEADQUARTERS SPECIAL GROUP) -->
-        
+        <!-- 1. EMPLOYEE GROUPS -->
         <!-- HANOI HQ GROUPS -->
         <record id="group_hn_board" model="t4.gate_keeper.employee_group">
             <field name="name">Ban Giám Đốc (Hanoi Board)</field>
             <field name="code">BOARD_DEPT</field>
             <field name="branch_id" ref="branch_hanoi_hq"/>
             <field name="description">Ban lãnh đạo cấp cao của doanh nghiệp tại trụ sở chính Hà Nội.</field>
+            <field name="color">1</field>
         </record>
 
         <record id="group_hn_it" model="t4.gate_keeper.employee_group">
@@ -257,6 +259,7 @@
             <field name="code">IT_DEPT</field>
             <field name="branch_id" ref="branch_hanoi_hq"/>
             <field name="description">Nhóm kỹ sư hệ thống, kỹ thuật viên quản trị hạ tầng IT tại Hà Nội.</field>
+            <field name="color">4</field>
         </record>
 
         <record id="group_hn_hr" model="t4.gate_keeper.employee_group">
@@ -264,6 +267,7 @@
             <field name="code">HR_DEPT</field>
             <field name="branch_id" ref="branch_hanoi_hq"/>
             <field name="description">Nhóm nhân sự phụ trách tuyển dụng và hành chính tại Hà Nội.</field>
+            <field name="color">10</field>
         </record>
 
         <record id="group_hn_security" model="t4.gate_keeper.employee_group">
@@ -271,6 +275,7 @@
             <field name="code">SECURITY</field>
             <field name="branch_id" ref="branch_hanoi_hq"/>
             <field name="description">Nhóm nhân viên an ninh bảo vệ tại Hà Nội.</field>
+            <field name="color">2</field>
         </record>
 
         <record id="group_hn_temp" model="t4.gate_keeper.employee_group">
@@ -278,6 +283,15 @@
             <field name="code">TEMP_STAFF</field>
             <field name="branch_id" ref="branch_hanoi_hq"/>
             <field name="description">Nhóm nhân viên bán thời gian, nhà thầu ngoài tại Hà Nội.</field>
+            <field name="color">7</field>
+        </record>
+
+        <record id="group_hn_maint" model="t4.gate_keeper.employee_group">
+            <field name="name">Kỹ thuật Bảo trì (Hanoi Maintenance)</field>
+            <field name="code">MAINT_DEPT</field>
+            <field name="branch_id" ref="branch_hanoi_hq"/>
+            <field name="description">Nhóm nhân viên kỹ thuật bảo trì, sửa chữa phần cứng/hạ tầng tại Hà Nội.</field>
+            <field name="color">8</field>
         </record>
 
         <!-- HCM OFFICE GROUPS -->
@@ -286,6 +300,7 @@
             <field name="code">IT_DEPT</field>
             <field name="branch_id" ref="branch_hcm_office"/>
             <field name="description">Nhóm kỹ sư hệ thống, kỹ thuật viên quản trị hạ tầng IT tại TP. HCM.</field>
+            <field name="color">4</field>
         </record>
 
         <record id="group_hcm_hr" model="t4.gate_keeper.employee_group">
@@ -293,6 +308,7 @@
             <field name="code">HR_DEPT</field>
             <field name="branch_id" ref="branch_hcm_office"/>
             <field name="description">Nhóm nhân sự phụ trách tuyển dụng và hành chính tại TP. HCM.</field>
+            <field name="color">10</field>
         </record>
 
         <record id="group_hcm_security" model="t4.gate_keeper.employee_group">
@@ -300,6 +316,7 @@
             <field name="code">SECURITY</field>
             <field name="branch_id" ref="branch_hcm_office"/>
             <field name="description">Nhóm nhân viên an ninh bảo vệ tại TP. HCM.</field>
+            <field name="color">2</field>
         </record>
 
         <record id="group_hcm_temp" model="t4.gate_keeper.employee_group">
@@ -307,6 +324,15 @@
             <field name="code">TEMP_STAFF</field>
             <field name="branch_id" ref="branch_hcm_office"/>
             <field name="description">Nhóm nhân viên bán thời gian, nhà thầu ngoài tại TP. HCM.</field>
+            <field name="color">7</field>
+        </record>
+
+        <record id="group_hcm_maint" model="t4.gate_keeper.employee_group">
+            <field name="name">Kỹ thuật Bảo trì (HCM Maintenance)</field>
+            <field name="code">MAINT_DEPT</field>
+            <field name="branch_id" ref="branch_hcm_office"/>
+            <field name="description">Nhóm nhân viên kỹ thuật bảo trì, sửa chữa phần cứng/hạ tầng tại TP. HCM.</field>
+            <field name="color">8</field>
         </record>
 
         <!-- DA NANG OFFICE GROUPS -->
@@ -315,6 +341,7 @@
             <field name="code">IT_DEPT</field>
             <field name="branch_id" ref="branch_danang_office"/>
             <field name="description">Nhóm kỹ sư hệ thống, kỹ thuật viên quản trị hạ tầng IT tại Đà Nẵng.</field>
+            <field name="color">4</field>
         </record>
 
         <record id="group_dn_hr" model="t4.gate_keeper.employee_group">
@@ -322,6 +349,7 @@
             <field name="code">HR_DEPT</field>
             <field name="branch_id" ref="branch_danang_office"/>
             <field name="description">Nhóm nhân sự phụ trách tuyển dụng và hành chính tại Đà Nẵng.</field>
+            <field name="color">10</field>
         </record>
 
         <record id="group_dn_security" model="t4.gate_keeper.employee_group">
@@ -329,6 +357,7 @@
             <field name="code">SECURITY</field>
             <field name="branch_id" ref="branch_danang_office"/>
             <field name="description">Nhóm nhân viên an ninh bảo vệ tại Đà Nẵng.</field>
+            <field name="color">2</field>
         </record>
 
         <record id="group_dn_temp" model="t4.gate_keeper.employee_group">
@@ -336,125 +365,543 @@
             <field name="code">TEMP_STAFF</field>
             <field name="branch_id" ref="branch_danang_office"/>
             <field name="description">Nhóm nhân viên bán thời gian, nhà thầu ngoài tại Đà Nẵng.</field>
+            <field name="color">7</field>
         </record>
 
-        <!-- 2. HR EMPLOYEES -->
-        <record id="hr_emp_nguyen_board" model="hr.employee">
-            <field name="name">Nguyễn Văn Giám Đốc</field>
-            <field name="emp_id">EMP-HN-DIR-001</field>
+        <record id="group_dn_maint" model="t4.gate_keeper.employee_group">
+            <field name="name">Kỹ thuật Bảo trì (Da Nang Maintenance)</field>
+            <field name="code">MAINT_DEPT</field>
+            <field name="branch_id" ref="branch_danang_office"/>
+            <field name="description">Nhóm nhân viên kỹ thuật bảo trì, sửa chữa phần cứng/hạ tầng tại Đà Nẵng.</field>
+            <field name="color">8</field>
         </record>
 
-        <record id="hr_emp_nguyen_it" model="hr.employee">
-            <field name="name">Nguyễn Văn Kỹ Thuật</field>
-            <field name="emp_id">EMP-HN-IT-001</field>
+        <!-- 2. HR DEPARTMENTS -->
+        <record id="dep_board" model="hr.department">
+            <field name="name">Ban Giám Đốc</field>
+        </record>
+        <record id="dep_it" model="hr.department">
+            <field name="name">Phòng Kỹ thuật IT</field>
+        </record>
+        <record id="dep_hr" model="hr.department">
+            <field name="name">Phòng Hành chính Nhân sự</field>
+        </record>
+        <record id="dep_security" model="hr.department">
+            <field name="name">Đội An ninh &amp; Bảo vệ</field>
+        </record>
+        <record id="dep_maint" model="hr.department">
+            <field name="name">Phòng Kỹ thuật Bảo trì</field>
         </record>
 
-        <record id="hr_emp_tran_hr" model="hr.employee">
-            <field name="name">Trần Thị Hành Chính</field>
-            <field name="emp_id">EMP-HN-HR-001</field>
+        <!-- 3. HR EMPLOYEES -->
+        <!-- HANOI BRANCH (6) -->
+        <record id="hr_emp_hn_triet" model="hr.employee">
+            <field name="name">Nguyễn Minh Triết</field>
+            <field name="emp_id">EMP-HN-001</field>
+            <field name="job_title">Tổng Giám Đốc</field>
+            <field name="department_id" ref="dep_board"/>
+            <field name="work_email">triet.nm@company.com</field>
+            <field name="work_phone">0901112223</field>
+            <field name="gender">male</field>
+        </record>
+        <record id="hr_emp_hn_son" model="hr.employee">
+            <field name="name">Phạm Thanh Sơn</field>
+            <field name="emp_id">EMP-HN-002</field>
+            <field name="job_title">Trưởng nhóm IT</field>
+            <field name="department_id" ref="dep_it"/>
+            <field name="work_email">son.pt@company.com</field>
+            <field name="work_phone">0902223334</field>
+            <field name="gender">male</field>
+        </record>
+        <record id="hr_emp_hn_trang" model="hr.employee">
+            <field name="name">Trần Thu Trang</field>
+            <field name="emp_id">EMP-HN-003</field>
+            <field name="job_title">Trưởng phòng Nhân sự</field>
+            <field name="department_id" ref="dep_hr"/>
+            <field name="work_email">trang.tt@company.com</field>
+            <field name="work_phone">0903334445</field>
+            <field name="gender">female</field>
+        </record>
+        <record id="hr_emp_hn_nam" model="hr.employee">
+            <field name="name">Lê Hoàng Nam</field>
+            <field name="emp_id">EMP-HN-004</field>
+            <field name="job_title">Đội trưởng An ninh</field>
+            <field name="department_id" ref="dep_security"/>
+            <field name="work_email">nam.lh@company.com</field>
+            <field name="work_phone">0904445556</field>
+            <field name="gender">male</field>
+        </record>
+        <record id="hr_emp_hn_anh" model="hr.employee">
+            <field name="name">Đỗ Tuấn Anh</field>
+            <field name="emp_id">EMP-HN-005</field>
+            <field name="job_title">Kỹ sư R&amp;D</field>
+            <field name="department_id" ref="dep_it"/>
+            <field name="work_email">anh.dt@company.com</field>
+            <field name="work_phone">0906667778</field>
+            <field name="gender">male</field>
+        </record>
+        <record id="hr_emp_hn_lan" model="hr.employee">
+            <field name="name">Hoàng Thị Lan</field>
+            <field name="emp_id">EMP-HN-006</field>
+            <field name="job_title">Cộng tác viên Hành chính</field>
+            <field name="department_id" ref="dep_hr"/>
+            <field name="work_email">lan.ht@company.com</field>
+            <field name="work_phone">0907778889</field>
+            <field name="gender">female</field>
         </record>
 
-        <record id="hr_emp_le_security" model="hr.employee">
-            <field name="name">Lê Văn Bảo Vệ</field>
-            <field name="emp_id">EMP-HN-SEC-001</field>
+        <record id="hr_emp_hn_maint_1" model="hr.employee">
+            <field name="name">Nguyễn Văn An</field>
+            <field name="emp_id">EMP-HN-007</field>
+            <field name="job_title">Kỹ sư Bảo trì</field>
+            <field name="department_id" ref="dep_maint"/>
+            <field name="work_email">an.nv@company.com</field>
+            <field name="work_phone">0909000111</field>
+            <field name="gender">male</field>
+        </record>
+        <record id="hr_emp_hn_maint_2" model="hr.employee">
+            <field name="name">Trần Văn Bình</field>
+            <field name="emp_id">EMP-HN-008</field>
+            <field name="job_title">Kỹ sư Bảo trì</field>
+            <field name="department_id" ref="dep_maint"/>
+            <field name="work_email">binh.tv@company.com</field>
+            <field name="work_phone">0909000222</field>
+            <field name="gender">male</field>
         </record>
 
-        <record id="hr_emp_pham_temp" model="hr.employee">
-            <field name="name">Phạm Văn Thời Vụ</field>
-            <field name="emp_id">EMP-HCM-TMP-001</field>
+        <!-- HCM BRANCH (6) -->
+        <record id="hr_emp_hcm_tho" model="hr.employee">
+            <field name="name">Nguyễn Hữu Thọ</field>
+            <field name="emp_id">EMP-HCM-001</field>
+            <field name="job_title">Quản lý Chi nhánh</field>
+            <field name="department_id" ref="dep_board"/>
+            <field name="work_email">tho.nh@company.com</field>
+            <field name="work_phone">0905556667</field>
+            <field name="gender">male</field>
+        </record>
+        <record id="hr_emp_hcm_tien" model="hr.employee">
+            <field name="name">Lâm Minh Tiến</field>
+            <field name="emp_id">EMP-HCM-002</field>
+            <field name="job_title">Kỹ sư Hệ thống</field>
+            <field name="department_id" ref="dep_it"/>
+            <field name="work_email">tien.lm@company.com</field>
+            <field name="work_phone">0908889990</field>
+            <field name="gender">male</field>
+        </record>
+        <record id="hr_emp_hcm_mai" model="hr.employee">
+            <field name="name">Bùi Thị Mai</field>
+            <field name="emp_id">EMP-HCM-003</field>
+            <field name="job_title">Chuyên viên Nhân sự</field>
+            <field name="department_id" ref="dep_hr"/>
+            <field name="work_email">mai.bt@company.com</field>
+            <field name="work_phone">0909990001</field>
+            <field name="gender">female</field>
+        </record>
+        <record id="hr_emp_hcm_hung" model="hr.employee">
+            <field name="name">Võ Văn Hùng</field>
+            <field name="emp_id">EMP-HCM-004</field>
+            <field name="job_title">Nhân viên An ninh</field>
+            <field name="department_id" ref="dep_security"/>
+            <field name="work_email">hung.vv@company.com</field>
+            <field name="work_phone">0901113335</field>
+            <field name="gender">male</field>
+        </record>
+        <record id="hr_emp_hcm_tri" model="hr.employee">
+            <field name="name">Phan Minh Trí</field>
+            <field name="emp_id">EMP-HCM-005</field>
+            <field name="job_title">Thủ kho</field>
+            <field name="department_id" ref="dep_hr"/>
+            <field name="work_email">tri.pm@company.com</field>
+            <field name="work_phone">0902224446</field>
+            <field name="gender">male</field>
+        </record>
+        <record id="hr_emp_hcm_kanh" model="hr.employee">
+            <field name="name">Nguyễn Thị Kim Anh</field>
+            <field name="emp_id">EMP-HCM-006</field>
+            <field name="job_title">Cộng tác viên Thời vụ</field>
+            <field name="department_id" ref="dep_hr"/>
+            <field name="work_email">anh.ntk@company.com</field>
+            <field name="work_phone">0903335557</field>
+            <field name="gender">female</field>
         </record>
 
-        <!-- 3. CONFIG DYNAMICALLY CREATED GATE KEEPER EMPLOYEES -->
+        <record id="hr_emp_hcm_maint_1" model="hr.employee">
+            <field name="name">Lê Văn Cường</field>
+            <field name="emp_id">EMP-HCM-007</field>
+            <field name="job_title">Kỹ sư Bảo trì</field>
+            <field name="department_id" ref="dep_maint"/>
+            <field name="work_email">cuong.lv@company.com</field>
+            <field name="work_phone">0909000333</field>
+            <field name="gender">male</field>
+        </record>
+        <record id="hr_emp_hcm_maint_2" model="hr.employee">
+            <field name="name">Phạm Văn Dũng</field>
+            <field name="emp_id">EMP-HCM-008</field>
+            <field name="job_title">Kỹ sư Bảo trì</field>
+            <field name="department_id" ref="dep_maint"/>
+            <field name="work_email">dung.pv@company.com</field>
+            <field name="work_phone">0909000444</field>
+            <field name="gender">male</field>
+        </record>
+
+        <!-- DA NANG BRANCH (6) -->
+        <record id="hr_emp_dn_tuan" model="hr.employee">
+            <field name="name">Lê Anh Tuấn</field>
+            <field name="emp_id">EMP-DN-001</field>
+            <field name="job_title">Giám đốc Chi nhánh</field>
+            <field name="department_id" ref="dep_board"/>
+            <field name="work_email">tuan.la@company.com</field>
+            <field name="work_phone">0904446668</field>
+            <field name="gender">male</field>
+        </record>
+        <record id="hr_emp_dn_viet" model="hr.employee">
+            <field name="name">Nguyễn Hoàng Việt</field>
+            <field name="emp_id">EMP-DN-002</field>
+            <field name="job_title">Kỹ sư R&amp;D</field>
+            <field name="department_id" ref="dep_it"/>
+            <field name="work_email">viet.nh@company.com</field>
+            <field name="work_phone">0905557779</field>
+            <field name="gender">male</field>
+        </record>
+        <record id="hr_emp_dn_khoa" model="hr.employee">
+            <field name="name">Trần Minh Khoa</field>
+            <field name="emp_id">EMP-DN-003</field>
+            <field name="job_title">Kỹ sư R&amp;D</field>
+            <field name="department_id" ref="dep_it"/>
+            <field name="work_email">khoa.tm@company.com</field>
+            <field name="work_phone">0906668880</field>
+            <field name="gender">male</field>
+        </record>
+        <record id="hr_emp_dn_khanh" model="hr.employee">
+            <field name="name">Ngô Quốc Khánh</field>
+            <field name="emp_id">EMP-DN-004</field>
+            <field name="job_title">Kỹ sư Hệ thống IT</field>
+            <field name="department_id" ref="dep_it"/>
+            <field name="work_email">khanh.nq@company.com</field>
+            <field name="work_phone">0907779991</field>
+            <field name="gender">male</field>
+        </record>
+        <record id="hr_emp_dn_trinh" model="hr.employee">
+            <field name="name">Phạm Ngọc Trinh</field>
+            <field name="emp_id">EMP-DN-005</field>
+            <field name="job_title">Chuyên viên Hành chính</field>
+            <field name="department_id" ref="dep_hr"/>
+            <field name="work_email">trinh.pn@company.com</field>
+            <field name="work_phone">0908880002</field>
+            <field name="gender">female</field>
+        </record>
+        <record id="hr_emp_dn_long" model="hr.employee">
+            <field name="name">Huỳnh Văn Long</field>
+            <field name="emp_id">EMP-DN-006</field>
+            <field name="job_title">Nhân viên An ninh</field>
+            <field name="department_id" ref="dep_security"/>
+            <field name="work_email">long.hv@company.com</field>
+            <field name="work_phone">0909991113</field>
+            <field name="gender">male</field>
+        </record>
+
+        <record id="hr_emp_dn_maint_1" model="hr.employee">
+            <field name="name">Hoàng Văn Em</field>
+            <field name="emp_id">EMP-DN-007</field>
+            <field name="job_title">Kỹ sư Bảo trì</field>
+            <field name="department_id" ref="dep_maint"/>
+            <field name="work_email">em.hv@company.com</field>
+            <field name="work_phone">0909000555</field>
+            <field name="gender">male</field>
+        </record>
+        <record id="hr_emp_dn_maint_2" model="hr.employee">
+            <field name="name">Ngô Văn Giang</field>
+            <field name="emp_id">EMP-DN-008</field>
+            <field name="job_title">Kỹ sư Bảo trì</field>
+            <field name="department_id" ref="dep_maint"/>
+            <field name="work_email">giang.nv@company.com</field>
+            <field name="work_phone">0909000666</field>
+            <field name="gender">male</field>
+        </record>
+
+        <!-- 4. CONFIG DYNAMICALLY CREATED GATE KEEPER EMPLOYEES -->
+        <!-- HANOI HQ -->
         <function model="t4.gate_keeper.employee" name="write">
-            <value model="t4.gate_keeper.employee" eval="obj().env['t4.gate_keeper.employee'].search([('emp_id', '=', 'EMP-HN-DIR-001')]).ids"/>
+            <value model="t4.gate_keeper.employee" eval="obj().env['t4.gate_keeper.employee'].search([('emp_id', '=', 'EMP-HN-001')]).ids"/>
             <value eval="{'branch_id': ref('branch_hanoi_hq'), 'group_ids': [(6, 0, [ref('group_hn_board')])] }"/>
         </function>
-
         <function model="t4.gate_keeper.employee" name="write">
-            <value model="t4.gate_keeper.employee" eval="obj().env['t4.gate_keeper.employee'].search([('emp_id', '=', 'EMP-HN-IT-001')]).ids"/>
+            <value model="t4.gate_keeper.employee" eval="obj().env['t4.gate_keeper.employee'].search([('emp_id', '=', 'EMP-HN-002')]).ids"/>
             <value eval="{'branch_id': ref('branch_hanoi_hq'), 'group_ids': [(6, 0, [ref('group_hn_it')])] }"/>
         </function>
-
         <function model="t4.gate_keeper.employee" name="write">
-            <value model="t4.gate_keeper.employee" eval="obj().env['t4.gate_keeper.employee'].search([('emp_id', '=', 'EMP-HN-HR-001')]).ids"/>
+            <value model="t4.gate_keeper.employee" eval="obj().env['t4.gate_keeper.employee'].search([('emp_id', '=', 'EMP-HN-003')]).ids"/>
             <value eval="{'branch_id': ref('branch_hanoi_hq'), 'group_ids': [(6, 0, [ref('group_hn_hr')])] }"/>
         </function>
-
         <function model="t4.gate_keeper.employee" name="write">
-            <value model="t4.gate_keeper.employee" eval="obj().env['t4.gate_keeper.employee'].search([('emp_id', '=', 'EMP-HN-SEC-001')]).ids"/>
+            <value model="t4.gate_keeper.employee" eval="obj().env['t4.gate_keeper.employee'].search([('emp_id', '=', 'EMP-HN-004')]).ids"/>
             <value eval="{'branch_id': ref('branch_hanoi_hq'), 'group_ids': [(6, 0, [ref('group_hn_security')])] }"/>
         </function>
-
         <function model="t4.gate_keeper.employee" name="write">
-            <value model="t4.gate_keeper.employee" eval="obj().env['t4.gate_keeper.employee'].search([('emp_id', '=', 'EMP-HCM-TMP-001')]).ids"/>
-            <value eval="{'branch_id': ref('branch_hcm_office'), 'group_ids': [(6, 0, [ref('group_hcm_temp')])] }"/>
+            <value model="t4.gate_keeper.employee" eval="obj().env['t4.gate_keeper.employee'].search([('emp_id', '=', 'EMP-HN-005')]).ids"/>
+            <value eval="{'branch_id': ref('branch_hanoi_hq'), 'group_ids': [(6, 0, [ref('group_hn_it')])] }"/>
+        </function>
+        <function model="t4.gate_keeper.employee" name="write">
+            <value model="t4.gate_keeper.employee" eval="obj().env['t4.gate_keeper.employee'].search([('emp_id', '=', 'EMP-HN-006')]).ids"/>
+            <value eval="{'branch_id': ref('branch_hanoi_hq'), 'group_ids': [(6, 0, [ref('group_hn_temp')])] }"/>
+        </function>
+        <function model="t4.gate_keeper.employee" name="write">
+            <value model="t4.gate_keeper.employee" eval="obj().env['t4.gate_keeper.employee'].search([('emp_id', '=', 'EMP-HN-007')]).ids"/>
+            <value eval="{'branch_id': ref('branch_hanoi_hq'), 'group_ids': [(6, 0, [ref('group_hn_maint')])] }"/>
+        </function>
+        <function model="t4.gate_keeper.employee" name="write">
+            <value model="t4.gate_keeper.employee" eval="obj().env['t4.gate_keeper.employee'].search([('emp_id', '=', 'EMP-HN-008')]).ids"/>
+            <value eval="{'branch_id': ref('branch_hanoi_hq'), 'group_ids': [(6, 0, [ref('group_hn_maint')])] }"/>
         </function>
 
-        <!-- 4. CARDS (AUTH INFO) -->
-        <record id="card_nguyen_board" model="t4.gate_keeper.auth_info">
-            <field name="employee_id" search="[('emp_id', '=', 'EMP-HN-DIR-001')]"/>
-            <field name="card_code">RFID-HN-DIR-01</field>
-            <field name="active" eval="True"/>
-            <field name="description">Thẻ VIP của Giám Đốc tại trụ sở chính Hà Nội.</field>
-        </record>
+        <!-- HCM OFFICE -->
+        <function model="t4.gate_keeper.employee" name="write">
+            <value model="t4.gate_keeper.employee" eval="obj().env['t4.gate_keeper.employee'].search([('emp_id', '=', 'EMP-HCM-001')]).ids"/>
+            <value eval="{'branch_id': ref('branch_hcm_office'), 'group_ids': [(6, 0, [ref('group_hcm_it')])] }"/>
+        </function>
+        <function model="t4.gate_keeper.employee" name="write">
+            <value model="t4.gate_keeper.employee" eval="obj().env['t4.gate_keeper.employee'].search([('emp_id', '=', 'EMP-HCM-002')]).ids"/>
+            <value eval="{'branch_id': ref('branch_hcm_office'), 'group_ids': [(6, 0, [ref('group_hcm_it')])] }"/>
+        </function>
+        <function model="t4.gate_keeper.employee" name="write">
+            <value model="t4.gate_keeper.employee" eval="obj().env['t4.gate_keeper.employee'].search([('emp_id', '=', 'EMP-HCM-003')]).ids"/>
+            <value eval="{'branch_id': ref('branch_hcm_office'), 'group_ids': [(6, 0, [ref('group_hcm_hr')])] }"/>
+        </function>
+        <function model="t4.gate_keeper.employee" name="write">
+            <value model="t4.gate_keeper.employee" eval="obj().env['t4.gate_keeper.employee'].search([('emp_id', '=', 'EMP-HCM-004')]).ids"/>
+            <value eval="{'branch_id': ref('branch_hcm_office'), 'group_ids': [(6, 0, [ref('group_hcm_security')])] }"/>
+        </function>
+        <function model="t4.gate_keeper.employee" name="write">
+            <value model="t4.gate_keeper.employee" eval="obj().env['t4.gate_keeper.employee'].search([('emp_id', '=', 'EMP-HCM-005')]).ids"/>
+            <value eval="{'branch_id': ref('branch_hcm_office'), 'group_ids': [(6, 0, [ref('group_hcm_temp')])] }"/>
+        </function>
+        <function model="t4.gate_keeper.employee" name="write">
+            <value model="t4.gate_keeper.employee" eval="obj().env['t4.gate_keeper.employee'].search([('emp_id', '=', 'EMP-HCM-006')]).ids"/>
+            <value eval="{'branch_id': ref('branch_hcm_office'), 'group_ids': [(6, 0, [ref('group_hcm_temp')])] }"/>
+        </function>
+        <function model="t4.gate_keeper.employee" name="write">
+            <value model="t4.gate_keeper.employee" eval="obj().env['t4.gate_keeper.employee'].search([('emp_id', '=', 'EMP-HCM-007')]).ids"/>
+            <value eval="{'branch_id': ref('branch_hcm_office'), 'group_ids': [(6, 0, [ref('group_hcm_maint')])] }"/>
+        </function>
+        <function model="t4.gate_keeper.employee" name="write">
+            <value model="t4.gate_keeper.employee" eval="obj().env['t4.gate_keeper.employee'].search([('emp_id', '=', 'EMP-HCM-008')]).ids"/>
+            <value eval="{'branch_id': ref('branch_hcm_office'), 'group_ids': [(6, 0, [ref('group_hcm_maint')])] }"/>
+        </function>
 
-        <record id="card_nguyen_it" model="t4.gate_keeper.auth_info">
-            <field name="employee_id" search="[('emp_id', '=', 'EMP-HN-IT-001')]"/>
-            <field name="card_code">RFID-HN-IT-01</field>
-            <field name="active" eval="True"/>
-            <field name="description">Thẻ Mifare phân quyền IT Hà Nội.</field>
-        </record>
+        <!-- DA NANG OFFICE -->
+        <function model="t4.gate_keeper.employee" name="write">
+            <value model="t4.gate_keeper.employee" eval="obj().env['t4.gate_keeper.employee'].search([('emp_id', '=', 'EMP-DN-001')]).ids"/>
+            <value eval="{'branch_id': ref('branch_danang_office'), 'group_ids': [(6, 0, [ref('group_dn_board')])] }"/>
+        </function>
+        <function model="t4.gate_keeper.employee" name="write">
+            <value model="t4.gate_keeper.employee" eval="obj().env['t4.gate_keeper.employee'].search([('emp_id', '=', 'EMP-DN-002')]).ids"/>
+            <value eval="{'branch_id': ref('branch_danang_office'), 'group_ids': [(6, 0, [ref('group_dn_tech')])] }"/>
+        </function>
+        <function model="t4.gate_keeper.employee" name="write">
+            <value model="t4.gate_keeper.employee" eval="obj().env['t4.gate_keeper.employee'].search([('emp_id', '=', 'EMP-DN-003')]).ids"/>
+            <value eval="{'branch_id': ref('branch_danang_office'), 'group_ids': [(6, 0, [ref('group_dn_tech')])] }"/>
+        </function>
+        <function model="t4.gate_keeper.employee" name="write">
+            <value model="t4.gate_keeper.employee" eval="obj().env['t4.gate_keeper.employee'].search([('emp_id', '=', 'EMP-DN-004')]).ids"/>
+            <value eval="{'branch_id': ref('branch_danang_office'), 'group_ids': [(6, 0, [ref('group_dn_it')])] }"/>
+        </function>
+        <function model="t4.gate_keeper.employee" name="write">
+            <value model="t4.gate_keeper.employee" eval="obj().env['t4.gate_keeper.employee'].search([('emp_id', '=', 'EMP-DN-005')]).ids"/>
+            <value eval="{'branch_id': ref('branch_danang_office'), 'group_ids': [(6, 0, [ref('group_dn_hr')])] }"/>
+        </function>
+        <function model="t4.gate_keeper.employee" name="write">
+            <value model="t4.gate_keeper.employee" eval="obj().env['t4.gate_keeper.employee'].search([('emp_id', '=', 'EMP-DN-006')]).ids"/>
+            <value eval="{'branch_id': ref('branch_danang_office'), 'group_ids': [(6, 0, [ref('group_dn_security')])] }"/>
+        </function>
+        <function model="t4.gate_keeper.employee" name="write">
+            <value model="t4.gate_keeper.employee" eval="obj().env['t4.gate_keeper.employee'].search([('emp_id', '=', 'EMP-DN-007')]).ids"/>
+            <value eval="{'branch_id': ref('branch_danang_office'), 'group_ids': [(6, 0, [ref('group_dn_maint')])] }"/>
+        </function>
+        <function model="t4.gate_keeper.employee" name="write">
+            <value model="t4.gate_keeper.employee" eval="obj().env['t4.gate_keeper.employee'].search([('emp_id', '=', 'EMP-DN-008')]).ids"/>
+            <value eval="{'branch_id': ref('branch_danang_office'), 'group_ids': [(6, 0, [ref('group_dn_maint')])] }"/>
+        </function>
 
-        <record id="card_tran_hr" model="t4.gate_keeper.auth_info">
-            <field name="employee_id" search="[('emp_id', '=', 'EMP-HN-HR-001')]"/>
-            <field name="card_code">RFID-HN-HR-01</field>
+        <!-- 5. CARDS (AUTH INFO) -->
+        <!-- HANOI HQ CARDS -->
+        <record id="card_hn_triet" model="t4.gate_keeper.auth_info">
+            <field name="employee_id" search="[('emp_id', '=', 'EMP-HN-001')]"/>
+            <field name="card_code">RFID-HN-001</field>
             <field name="active" eval="True"/>
-            <field name="description">Thẻ Mifare phân quyền Hành chính Hà Nội.</field>
+            <field name="description">Thẻ VIP Ban Giám Đốc Hà Nội.</field>
         </record>
-
-        <record id="card_le_security" model="t4.gate_keeper.auth_info">
-            <field name="employee_id" search="[('emp_id', '=', 'EMP-HN-SEC-001')]"/>
-            <field name="card_code">RFID-HN-SEC-01</field>
+        <record id="card_hn_son" model="t4.gate_keeper.auth_info">
+            <field name="employee_id" search="[('emp_id', '=', 'EMP-HN-002')]"/>
+            <field name="card_code">RFID-HN-002</field>
             <field name="active" eval="True"/>
-            <field name="description">Thẻ Proximity phân quyền Bảo vệ Hà Nội.</field>
+            <field name="description">Thẻ Phòng Kỹ thuật Hà Nội.</field>
         </record>
-
-        <record id="card_pham_temp" model="t4.gate_keeper.auth_info">
-            <field name="employee_id" search="[('emp_id', '=', 'EMP-HCM-TMP-001')]"/>
-            <field name="card_code">RFID-HCM-TMP-01</field>
+        <record id="card_hn_trang" model="t4.gate_keeper.auth_info">
+            <field name="employee_id" search="[('emp_id', '=', 'EMP-HN-003')]"/>
+            <field name="card_code">RFID-HN-003</field>
             <field name="active" eval="True"/>
-            <field name="description">Thẻ Proximity cho CTV Thời vụ HCM.</field>
+            <field name="description">Thẻ Phòng Nhân sự Hà Nội.</field>
+        </record>
+        <record id="card_hn_nam" model="t4.gate_keeper.auth_info">
+            <field name="employee_id" search="[('emp_id', '=', 'EMP-HN-004')]"/>
+            <field name="card_code">RFID-HN-004</field>
+            <field name="active" eval="True"/>
+            <field name="description">Thẻ Đội Bảo vệ Hà Nội.</field>
+        </record>
+        <record id="card_hn_anh" model="t4.gate_keeper.auth_info">
+            <field name="employee_id" search="[('emp_id', '=', 'EMP-HN-005')]"/>
+            <field name="card_code">RFID-HN-005</field>
+            <field name="active" eval="True"/>
+            <field name="description">Thẻ R&amp;D Hà Nội.</field>
+        </record>
+        <record id="card_hn_lan" model="t4.gate_keeper.auth_info">
+            <field name="employee_id" search="[('emp_id', '=', 'EMP-HN-006')]"/>
+            <field name="card_code">RFID-HN-006</field>
+            <field name="active" eval="True"/>
+            <field name="description">Thẻ Nhân viên Thời vụ Hà Nội.</field>
+        </record>
+        <record id="card_hn_maint_1" model="t4.gate_keeper.auth_info">
+            <field name="employee_id" search="[('emp_id', '=', 'EMP-HN-007')]"/>
+            <field name="card_code">RFID-HN-007</field>
+            <field name="active" eval="True"/>
+            <field name="description">Thẻ Kỹ thuật Bảo trì Hà Nội.</field>
+        </record>
+        <record id="card_hn_maint_2" model="t4.gate_keeper.auth_info">
+            <field name="employee_id" search="[('emp_id', '=', 'EMP-HN-008')]"/>
+            <field name="card_code">RFID-HN-008</field>
+            <field name="active" eval="True"/>
+            <field name="description">Thẻ Kỹ thuật Bảo trì Hà Nội.</field>
+        </record>
+ 
+         <!-- HCM OFFICE CARDS -->
+         <record id="card_hcm_tho" model="t4.gate_keeper.auth_info">
+             <field name="employee_id" search="[('emp_id', '=', 'EMP-HCM-001')]"/>
+             <field name="card_code">RFID-HCM-001</field>
+             <field name="active" eval="True"/>
+             <field name="description">Thẻ Ban Giám Đốc HCM.</field>
+         </record>
+         <record id="card_hcm_tien" model="t4.gate_keeper.auth_info">
+             <field name="employee_id" search="[('emp_id', '=', 'EMP-HCM-002')]"/>
+             <field name="card_code">RFID-HCM-002</field>
+             <field name="active" eval="True"/>
+             <field name="description">Thẻ Kỹ thuật IT HCM.</field>
+         </record>
+         <record id="card_hcm_mai" model="t4.gate_keeper.auth_info">
+             <field name="employee_id" search="[('emp_id', '=', 'EMP-HCM-003')]"/>
+             <field name="card_code">RFID-HCM-003</field>
+             <field name="active" eval="True"/>
+             <field name="description">Thẻ Nhân sự HCM.</field>
+         </record>
+         <record id="card_hcm_hung" model="t4.gate_keeper.auth_info">
+             <field name="employee_id" search="[('emp_id', '=', 'EMP-HCM-004')]"/>
+             <field name="card_code">RFID-HCM-004</field>
+             <field name="active" eval="True"/>
+             <field name="description">Thẻ Bảo vệ kho HCM.</field>
+         </record>
+         <record id="card_hcm_tri" model="t4.gate_keeper.auth_info">
+             <field name="employee_id" search="[('emp_id', '=', 'EMP-HCM-005')]"/>
+             <field name="card_code">RFID-HCM-005</field>
+             <field name="active" eval="True"/>
+             <field name="description">Thẻ Thủ kho HCM.</field>
+         </record>
+         <record id="card_hcm_kanh" model="t4.gate_keeper.auth_info">
+             <field name="employee_id" search="[('emp_id', '=', 'EMP-HCM-006')]"/>
+             <field name="card_code">RFID-HCM-006</field>
+             <field name="active" eval="True"/>
+             <field name="description">Thẻ CTV Thời vụ HCM.</field>
+         </record>
+        <record id="card_hcm_maint_1" model="t4.gate_keeper.auth_info">
+            <field name="employee_id" search="[('emp_id', '=', 'EMP-HCM-007')]"/>
+            <field name="card_code">RFID-HCM-007</field>
+            <field name="active" eval="True"/>
+            <field name="description">Thẻ Kỹ thuật Bảo trì HCM.</field>
+        </record>
+        <record id="card_hcm_maint_2" model="t4.gate_keeper.auth_info">
+            <field name="employee_id" search="[('emp_id', '=', 'EMP-HCM-008')]"/>
+            <field name="card_code">RFID-HCM-008</field>
+            <field name="active" eval="True"/>
+            <field name="description">Thẻ Kỹ thuật Bảo trì HCM.</field>
+        </record>
+ 
+         <!-- DA NANG OFFICE CARDS -->
+         <record id="card_dn_tuan" model="t4.gate_keeper.auth_info">
+             <field name="employee_id" search="[('emp_id', '=', 'EMP-DN-001')]"/>
+             <field name="card_code">RFID-DN-001</field>
+             <field name="active" eval="True"/>
+             <field name="description">Thẻ Giám đốc Đà Nẵng.</field>
+         </record>
+         <record id="card_dn_viet" model="t4.gate_keeper.auth_info">
+             <field name="employee_id" search="[('emp_id', '=', 'EMP-DN-002')]"/>
+             <field name="card_code">RFID-DN-002</field>
+             <field name="active" eval="True"/>
+             <field name="description">Thẻ Kỹ sư R&amp;D Đà Nẵng.</field>
+         </record>
+         <record id="card_dn_khoa" model="t4.gate_keeper.auth_info">
+             <field name="employee_id" search="[('emp_id', '=', 'EMP-DN-003')]"/>
+             <field name="card_code">RFID-DN-003</field>
+             <field name="active" eval="True"/>
+             <field name="description">Thẻ Kỹ sư R&amp;D Đà Nẵng.</field>
+         </record>
+         <record id="card_dn_khanh" model="t4.gate_keeper.auth_info">
+             <field name="employee_id" search="[('emp_id', '=', 'EMP-DN-004')]"/>
+             <field name="card_code">RFID-DN-004</field>
+             <field name="active" eval="True"/>
+             <field name="description">Thẻ Kỹ thuật IT Đà Nẵng.</field>
+         </record>
+         <record id="card_dn_trinh" model="t4.gate_keeper.auth_info">
+             <field name="employee_id" search="[('emp_id', '=', 'EMP-DN-005')]"/>
+             <field name="card_code">RFID-DN-005</field>
+             <field name="active" eval="True"/>
+             <field name="description">Thẻ Nhân sự Đà Nẵng.</field>
+         </record>
+         <record id="card_dn_long" model="t4.gate_keeper.auth_info">
+             <field name="employee_id" search="[('emp_id', '=', 'EMP-DN-006')]"/>
+             <field name="card_code">RFID-DN-006</field>
+             <field name="active" eval="True"/>
+             <field name="description">Thẻ An ninh Đà Nẵng.</field>
+         </record>
+        <record id="card_dn_maint_1" model="t4.gate_keeper.auth_info">
+            <field name="employee_id" search="[('emp_id', '=', 'EMP-DN-007')]"/>
+            <field name="card_code">RFID-DN-007</field>
+            <field name="active" eval="True"/>
+            <field name="description">Thẻ Kỹ thuật Bảo trì Đà Nẵng.</field>
+        </record>
+        <record id="card_dn_maint_2" model="t4.gate_keeper.auth_info">
+            <field name="employee_id" search="[('emp_id', '=', 'EMP-DN-008')]"/>
+            <field name="card_code">RFID-DN-008</field>
+            <field name="active" eval="True"/>
+            <field name="description">Thẻ Kỹ thuật Bảo trì Đà Nẵng.</field>
         </record>
 
         <!-- 5. ALERT POLICIES -->
         
         <!-- HANOI SECURITY POLICY -->
         <record id="policy_server_restrict" model="t4.gate_keeper.alert_policy">
-            <field name="name">Chỉ kỹ thuật và bảo vệ được vào Phòng Máy Chủ (Hà Nội)</field>
+            <field name="name">Chỉ kỹ thuật IT và bảo vệ được vào Phòng Máy Chủ (Hà Nội)</field>
             <field name="code">POL-SRV-RESTRICT-HN</field>
             <field name="warning_type_id" ref="warning_type_unauthorized_area"/>
             <field name="priority">critical</field>
             <field name="branch_ids" eval="[(6, 0, [ref('branch_hanoi_hq')])]"/>
             <field name="area_ids" eval="[(6, 0, [ref('area_hn_server')])]"/>
-            <field name="allowed_group_ids" eval="[(6, 0, [ref('group_hn_it'), ref('group_hn_security'), ref('group_hn_board')])]"/>
-            <field name="description">Quy tắc nghiêm ngặt Hà Nội: Chỉ nhóm IT, Bảo vệ và Ban Giám Đốc Hà Nội được phép vào phòng máy chủ HN.</field>
+            <field name="allowed_group_ids" eval="[(6, 0, [ref('group_hn_it'), ref('group_hn_security'), ref('group_hn_board'), ref('group_hn_maint')])]"/>
+            <field name="description">Quy tắc nghiêm ngặt Hà Nội: Chỉ nhóm IT, Bảo vệ, Ban Giám Đốc Hà Nội và Kỹ thuật Bảo trì được phép vào phòng máy chủ HN.</field>
         </record>
 
         <!-- DA NANG SECURITY POLICY -->
         <record id="policy_tech_restrict_dn" model="t4.gate_keeper.alert_policy">
-            <field name="name">Chỉ kỹ thuật IT được vào Phòng R&amp;D (Đà Nẵng)</field>
+            <field name="name">Chỉ kỹ thuật IT và Kỹ thuật viên được vào Phòng R&amp;D (Đà Nẵng)</field>
             <field name="code">POL-RD-RESTRICT-DN</field>
             <field name="warning_type_id" ref="warning_type_unauthorized_area"/>
             <field name="priority">critical</field>
             <field name="branch_ids" eval="[(6, 0, [ref('branch_danang_office')])]"/>
             <field name="area_ids" eval="[(6, 0, [ref('area_dn_tech')])]"/>
-            <field name="allowed_group_ids" eval="[(6, 0, [ref('group_dn_it')])]"/>
-            <field name="description">Quy tắc bảo mật Đà Nẵng: Chỉ nhóm IT Đà Nẵng được phép vào phòng nghiên cứu phát triển R&amp;D.</field>
+            <field name="allowed_group_ids" eval="[(6, 0, [ref('group_dn_it'), ref('group_dn_maint'), ref('group_dn_tech')])]"/>
+            <field name="description">Quy tắc bảo mật Đà Nẵng: Chỉ nhóm IT Đà Nẵng, Kỹ thuật Bảo trì và Kỹ thuật viên R&amp;D được phép vào phòng nghiên cứu phát triển R&amp;D.</field>
         </record>
 
         <!-- UNIFIED TEMP STAFF CURFEW POLICY (ALL BRANCHES) -->
         <record id="policy_temp_curfew" model="t4.gate_keeper.alert_policy">
-            <field name="name">Nhân viên thời vụ không được vào ngoài giờ và cuối tuần (Toàn quốc)</field>
+            <field name="name">Nhân viên Thời Vụ không được vào ngoài giờ và cuối tuần (Toàn quốc)</field>
             <field name="code">POL-TEMP-CURFEW</field>
             <field name="warning_type_id" ref="warning_type_unauthorized_time"/>
             <field name="priority">high</field>
@@ -466,7 +913,35 @@
             <field name="description">Cấm truy cập toàn quốc: Nhân viên thời vụ / nhà thầu tại tất cả chi nhánh không được phép vào ngoài giờ hành chính hoặc cuối tuần.</field>
         </record>
 
-        <!-- ANTI-PASSBACK POLICY (ALL BRANCHES) -->
+        <!-- UNIFIED OFFICE STAFF CURFEW POLICY (ALL BRANCHES) -->
+        <record id="policy_office_staff_curfew" model="t4.gate_keeper.alert_policy">
+            <field name="name">Nhân viên Hành Chính không được vào ngoài giờ và cuối tuần (Toàn quốc)</field>
+            <field name="code">POL-OFFICE-STAFF-CURFEW</field>
+            <field name="warning_type_id" ref="warning_type_unauthorized_time"/>
+            <field name="priority">critical</field>
+            <field name="branch_ids" eval="[(6, 0, [ref('branch_hanoi_hq'), ref('branch_hcm_office'), ref('branch_danang_office')])]"/>
+            <field name="employee_group_ids" eval="[(6, 0, [ref('group_hn_hr'), ref('group_hcm_hr'), ref('group_dn_hr')])]"/>
+            <field name="start_hour">20.0</field>
+            <field name="end_hour">6.0</field>
+            <field name="apply_weekend" eval="True"/>
+            <field name="description">Cấm truy cập toàn quốc: Nhân viên hành chính tại tất cả chi nhánh không được phép vào ngoài giờ hành chính hoặc cuối tuần.</field>
+        </record>
+
+        <!-- UNIFIED IT STAFF CURFEW POLICY (ALL BRANCHES) -->
+        <record id="policy_it_staff_curfew" model="t4.gate_keeper.alert_policy">
+            <field name="name">Nhân viên Kỹ thuật IT không được vào ngoài giờ và cuối tuần (Toàn quốc)</field>
+            <field name="code">POL-IT-STAFF-CURFEW</field>
+            <field name="warning_type_id" ref="warning_type_unauthorized_time"/>
+            <field name="priority">high</field>
+            <field name="branch_ids" eval="[(6, 0, [ref('branch_hanoi_hq'), ref('branch_hcm_office'), ref('branch_danang_office')])]"/>
+            <field name="employee_group_ids" eval="[(6, 0, [ref('group_hn_it'), ref('group_hcm_it'), ref('group_dn_it')])]"/>
+            <field name="start_hour">22.0</field>
+            <field name="end_hour">6.0</field>
+            <field name="apply_weekend" eval="True"/>
+            <field name="description">Cấm truy cập đêm muộn toàn quốc: Nhân viên kỹ thuật IT tại tất cả chi nhánh không được phép vào từ 22:00 đến 06:00 sáng hoặc cuối tuần.</field>
+        </record>
+
+        <!-- ANTI-PASSBACK POLICY (ALL BRANCHES - CRITICAL) -->
         <record id="policy_apb_enforce" model="t4.gate_keeper.alert_policy">
             <field name="name">Giám sát chống xoay vòng thẻ Anti-passback</field>
             <field name="code">POL-APB-ENFORCE</field>
@@ -475,6 +950,8 @@
             <field name="branch_ids" eval="[(6, 0, [ref('branch_hanoi_hq'), ref('branch_hcm_office'), ref('branch_danang_office')])]"/>
             <field name="description">Quy tắc chống quay vòng thẻ: Hệ thống sẽ giám sát trình tự ra/vào của tất cả nhân viên tại tất cả chi nhánh.</field>
         </record>
+
+
 
         <!-- UNKNOWN CARD POLICY (ALL BRANCHES) -->
         <record id="policy_unknown_card_monitor" model="t4.gate_keeper.alert_policy">

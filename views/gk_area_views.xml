@@ -65,7 +65,15 @@
                                       decoration-danger="priority == 'critical'"
                                       decoration-warning="priority == 'high'">
                                     <field name="create_date" string="Detected At"/>
-                                    <field name="warning_type_id"/>
+                                    <field name="warning_type_code" column_invisible="True"/>
+                                    <field name="warning_type_id"
+                                           widget="badge"
+                                           decoration-danger="warning_type_code == 'invalid_sequence'"
+                                           decoration-warning="warning_type_code == 'unauthorized_area'"
+                                           decoration-primary="warning_type_code == 'unknown_card'"
+                                           decoration-info="warning_type_code == 'device_issue'"
+                                           decoration-success="warning_type_code == 'unauthorized_time'"
+                                           decoration-muted="warning_type_code == 'overtime'"/>
                                     <field name="employee_id"/>
                                     <field name="device_id"/>
                                     <field name="priority" widget="badge"
@@ -94,7 +102,15 @@
         <field name="arch" type="xml">
             <list string="Area Warnings" create="false" delete="false">
                 <field name="area_id"/>
-                <field name="warning_type_id"/>
+                <field name="warning_type_code" column_invisible="True"/>
+                <field name="warning_type_id"
+                       widget="badge"
+                       decoration-danger="warning_type_code == 'invalid_sequence'"
+                       decoration-warning="warning_type_code == 'unauthorized_area'"
+                       decoration-primary="warning_type_code == 'unknown_card'"
+                       decoration-info="warning_type_code == 'device_issue'"
+                       decoration-success="warning_type_code == 'unauthorized_time'"
+                       decoration-muted="warning_type_code == 'overtime'"/>
                 <field name="employee_id"/>
                 <field name="device_id"/>
                 <field name="create_date" string="Detected At"/>

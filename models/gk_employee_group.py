@@ -13,6 +13,7 @@ class GateKeeperEmployeeGroup(models.Model):
     code = fields.Char(string="Code", required=True)
     description = fields.Text(string="Description")
     active = fields.Boolean(string="Active", default=True)
+    color = fields.Integer(string="Color Index", default=0)
 
     branch_id = fields.Many2one(
         comodel_name="t4.gate_keeper.branch",

@@ -10,7 +10,16 @@
                 <list string="Alert Policies" decoration-muted="not active">
                     <field name="name" string="Policy Name"/>
                     <field name="code" string="Code"/>
-                    <field name="warning_type_id" string="Warning Type"/>
+                    <field name="condition_type" column_invisible="True"/>
+                    <field name="warning_type_id"
+                           string="Warning Type"
+                           widget="badge"
+                           decoration-danger="condition_type == 'invalid_sequence'"
+                           decoration-warning="condition_type == 'unauthorized_area'"
+                           decoration-primary="condition_type == 'unknown_card'"
+                           decoration-info="condition_type == 'device_offline'"
+                           decoration-success="condition_type == 'unauthorized_time'"
+                           decoration-muted="condition_type == 'overtime'"/>
                     <field name="priority"
                            string="Priority"
                            widget="badge"
