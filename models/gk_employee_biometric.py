@@ -47,10 +47,7 @@ class GateKeeperEmployeeBiometric(models.Model):
         string="Description",
     )
 
-    _sql_constraints = [
-        (
-            "employee_biometric_unique",
-            "UNIQUE(employee_id, algorithm_id, finger_index)",
-            "A biometric template already exists for this employee, algorithm, and finger/slot index."
-        )
-    ]
+    _employee_biometric_unique = models.Constraint(
+        "unique(employee_id, algorithm_id, finger_index)",
+        "A biometric template already exists for this employee, algorithm, and finger/slot index.",
+    )

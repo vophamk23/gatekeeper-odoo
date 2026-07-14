@@ -9,7 +9,7 @@
 #                     REST Client sẽ tự động lưu token này vào biến toàn cục {{token}}.
 # CÁC TRƯỜNG CẬP NHẬT: Tạo bản ghi token mới trong bảng `core.api.token`.
 # ------------------------------------------------------------------------------
-POST http://localhost:8070/api/v1/auth/token
+POST http://localhost:8070/auth/token
 Content-Type: application/json
 
 {
@@ -33,8 +33,7 @@ Authorization: Bearer {{token}}
 Content-Type: application/json
 
 {
-    "serial_number": "CTRL-HN-LOBBY-01",
-    "last_sync_at": "2026-07-01 08:00:00"
+    "controller_sn": "CTRL-HN-LOBBY-01"
 }
 
 ### 3.1.B Truy vấn danh sách nhân viên thay đổi của Phòng Máy Chủ Hà Nội (ControllerEmployeeSync)
@@ -48,8 +47,7 @@ Authorization: Bearer {{token}}
 Content-Type: application/json
 
 {
-    "serial_number": "CTRL-HN-SRV-01",
-    "last_sync_at": "2026-07-01 08:00:00"
+    "controller_sn": "CTRL-HN-SRV-01"
 }
 
 ### 3.1.C Truy vấn danh sách nhân viên thay đổi của Kho HCM (ControllerEmployeeSync)
@@ -63,8 +61,7 @@ Authorization: Bearer {{token}}
 Content-Type: application/json
 
 {
-    "serial_number": "CTRL-HCM-WHS-01",
-    "last_sync_at": "2026-07-01 08:00:00"
+    "controller_sn": "CTRL-HCM-WHS-01"
 }
 
 ### 3.1.D Truy vấn danh sách nhân viên thay đổi của Chi nhánh Đà Nẵng (ControllerEmployeeSync)
@@ -78,8 +75,7 @@ Authorization: Bearer {{token}}
 Content-Type: application/json
 
 {
-    "serial_number": "CTRL-DN-MAIN-01",
-    "last_sync_at": "2026-07-01 08:00:00"
+    "controller_sn": "CTRL-DN-MAIN-01"
 }
 
 

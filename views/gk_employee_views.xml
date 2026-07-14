@@ -201,10 +201,9 @@
                     <separator/>
                     <filter string="Active" name="active" domain="[('active', '=', True)]"/>
                     <filter string="Archived" name="archived" domain="[('active', '=', False)]"/>
-                    <group expand="1" string="Group By">
-                        <filter string="Branch" name="group_branch" context="{'group_by': 'branch_id'}"/>
-                        <filter string="Presence" name="group_presence" context="{'group_by': 'presence_state'}"/>
-                    </group>
+                    <separator/>
+                    <filter string="Branch" name="group_branch" context="{'group_by': 'branch_id'}"/>
+                    <filter string="Presence" name="group_presence" context="{'group_by': 'presence_state'}"/>
                 </search>
             </field>
         </record>

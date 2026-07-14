@@ -100,7 +100,7 @@ class TestApiEndpoints(common.TransactionCase):
         Đảm bảo cập nhật trạng thái Controller thành 'online' và cập nhật thời gian last_heartbeat_at.
         """
         # Bước 1: Gửi tín hiệu Heartbeat hợp lệ
-        payload = {"controller_id": "CTRL-API-999"}
+        payload = {"controller_sn": "CTRL-API-999"}
         p_request, p_body = self._mock_request_and_body(payload)
 
         with p_request, p_body:
@@ -111,7 +111,7 @@ class TestApiEndpoints(common.TransactionCase):
         self.assertTrue(self.controller.last_heartbeat_at)
 
         # Bước 2: Gửi tín hiệu Heartbeat với mã Serial sai -> Hệ thống phải ném lỗi ValidationError
-        invalid_payload = {"controller_id": "CTRL-API-INVALID"}
+        invalid_payload = {"controller_sn": "CTRL-API-INVALID"}
         p_request2, p_body2 = self._mock_request_and_body(invalid_payload)
         with p_request2, p_body2:
             with self.assertRaises(ValidationError):
@@ -119,9 +119,9 @@ class TestApiEndpoints(common.TransactionCase):
 
     def test_02_controller_employee_sync_api(self):
         """Hàm kiểm thử: API đồng bộ thông tin nhân sự và sinh trắc học sang bộ điều khiển (Employee Delta Sync).
-        Đảm bảo xuất dữ liệu đúng định dạng delta sync (chỉ lấy các thay đổi mới nhất) và cập nhật last_sync_at.
+        Đảm bảo xuất dữ liệu đúng định dạng new/update/deleted và cập nhật last_sync_at.
         """
-        payload = {"serial_number": "CTRL-API-999"}
+        payload = {"controller_sn": "CTRL-API-999"}
         p_request, p_body = self._mock_request_and_body(payload)
 
         # Reset last_sync_at về False để lấy toàn bộ dữ liệu đồng bộ lần đầu
@@ -130,23 +130,25 @@ class TestApiEndpoints(common.TransactionCase):
         with p_request, p_body:
             res = self.controller.controller_employee_sync()
 
-        # Xác thực 1: Cấu trúc JSON trả về chứa thông tin nhân sự trong changes
+        # Xác thực 1: Cấu trúc JSON trả về chứa danh sách new/update/deleted
         self.assertIn("data", res)
-        self.assertIn("changes", res["data"])
-        emp_data = next((e for e in res["data"]["changes"] if e["emp_id"] == "EMP_API_001"), None)
-        self.assertTrue(emp_data, "Không tìm thấy nhân viên test trong danh sách đồng bộ")
-        self.assertEqual(emp_data["action"], "update")
+        data_list = res["data"]
+        self.assertTrue(len(data_list) > 0)
+        data = data_list[0]
+        self.assertIn("new", data)
+        self.assertIn("update", data)
+        self.assertIn("deleted", data)
+        # Lần đầu sync: nhân viên test phải nằm trong danh sách "new"
+        emp_data = next((e for e in data["new"] if e["id"] == self.employee.id), None)
+        self.assertTrue(emp_data, "Không tìm thấy nhân viên test trong danh sách new")
 
-        # Xác thực 2: Trường last_sync_at của Controller được cập nhật thời gian đồng bộ thành công
-        # Odoo API decorated method doesn't update write_date inside test transaction automatically if write is not called,
-        # but in sync_ack we do update it. For the test, we write last_sync_at manually or via sync_ack.
-
-        # Bước 3: Đồng bộ lần thứ hai (không có thay đổi mới) -> Trả về danh sách thay đổi trống
+        # Bước 3: Đồng bộ lần thứ hai (không có thay đổi mới) -> Trả về danh sách rỗng
         from datetime import timedelta
         self.controller.write({"last_sync_at": Datetime.now() + timedelta(minutes=5)})
         with p_request, p_body:
             res2 = self.controller.controller_employee_sync()
-        self.assertEqual(len(res2["data"]["changes"]), 0)
+        data2 = res2["data"][0]
+        self.assertEqual(len(data2["new"]) + len(data2["update"]) + len(data2["deleted"]), 0)
 
     def test_03_access_log_upload_rfid_card(self):
         """Hàm kiểm thử: API tải nhật ký quẹt thẻ vật lý (RFID Card Upload).

@@ -20,10 +20,7 @@ class GateKeeperAuthInfo(models.Model):
     active = fields.Boolean(string="Active", default=True)
     description = fields.Text(string="Description")
 
-    _sql_constraints = [
-        (
-            "card_code_unique",
-            "UNIQUE(card_code)",
-            "Card code must be unique.",
-        )
-    ]
+    _card_code_unique = models.Constraint(
+        "unique(card_code)",
+        "Card code must be unique.",
+    )

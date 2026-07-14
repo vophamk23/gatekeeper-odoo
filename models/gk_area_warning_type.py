@@ -29,6 +29,6 @@ class GateKeeperAreaWarningType(models.Model):
         default="unauthorized_time",
     )
 
-    _sql_constraints = [
-        ("code_unique", "UNIQUE(code)", "Warning type code must be unique."),
-    ]
+    _code_unique = models.Constraint(
+        "unique(code)", "Warning type code must be unique."
+    )

@@ -20,7 +20,7 @@
                             }
                         ],
                         "url": {
-                            "raw": "{{baseUrl}}/api/v1/auth/token",
+                            "raw": "{{baseUrl}}/auth/token",
                             "host": [
                                 "{{baseUrl}}"
                             ],
@@ -818,7 +818,7 @@
                             }
                         ],
                         "url": {
-                            "raw": "{{baseUrl}}/api/v1/auth/token",
+                            "raw": "{{baseUrl}}/auth/token",
                             "host": [
                                 "{{baseUrl}}"
                             ],
@@ -1086,7 +1086,7 @@
                             }
                         ],
                         "url": {
-                            "raw": "{{baseUrl}}/api/v1/auth/token",
+                            "raw": "{{baseUrl}}/auth/token",
                             "host": [
                                 "{{baseUrl}}"
                             ],
@@ -3559,7 +3559,7 @@
                             }
                         ],
                         "url": {
-                            "raw": "{{baseUrl}}/api/v1/auth/token",
+                            "raw": "{{baseUrl}}/auth/token",
                             "host": [
                                 "{{baseUrl}}"
                             ],
@@ -4039,7 +4039,7 @@
                             }
                         ],
                         "url": {
-                            "raw": "{{baseUrl}}/api/v1/auth/token",
+                            "raw": "{{baseUrl}}/auth/token",
                             "host": [
                                 "{{baseUrl}}"
                             ],

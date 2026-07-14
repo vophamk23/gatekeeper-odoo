@@ -96,9 +96,8 @@
                     <separator/>
                     <filter string="Active" name="filter_active" domain="[('active', '=', True)]"/>
                     <filter string="Archived" name="filter_inactive" domain="[('active', '=', False)]"/>
-                    <group expand="0" string="Group By">
-                        <filter string="Branch" name="group_by_branch" context="{'group_by': 'branch_id'}"/>
-                    </group>
+                    <separator/>
+                    <filter string="Branch" name="group_by_branch" context="{'group_by': 'branch_id'}"/>
                 </search>
             </field>
         </record>

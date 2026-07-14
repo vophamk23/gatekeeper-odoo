@@ -119,14 +119,13 @@
                     <separator/>
                     <filter string="Sync Failures" name="filter_fail" domain="[('sync_status', '=', 'fail')]"/>
                     <filter string="User Events" name="filter_user" domain="[('is_system_generated', '=', False)]"/>
-                    <group expand="1" string="Group By">
-                        <filter string="Direction" name="group_direction" context="{'group_by': 'direction'}"/>
-                        <filter string="Employee" name="group_employee" context="{'group_by': 'employee_id'}"/>
-                        <filter string="Branch" name="group_branch" context="{'group_by': 'branch_id'}"/>
-                        <filter string="Area" name="group_area" context="{'group_by': 'area_id'}"/>
-                        <filter string="Device" name="group_device" context="{'group_by': 'device_id'}"/>
-                        <filter string="Date" name="group_date" context="{'group_by': 'access_time:day'}"/>
-                    </group>
+                    <separator/>
+                    <filter string="Direction" name="group_direction" context="{'group_by': 'direction'}"/>
+                    <filter string="Employee" name="group_employee" context="{'group_by': 'employee_id'}"/>
+                    <filter string="Branch" name="group_branch" context="{'group_by': 'branch_id'}"/>
+                    <filter string="Area" name="group_area" context="{'group_by': 'area_id'}"/>
+                    <filter string="Device" name="group_device" context="{'group_by': 'device_id'}"/>
+                    <filter string="Date" name="group_date" context="{'group_by': 'access_time:day'}"/>
                 </search>
             </field>
         </record>

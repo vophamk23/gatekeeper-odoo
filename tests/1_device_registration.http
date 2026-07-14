@@ -9,7 +9,7 @@
 #                     REST Client sẽ tự động lưu token này vào biến toàn cục {{token}}.
 # CÁC TRƯỜNG CẬP NHẬT: Tạo bản ghi token mới trong bảng `core.api.token`.
 # ------------------------------------------------------------------------------
-POST http://localhost:8070/api/v1/auth/token
+POST http://localhost:8070/auth/token
 Content-Type: application/json
 
 {
@@ -43,7 +43,8 @@ Authorization: Bearer {{token}}
 Content-Type: application/json
 
 {
-    "controller_id": "CTRL-HN-LOBBY-01",
+    "serial_number": "CTRL-HN-LOBBY-01",
+    "branch_code": "Hà Nội",
     "hardware_model": "T4-GATE-PRO",
     "firmware_version": "v2.1.0",
     "ip_address": "192.168.10.210",
@@ -72,7 +73,8 @@ Authorization: Bearer {{token}}
 Content-Type: application/json
 
 {
-    "controller_id": "CTRL-HN-SRV-01",
+    "serial_number": "CTRL-HN-SRV-01",
+    "branch_code": "Hà Nội",
     "hardware_model": "InBio Pro 260",
     "firmware_version": "v2.4.1",
     "ip_address": "192.168.10.211",
@@ -101,7 +103,8 @@ Authorization: Bearer {{token}}
 Content-Type: application/json
 
 {
-    "controller_id": "CTRL-HCM-WHS-01",
+    "serial_number": "CTRL-HCM-WHS-01",
+    "branch_code": "Hồ Chí Minh",
     "hardware_model": "InBio Pro 160",
     "firmware_version": "v2.3.2",
     "ip_address": "192.168.20.220",
@@ -130,7 +133,8 @@ Authorization: Bearer {{token}}
 Content-Type: application/json
 
 {
-    "controller_id": "CTRL-DN-MAIN-01",
+    "serial_number": "CTRL-DN-MAIN-01",
+    "branch_code": "Đà Nẵng",
     "hardware_model": "InBio Pro 260",
     "firmware_version": "v2.4.1",
     "ip_address": "192.168.30.150",

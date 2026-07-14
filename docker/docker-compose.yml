@@ -20,7 +20,7 @@ services:
       - tnnt_net
 
   odoo:
-    image: odoo:18.0
+    image: odoo:19.0
     container_name: tnnt_odoo
     restart: unless-stopped
     depends_on:
@@ -36,7 +36,7 @@ services:
       - ./odoo.conf:/etc/odoo/odoo.conf:ro
       # Mount trực tiếp các thư mục chứa mã nguồn của t4_gatekeeper và coreapi
       - ..:/mnt/t4_gate_keeper:ro
-      - ../../gatekepper/t4_coreapi:/mnt/t4_coreapi:ro
+      - ../../t4_core_api:/mnt/t4_coreapi:ro
     command: -d gatekeeper_db -u t4_coreapi,t4_gate_keeper
     ports:
       - "8070:8069" # Dùng cổng 8070 để tránh đụng độ với Odoo đang chạy trên máy (8069)

@@ -137,13 +137,10 @@ class GateKeeperDevice(models.Model):
     )
 
 
-    _sql_constraints = [
-        (
-            "controller_port_unique",
-            "UNIQUE(controller_id, port_or_channel)",
-            "Device port or channel must be unique per controller.",
-        )
-    ]
+    _controller_port_unique = models.Constraint(
+        "unique(controller_id, port_or_channel)",
+        "Device port or channel must be unique per controller.",
+    )
 
     def _compute_employee_sync_status(self):
         """Tính trạng thái đồng bộ nhân viên cho device.

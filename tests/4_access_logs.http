@@ -9,7 +9,7 @@
 #                     REST Client sẽ tự động lưu token này vào biến toàn cục {{token}}.
 # CÁC TRƯỜNG CẬP NHẬT: Tạo bản ghi token mới trong bảng `core.api.token`.
 # ------------------------------------------------------------------------------
-POST http://localhost:8070/api/v1/auth/token
+POST http://localhost:8070/auth/token
 Content-Type: application/json
 
 {

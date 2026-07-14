@@ -9,9 +9,9 @@ class HrEmployee(models.Model):
 
     emp_id = fields.Char(string="Mã số nhân viên", default=False)
 
-    _sql_constraints = [
-        ("employee_id_custom_unique", "UNIQUE(emp_id)", "Employee ID must be unique.")
-    ]
+    _employee_id_custom_unique = models.Constraint(
+        "unique(emp_id)", "Employee ID must be unique."
+    )
 
     @api.model_create_multi
     def create(self, vals_list):

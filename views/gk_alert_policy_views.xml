@@ -149,10 +149,9 @@
                     <separator/>
                     <filter string="Active" name="active" domain="[('active', '=', True)]"/>
                     <filter string="Archived" name="archived" domain="[('active', '=', False)]"/>
-                    <group expand="1" string="Group By">
-                        <filter string="Warning Type" name="group_warning_type" context="{'group_by': 'warning_type_id'}"/>
-                        <filter string="Priority" name="group_priority" context="{'group_by': 'priority'}"/>
-                    </group>
+                    <separator/>
+                    <filter string="Warning Type" name="group_warning_type" context="{'group_by': 'warning_type_id'}"/>
+                    <filter string="Priority" name="group_priority" context="{'group_by': 'priority'}"/>
                 </search>
             </field>
         </record>

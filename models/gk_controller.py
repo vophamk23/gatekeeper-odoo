@@ -128,13 +128,10 @@ class T4GateKeeperController(models.Model):
         help="Indicates whether the controller has synchronized the latest employee updates.",
     )
 
-    _sql_constraints = [
-        (
-            "serial_number_unique",
-            "UNIQUE(serial_number)",
-            "Controller serial number must be unique.",
-        )
-    ]
+    _serial_number_unique = models.Constraint(
+        "unique(serial_number)",
+        "Controller serial number must be unique.",
+    )
 
     def _compute_employee_sync_status(self):
         """Tính trạng thái đồng bộ nhân viên cho controller.
@@ -205,43 +202,59 @@ class T4GateKeeperController(models.Model):
     def controller_register(self):
         """API nhận thông tin đăng ký phần cứng từ Controller vật lý khi khởi động.
 
-        - Input: serial_number (controller_id), hardware_model, firmware_version, ip_address, mac_address, connection_type.
-        - Logic: Tìm Controller theo serial_number, cập nhật thông tin kết nối và phần cứng,
-                 chuyển status sang online và cập nhật last_heartbeat_at.
-        - Output: Trạng thái 200 OK cùng ID và tên của Controller.
+        - Input: serial_number (bắt buộc), branch_code (bắt buộc), hardware_model,
+                 firmware_version, ip_address, mac_address, connection_type, installed_at.
+        - Logic: Tìm Controller theo serial_number.
+                 Nếu chưa tồn tại: tạo mới, tìm Branch theo tên branch_code.
+                 Nếu đã tồn tại: cập nhật thông tin phần cứng.
+                 Chuyển status sang online, cập nhật last_heartbeat_at.
+        - Output: controller id cùng thông báo đăng ký thành công.
         """
-        # Lấy toàn bộ dữ liệu JSON (payload) được gửi từ thiết bị trong HTTP request body
         body = get_body()
-        # Kiểm tra tính hợp lệ: Bắt buộc request body phải chứa trường "controller_id"
-        require_fields(body, ["controller_id"])
-        # Trích xuất giá trị "controller_id" (mã serial) để sử dụng ở các bước tiếp theo
-        controller_id = body.get("controller_id")
+        require_fields(body, ["serial_number", "branch_code"])
+        serial_number = body.get("serial_number")
+        branch_code = body.get("branch_code")
 
-        # Tìm Controller theo mã serial_number duy nhất (controller_id)
-        controller = self._find_controller(controller_id)
-        if not controller:
+        # Tìm Branch theo tên (branch_code map với Branch name)
+        branch = self.env["t4.gate_keeper.branch"].search(
+            [("name", "ilike", branch_code)], limit=1
+        )
+        if not branch:
             raise ValidationError(
-                _("Không tìm thấy Controller với serial: %s") % controller_id
+                _("Không tìm thấy Branch với mã: %s") % branch_code
             )
 
-        controller.write(
-            {
-                "hardware_model": body.get("hardware_model"),
-                "firmware_version": body.get("firmware_version"),
-                "ip_address": body.get("ip_address"),
-                "mac_address": body.get("mac_address"),
-                "connection_type": body.get("connection_type") or "tcp_ip",
-                "status": "online",
-                "last_heartbeat_at": fields.Datetime.now(),
-            }
-        )
+        # Tìm Controller theo serial_number
+        controller = self._find_controller(serial_number)
+
+        write_vals = {
+            "hardware_model": body.get("hardware_model"),
+            "firmware_version": body.get("firmware_version"),
+            "ip_address": body.get("ip_address"),
+            "mac_address": body.get("mac_address"),
+            "connection_type": body.get("connection_type") or "tcp_ip",
+            "status": "online",
+            "last_heartbeat_at": fields.Datetime.now(),
+        }
+        if body.get("installed_at"):
+            write_vals["installed_at"] = body.get("installed_at")
+
+        if controller:
+            # Controller đã tồn tại: chỉ cập nhật thông tin phần cứng
+            controller.write(write_vals)
+        else:
+            # Controller chưa tồn tại: tạo mới
+            write_vals.update({
+                "name": body.get("name") or serial_number,
+                "serial_number": serial_number,
+                "branch_id": branch.id,
+            })
+            controller = self.create(write_vals)
 
         return {
-            "message": "Success",
+            "message": "Controller registered successfully",
             "data": {
-                "status": "200 OK",
-                "controller_id": controller.id,
-                "name": controller.name,
+                "id": controller.id,
             },
         }
 
@@ -351,20 +364,20 @@ class T4GateKeeperController(models.Model):
     def controller_heartbeat(self):
         """API nhận nhịp tim định kỳ và cập nhật trạng thái kết nối các thiết bị.
 
-        - Input: controller_id, devices_status (danh sách trạng thái online/offline của từng device_sn).
+        - Input: controller_sn, devices_status (danh sách trạng thái online/offline của từng device_sn).
         - Logic: Cập nhật status của Controller thành online, ghi nhận last_heartbeat_at.
                  Duyệt qua từng device_sn để cập nhật status tương ứng.
         - Output: Trạng thái 200 OK.
         """
         body = get_body()
-        require_fields(body, ["controller_id"])
-        controller_id = body.get("controller_id")
+        require_fields(body, ["controller_sn"])
+        controller_sn = body.get("controller_sn")
         devices_status = body.get("devices_status", [])
 
-        controller = self._find_controller(controller_id)
+        controller = self._find_controller(controller_sn)
         if not controller:
             raise ValidationError(
-                _("Không tìm thấy Controller với serial: %s") % controller_id
+                _("Không tìm thấy Controller với serial: %s") % controller_sn
             )
 
         # Cập nhật trạng thái Controller thành online và ghi nhận thời gian nhận heartbeat
@@ -392,83 +405,116 @@ class T4GateKeeperController(models.Model):
 
         return {
             "message": "Success",
-            "data": {
-                "status": "200 OK",
-            },
+            "status": "200 OK",
         }
 
     # ----------------------------------------------------
-    # API 5: ControllerEmployeeSync (Lọc danh sách cập nhật nhân sự)
+    # API 5: ControllerEmployeeSync (Đồng bộ danh sách nhân sự)
     # ----------------------------------------------------
     @endpoint(name="ControllerEmployeeSync")
     def controller_employee_sync(self):
         """API lấy danh sách thay đổi nhân sự (delta sync) để thêm/sửa/xóa trên thiết bị.
 
-        - Input: serial_number, last_sync_at (thời gian đồng bộ cuối cùng).
+        - Input: controller_sn (serial number của Controller).
         - Logic:
-            + Nếu chưa sync lần nào: Tìm tất cả nhân viên.
-            + Nếu đã sync: Tìm các nhân viên có write_date lớn hơn last_sync.
-            + Với mỗi nhân viên, nếu đang hoạt động (active) và thuộc chi nhánh của Controller
-              (hoặc dùng chung) thì đánh dấu action="update", ngược lại action="delete".
-        - Output: sync_timestamp hiện tại và danh sách các thay đổi (emp_id và action).
+            + Nếu chưa sync lần nào: tất cả nhân viên active thuộc branch → "new".
+            + Nếu đã sync trước đó:
+                * Nhân viên mới tạo sau last_sync_at → "new".
+                * Nhân viên cập nhật sau last_sync_at và còn active → "update".
+                * Nhân viên inactive hoặc không thuộc branch sau last_sync_at → "deleted".
+        - Output: danh sách new/update/deleted với id, name, branch_id.
         """
-        # Nhận dữ liệu request, bắt buộc có serial_number của Controller
         body = get_body()
-        require_fields(body, ["serial_number"])
-        serial = body.get("serial_number")
-        last_sync_str = body.get("last_sync_at")
+        require_fields(body, ["controller_sn"])
+        controller_sn = body.get("controller_sn")
 
-        controller = self._find_controller(serial)
+        controller = self._find_controller(controller_sn)
         if not controller:
             raise ValidationError(
-                _("Không tìm thấy Controller với serial: %s") % serial
+                _("Không tìm thấy Controller với serial: %s") % controller_sn
             )
 
-        # Lấy mốc thời gian đồng bộ cuối cùng của thiết bị để thực hiện delta sync
-        last_sync = (
-            fields.Datetime.from_string(last_sync_str)
-            if last_sync_str
-            else controller.last_sync_at
-        )
+        last_sync = controller.last_sync_at
 
-        # Nếu chưa đồng bộ lần nào, lấy tất cả nhân viên của chi nhánh hoặc dùng chung
+        # Helper: chuyển employee thành dict response
+        def _emp_dict(emp):
+            return {
+                "id": emp.id,
+                "name": emp.name,
+                "branch_id": emp.branch_id.id if emp.branch_id else False,
+            }
+
+        # Helper: nhân viên thuộc branch của controller (hoặc không giới hạn branch)
+        def _belongs_to_branch(emp):
+            return not emp.branch_id or emp.branch_id.id == controller.branch_id.id
+
+        new_list = []
+        update_list = []
+        deleted_list = []
+
         if not last_sync:
-            employees = (
-                self.env["t4.gate_keeper.employee"]
-                .with_context(active_test=False)
-                .search([])
-            )
+            # Lần đầu sync: tất cả nhân viên active thuộc branch → "new"
+            employees = self.env["t4.gate_keeper.employee"].search([])
+            for emp in employees:
+                if _belongs_to_branch(emp):
+                    new_list.append(_emp_dict(emp))
         else:
+            # Delta sync: chỉ lấy nhân viên có thay đổi kể từ last_sync
             employees = (
                 self.env["t4.gate_keeper.employee"]
                 .with_context(active_test=False)
                 .search([("write_date", ">", last_sync)])
             )
+            for emp in employees:
+                belongs = _belongs_to_branch(emp)
+                if not emp.active or not belongs:
+                    deleted_list.append(_emp_dict(emp))
+                elif emp.create_date > last_sync:
+                    new_list.append(_emp_dict(emp))
+                else:
+                    update_list.append(_emp_dict(emp))
 
-        sync_data = []
-        for emp in employees:
-            # Xác định action dựa trên trạng thái hoạt động và chi nhánh áp dụng
-            is_active_and_belongs = emp.active and (
-                not emp.branch_id or emp.branch_id.id == controller.branch_id.id
+        return {
+            "message": "Employee Sync Completed",
+            "data": [{
+                "new": new_list,
+                "update": update_list,
+                "deleted": deleted_list,
+            }],
+        }
+
+    # ----------------------------------------------------
+    # API 6: ControllerEmployeeSyncStatus (Kiểm tra trạng thái đồng bộ nhân sự)
+    # ----------------------------------------------------
+    @endpoint(name="ControllerEmployeeSyncStatus")
+    def controller_employee_sync_status(self):
+        """API kiểm tra controller có cần đồng bộ nhân sự hay không.
+
+        - Input: controller_sn (serial number của Controller).
+        - Logic: Tìm Controller, kiểm tra employee_sync_status.
+        - Output: {"update": True} nếu cần sync, {"update": False} nếu đã sync đủ.
+        """
+        body = get_body()
+        require_fields(body, ["controller_sn"])
+        controller_sn = body.get("controller_sn")
+
+        controller = self._find_controller(controller_sn)
+        if not controller:
+            raise ValidationError(
+                _("Không tìm thấy Controller với serial: %s") % controller_sn
             )
-            sync_data.append(
-                {
-                    "emp_id": emp.emp_id,
-                    "action": "update" if is_active_and_belongs else "delete",
-                }
-            )
+
+        needs_update = controller.employee_sync_status == "out_of_sync"
 
         return {
             "message": "Success",
             "data": {
-                "status": "200 OK",
-                "sync_timestamp": fields.Datetime.to_string(fields.Datetime.now()),
-                "changes": sync_data,
+                "update": needs_update,
             },
         }
 
     # ----------------------------------------------------
-    # API 6: EmployeeBiometricGet (Tải dữ liệu mẫu sinh trắc học Base64)
+    # API 7: EmployeeBiometricGet (Tải dữ liệu mẫu sinh trắc học Base64)
     # ----------------------------------------------------
     @endpoint(name="EmployeeBiometricGet")
     def get_biometric(self):
@@ -545,7 +591,7 @@ class T4GateKeeperController(models.Model):
         }
 
     # ----------------------------------------------------
-    # API 7: ControllerSyncAck (Xác nhận hoàn thành đồng bộ)
+    # API 8: ControllerSyncAck (Xác nhận hoàn thành đồng bộ)
     # ----------------------------------------------------
     @endpoint(name="ControllerSyncAck")
     def sync_ack(self):
@@ -587,7 +633,7 @@ class T4GateKeeperController(models.Model):
         }
 
     # ----------------------------------------------------
-    # API 8: AccessLogUpload (Tiếp nhận lô quẹt thẻ offline)
+    # API 9: AccessLogUpload (Tiếp nhận lô quẹt thẻ offline)
     # ----------------------------------------------------
     @endpoint(name="AccessLogUpload")
     def upload_logs(self):
@@ -679,7 +725,7 @@ class T4GateKeeperController(models.Model):
         }
 
     # ----------------------------------------------------
-    # API 9: ControllerCommandPoll (Quét lệnh điều khiển từ xa)
+    # API 10: ControllerCommandPoll (Quét lệnh điều khiển từ xa)
     # ----------------------------------------------------
     @endpoint(name="ControllerCommandPoll")
     def command_poll(self):
@@ -733,7 +779,7 @@ class T4GateKeeperController(models.Model):
         }
 
     # ----------------------------------------------------
-    # API 10: ControllerCommandAck (Báo cáo kết quả thực thi lệnh)
+    # API 11: ControllerCommandAck (Báo cáo kết quả thực thi lệnh)
     # ----------------------------------------------------
     @endpoint(name="ControllerCommandAck")
     def command_ack(self):

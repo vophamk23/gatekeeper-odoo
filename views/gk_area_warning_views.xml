@@ -107,14 +107,13 @@
                 <separator/>
                 <filter string="Critical Priority" name="priority_critical" domain="[('priority', '=', 'critical')]"/>
                 <filter string="High Priority" name="priority_high" domain="[('priority', '=', 'high')]"/>
-                <group expand="0" string="Group By">
-                    <filter string="Branch" name="group_branch" context="{'group_by': 'branch_id'}"/>
-                    <filter string="Status" name="group_state" context="{'group_by': 'state'}"/>
-                    <filter string="Priority" name="group_priority" context="{'group_by': 'priority'}"/>
-                    <filter string="Area" name="group_area" context="{'group_by': 'area_id'}"/>
-                    <filter string="Warning Type" name="group_warning_type" context="{'group_by': 'warning_type_id'}"/>
-                    <filter string="Detection Date" name="group_date" context="{'group_by': 'create_date:day'}"/>
-                </group>
+                <separator/>
+                <filter string="Branch" name="group_branch" context="{'group_by': 'branch_id'}"/>
+                <filter string="Status" name="group_state" context="{'group_by': 'state'}"/>
+                <filter string="Priority" name="group_priority" context="{'group_by': 'priority'}"/>
+                <filter string="Area" name="group_area" context="{'group_by': 'area_id'}"/>
+                <filter string="Warning Type" name="group_warning_type" context="{'group_by': 'warning_type_id'}"/>
+                <filter string="Detection Date" name="group_date" context="{'group_by': 'create_date:day'}"/>
             </search>
         </field>
     </record>

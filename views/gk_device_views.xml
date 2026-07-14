@@ -185,12 +185,11 @@
                     <filter string="Online" name="filter_online" domain="[('status', '=', 'online')]"/>
                     <filter string="Offline" name="filter_offline" domain="[('status', '=', 'offline')]"/>
                     <filter string="Controller Offline" name="filter_controller_offline" domain="[('status', '=', 'controller_offline')]"/>
-                    <group expand="1" string="Group By">
-                        <filter string="Controller" name="group_controller" context="{'group_by': 'controller_id'}"/>
-                        <filter string="Area" name="group_area" context="{'group_by': 'area_id'}"/>
-                        <filter string="Branch" name="group_branch" context="{'group_by': 'branch_id'}"/>
-                        <filter string="Status" name="group_status" context="{'group_by': 'status'}"/>
-                    </group>
+                    <separator/>
+                    <filter string="Controller" name="group_controller" context="{'group_by': 'controller_id'}"/>
+                    <filter string="Area" name="group_area" context="{'group_by': 'area_id'}"/>
+                    <filter string="Branch" name="group_branch" context="{'group_by': 'branch_id'}"/>
+                    <filter string="Status" name="group_status" context="{'group_by': 'status'}"/>
                 </search>
             </field>
         </record>

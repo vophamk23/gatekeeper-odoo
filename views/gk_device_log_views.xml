@@ -58,12 +58,11 @@
             <search string="Search Device Logs">
                 <field name="device_id" string="Device"/>
                 <field name="controller_id" string="Controller"/>
-                <group expand="1" string="Group By">
-                    <filter string="Branch" name="group_branch" context="{'group_by': 'branch_id'}"/>
-                    <filter string="Controller" name="group_controller" context="{'group_by': 'controller_id'}"/>
-                    <filter string="Device" name="group_device" context="{'group_by': 'device_id'}"/>
-                    <filter string="Event Type" name="group_event_type" context="{'group_by': 'event_type'}"/>
-                </group>
+                <separator/>
+                <filter string="Branch" name="group_branch" context="{'group_by': 'branch_id'}"/>
+                <filter string="Controller" name="group_controller" context="{'group_by': 'controller_id'}"/>
+                <filter string="Device" name="group_device" context="{'group_by': 'device_id'}"/>
+                <filter string="Event Type" name="group_event_type" context="{'group_by': 'event_type'}"/>
             </search>
         </field>
     </record>

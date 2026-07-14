@@ -66,9 +66,9 @@ class GateKeeperEmployee(models.Model):
     active = fields.Boolean(string="Active", default=True, tracking=True)
     avatar = fields.Image(related="hr_employee_id.image_1920", string="Avatar", readonly=False)
 
-    _sql_constraints = [
-        ("emp_id_unique", "UNIQUE(emp_id)", "Employee ID must be unique."),
-    ]
+    _emp_id_unique = models.Constraint(
+        "unique(emp_id)", "Employee ID must be unique."
+    )
 
     @api.model_create_multi
     def create(self, vals_list):

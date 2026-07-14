@@ -402,7 +402,6 @@
             <field name="department_id" ref="dep_board"/>
             <field name="work_email">triet.nm@company.com</field>
             <field name="work_phone">0901112223</field>
-            <field name="gender">male</field>
         </record>
         <record id="hr_emp_hn_son" model="hr.employee">
             <field name="name">Phạm Thanh Sơn</field>
@@ -411,7 +410,6 @@
             <field name="department_id" ref="dep_it"/>
             <field name="work_email">son.pt@company.com</field>
             <field name="work_phone">0902223334</field>
-            <field name="gender">male</field>
         </record>
         <record id="hr_emp_hn_trang" model="hr.employee">
             <field name="name">Trần Thu Trang</field>
@@ -420,7 +418,6 @@
             <field name="department_id" ref="dep_hr"/>
             <field name="work_email">trang.tt@company.com</field>
             <field name="work_phone">0903334445</field>
-            <field name="gender">female</field>
         </record>
         <record id="hr_emp_hn_nam" model="hr.employee">
             <field name="name">Lê Hoàng Nam</field>
@@ -429,7 +426,6 @@
             <field name="department_id" ref="dep_security"/>
             <field name="work_email">nam.lh@company.com</field>
             <field name="work_phone">0904445556</field>
-            <field name="gender">male</field>
         </record>
         <record id="hr_emp_hn_anh" model="hr.employee">
             <field name="name">Đỗ Tuấn Anh</field>
@@ -438,7 +434,6 @@
             <field name="department_id" ref="dep_it"/>
             <field name="work_email">anh.dt@company.com</field>
             <field name="work_phone">0906667778</field>
-            <field name="gender">male</field>
         </record>
         <record id="hr_emp_hn_lan" model="hr.employee">
             <field name="name">Hoàng Thị Lan</field>
@@ -447,7 +442,6 @@
             <field name="department_id" ref="dep_hr"/>
             <field name="work_email">lan.ht@company.com</field>
             <field name="work_phone">0907778889</field>
-            <field name="gender">female</field>
         </record>
 
         <record id="hr_emp_hn_maint_1" model="hr.employee">
@@ -457,7 +451,6 @@
             <field name="department_id" ref="dep_maint"/>
             <field name="work_email">an.nv@company.com</field>
             <field name="work_phone">0909000111</field>
-            <field name="gender">male</field>
         </record>
         <record id="hr_emp_hn_maint_2" model="hr.employee">
             <field name="name">Trần Văn Bình</field>
@@ -466,7 +459,6 @@
             <field name="department_id" ref="dep_maint"/>
             <field name="work_email">binh.tv@company.com</field>
             <field name="work_phone">0909000222</field>
-            <field name="gender">male</field>
         </record>
 
         <!-- HCM BRANCH (6) -->
@@ -477,7 +469,6 @@
             <field name="department_id" ref="dep_board"/>
             <field name="work_email">tho.nh@company.com</field>
             <field name="work_phone">0905556667</field>
-            <field name="gender">male</field>
         </record>
         <record id="hr_emp_hcm_tien" model="hr.employee">
             <field name="name">Lâm Minh Tiến</field>
@@ -486,7 +477,6 @@
             <field name="department_id" ref="dep_it"/>
             <field name="work_email">tien.lm@company.com</field>
             <field name="work_phone">0908889990</field>
-            <field name="gender">male</field>
         </record>
         <record id="hr_emp_hcm_mai" model="hr.employee">
             <field name="name">Bùi Thị Mai</field>
@@ -495,7 +485,6 @@
             <field name="department_id" ref="dep_hr"/>
             <field name="work_email">mai.bt@company.com</field>
             <field name="work_phone">0909990001</field>
-            <field name="gender">female</field>
         </record>
         <record id="hr_emp_hcm_hung" model="hr.employee">
             <field name="name">Võ Văn Hùng</field>
@@ -504,7 +493,6 @@
             <field name="department_id" ref="dep_security"/>
             <field name="work_email">hung.vv@company.com</field>
             <field name="work_phone">0901113335</field>
-            <field name="gender">male</field>
         </record>
         <record id="hr_emp_hcm_tri" model="hr.employee">
             <field name="name">Phan Minh Trí</field>
@@ -513,7 +501,6 @@
             <field name="department_id" ref="dep_hr"/>
             <field name="work_email">tri.pm@company.com</field>
             <field name="work_phone">0902224446</field>
-            <field name="gender">male</field>
         </record>
         <record id="hr_emp_hcm_kanh" model="hr.employee">
             <field name="name">Nguyễn Thị Kim Anh</field>
@@ -522,7 +509,6 @@
             <field name="department_id" ref="dep_hr"/>
             <field name="work_email">anh.ntk@company.com</field>
             <field name="work_phone">0903335557</field>
-            <field name="gender">female</field>
         </record>
 
         <record id="hr_emp_hcm_maint_1" model="hr.employee">
@@ -532,7 +518,6 @@
             <field name="department_id" ref="dep_maint"/>
             <field name="work_email">cuong.lv@company.com</field>
             <field name="work_phone">0909000333</field>
-            <field name="gender">male</field>
         </record>
         <record id="hr_emp_hcm_maint_2" model="hr.employee">
             <field name="name">Phạm Văn Dũng</field>
@@ -541,7 +526,6 @@
             <field name="department_id" ref="dep_maint"/>
             <field name="work_email">dung.pv@company.com</field>
             <field name="work_phone">0909000444</field>
-            <field name="gender">male</field>
         </record>
 
         <!-- DA NANG BRANCH (6) -->
@@ -552,7 +536,6 @@
             <field name="department_id" ref="dep_board"/>
             <field name="work_email">tuan.la@company.com</field>
             <field name="work_phone">0904446668</field>
-            <field name="gender">male</field>
         </record>
         <record id="hr_emp_dn_viet" model="hr.employee">
             <field name="name">Nguyễn Hoàng Việt</field>
@@ -561,7 +544,6 @@
             <field name="department_id" ref="dep_it"/>
             <field name="work_email">viet.nh@company.com</field>
             <field name="work_phone">0905557779</field>
-            <field name="gender">male</field>
         </record>
         <record id="hr_emp_dn_khoa" model="hr.employee">
             <field name="name">Trần Minh Khoa</field>
@@ -570,7 +552,6 @@
             <field name="department_id" ref="dep_it"/>
             <field name="work_email">khoa.tm@company.com</field>
             <field name="work_phone">0906668880</field>
-            <field name="gender">male</field>
         </record>
         <record id="hr_emp_dn_khanh" model="hr.employee">
             <field name="name">Ngô Quốc Khánh</field>
@@ -579,7 +560,6 @@
             <field name="department_id" ref="dep_it"/>
             <field name="work_email">khanh.nq@company.com</field>
             <field name="work_phone">0907779991</field>
-            <field name="gender">male</field>
         </record>
         <record id="hr_emp_dn_trinh" model="hr.employee">
             <field name="name">Phạm Ngọc Trinh</field>
@@ -588,7 +568,6 @@
             <field name="department_id" ref="dep_hr"/>
             <field name="work_email">trinh.pn@company.com</field>
             <field name="work_phone">0908880002</field>
-            <field name="gender">female</field>
         </record>
         <record id="hr_emp_dn_long" model="hr.employee">
             <field name="name">Huỳnh Văn Long</field>
@@ -597,7 +576,6 @@
             <field name="department_id" ref="dep_security"/>
             <field name="work_email">long.hv@company.com</field>
             <field name="work_phone">0909991113</field>
-            <field name="gender">male</field>
         </record>
 
         <record id="hr_emp_dn_maint_1" model="hr.employee">
@@ -607,7 +585,6 @@
             <field name="department_id" ref="dep_maint"/>
             <field name="work_email">em.hv@company.com</field>
             <field name="work_phone">0909000555</field>
-            <field name="gender">male</field>
         </record>
         <record id="hr_emp_dn_maint_2" model="hr.employee">
             <field name="name">Ngô Văn Giang</field>
@@ -616,7 +593,6 @@
             <field name="department_id" ref="dep_maint"/>
             <field name="work_email">giang.nv@company.com</field>
             <field name="work_phone">0909000666</field>
-            <field name="gender">male</field>
         </record>
 
         <!-- 4. CONFIG DYNAMICALLY CREATED GATE KEEPER EMPLOYEES -->

@@ -51,10 +51,7 @@ class GateKeeperAlgorithm(models.Model):
         string="Notes",
     )
 
-    _sql_constraints = [
-        (
-            "algorithm_version_unique",
-            "UNIQUE(name, algorithm_type, version)",
-            "Algorithm version must be unique per name, type and version."
-        )
-    ]
+    _algorithm_version_unique = models.Constraint(
+        "unique(name, algorithm_type, version)",
+        "Algorithm version must be unique per name, type and version.",
+    )
